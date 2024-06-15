@@ -1,0 +1,4 @@
+(executable
+ (public_name riscv_disasm_from_sail)
+ (name main)
+ (libraries riscv_disasm_from_sail))

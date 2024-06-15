@@ -1,0 +1,3 @@
+(library
+ (name riscv_disasm_from_sail)
+ (libraries libsail))
