@@ -104,5 +104,6 @@ let dummyoptions =
 let ast, types, side_effects =
   Frontend.load_files sailpath dummyoptions initial_typeenv filepaths
 
-let type_reg = Gen_disasm.collect_types ast
-let x = Gen_disasm.gen_clike_ast "ast" type_reg
+let () =
+  print_endline
+    (Stringify.stringify_clike_typedef (Gen_clike_typedef.gen_def "ast" ast))

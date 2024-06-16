@@ -1,8 +1,8 @@
 open Sail_ast_processor
-open Sail_ast_visitor
+open Sail_ast_foreach
 open Libsail
 open Ast
-open Clike_ast
+open Clike_typedef
 
 module StringMap = Map.Make (String)
 type type_registery = type_def_aux StringMap.t
@@ -95,14 +95,19 @@ and gen_clike_type_from_abbrev type_reg typarg =
   | A_aux (A_typ typ, _) -> gen_clike_type type_reg typ
   | _ -> failwith "Type arguments other than A_typ are not supported"
 
-let gen_clike_ast ast_typename type_reg =
+let gen_clike_typedef ast_typename type_reg =
   let ast_type = StringMap.find ast_typename type_reg in
   let case_names, case_bodies = split_union_into_names_and_bodies ast_type in
   let clike_bodies = List.map (gen_clike_type type_reg) case_bodies in
   Clike_struct
     ( ast_typename,
+      "",
       [
-        Clike_enum (ast_typename ^ "_node_type", case_names);
-        Clike_variant (ast_typename ^ "_node", clike_bodies);
+        Clike_enum ("", ast_typename ^ "_node_type", case_names);
+        Clike_union ("", ast_typename ^ "_node", clike_bodies);
       ]
     )
+
+let gen_def ast_typename ast =
+  let type_reg = collect_types ast in
+  gen_clike_typedef ast_typename type_reg

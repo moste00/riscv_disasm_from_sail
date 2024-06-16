@@ -11,10 +11,11 @@ type clike_bitvec =
   | Clike_word
   | Clike_dword
   | Clike_qword
-type clike_type =
-  | Clike_enum of string * string list
-    (* An enum having a possibly-empty name and several members *)
-  | Clike_struct of string * clike_type list (* A struct having members *)
-  | Clike_variant of string * clike_type list
+type clike_typedef =
+  | Clike_enum of string * string * string list
+    (* An enum having a possibly-empty type name, a possibly-empty instance name, and several members *)
+  | Clike_struct of
+      string * string * clike_typedef list (* A struct having members *)
+  | Clike_union of string * string * clike_typedef list
     (* An unsafe "union" or variant type, just like the semantics of C *)
   | Clike_builtin of string * clike_bitvec (* A fixed-width machine type *)
