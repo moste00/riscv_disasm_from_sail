@@ -3,6 +3,23 @@ open Ast
 open Ast_defs
 open Sail_ast_processor
 
+let id_to_str id =
+  let (Id_aux (i, _)) = id in
+  match i with
+  | Id s -> s
+  | Operator _ -> failwith "Operator identifiers are not supported"
+
+let foreach_fundef node proc =
+  let (FD_aux (child, _)) = node in
+  let (FD_function (_, _, clauses)) = child in
+  List.iter
+    (fun c ->
+      let (FCL_aux (clause, _)) = c in
+      let (FCL_funcl (id, pexp)) = clause in
+      proc.process_function_clause clause id pexp
+    )
+    clauses
+
 let foreach_mapdef node proc =
   let (MD_aux (child, _)) = node in
   let (MD_mapping (c1, _, _)) = child in
@@ -15,7 +32,10 @@ let foreach_literal node proc =
   match child with L_hex _ -> () | _ -> ()
 
 let foreach_expaux node proc =
-  match node with E_lit child -> foreach_literal child proc | _ -> ()
+  match node with
+  | E_lit child -> foreach_literal child proc
+  | E_app (id, args) -> print_endline (id_to_str id)
+  | _ -> ()
 
 let foreach_exp node proc =
   match node with E_aux (child, _) -> foreach_expaux child proc
@@ -52,6 +72,7 @@ let foreach_defaux node proc =
   | DEF_type child -> foreach_typedef child proc
   | DEF_let child -> foreach_let child proc
   | DEF_mapdef child -> foreach_mapdef child proc
+  | DEF_fundef child -> foreach_fundef child proc
   | _ -> ()
 
 let foreach_def node proc =

@@ -5,93 +5,37 @@ open Riscv_disasm_from_sail
 
 let sailpath = "/home/mostafa/.opam/default/share/sail/"
 
-let files =
+let paths_filename = ref ""
+let usage_msg = "Usage: riscv_disasm_from_sail -f <path-to-list-of-input-files>"
+let arg_spec =
   [
-    "model/prelude.sail";
-    "model/riscv_xlen64.sail";
-    "model/riscv_flen_D.sail";
-    "model/riscv_vlen.sail";
-    "model/prelude_mem_metadata.sail";
-    "model/prelude_mem.sail";
-    "model/riscv_types_common.sail";
-    "model/riscv_types_ext.sail";
-    "model/riscv_types.sail";
-    "model/riscv_vmem_types.sail";
-    "model/riscv_reg_type.sail";
-    "model/riscv_freg_type.sail";
-    "model/riscv_regs.sail";
-    "model/riscv_pc_access.sail";
-    "model/riscv_sys_regs.sail";
-    "model/riscv_pmp_regs.sail";
-    "model/riscv_pmp_control.sail";
-    "model/riscv_ext_regs.sail";
-    "model/riscv_addr_checks_common.sail";
-    "model/riscv_addr_checks.sail";
-    "model/riscv_misa_ext.sail";
-    "model/riscv_vreg_type.sail";
-    "model/riscv_vext_regs.sail";
-    "model/riscv_csr_map.sail";
-    "model/riscv_vext_control.sail";
-    "model/riscv_next_regs.sail";
-    "model/riscv_sys_exceptions.sail";
-    "model/riscv_sync_exception.sail";
-    "model/riscv_next_control.sail";
-    "model/riscv_softfloat_interface.sail";
-    "model/riscv_fdext_regs.sail";
-    "model/riscv_fdext_control.sail";
-    "model/riscv_csr_ext.sail";
-    "model/riscv_sys_control.sail";
-    "model/riscv_platform.sail";
-    "model/riscv_mem.sail";
-    "model/riscv_vmem_common.sail";
-    "model/riscv_vmem_pte.sail";
-    "model/riscv_vmem_ptw.sail";
-    "model/riscv_vmem_tlb.sail";
-    "model/riscv_vmem.sail";
-    "model/riscv_types_kext.sail";
-    "model/riscv_insts_begin.sail";
-    (*"model/riscv_insts_base.sail";
-      "model/riscv_insts_aext.sail";
-      "model/riscv_insts_cext.sail" ;
-      "model/riscv_insts_mext.sail" ;
-      "model/riscv_insts_zicsr.sail" ;
-      "model/riscv_insts_next.sail" ;
-      "model/riscv_insts_hints.sail" ;
-      "model/riscv_insts_fext.sail" ;
-      "model/riscv_insts_cfext.sail";
-      "model/riscv_insts_dext.sail";
-      "model/riscv_insts_cdext.sail";
-      "model/riscv_insts_svinval.sail";
-      "model/riscv_insts_zba.sail";
-      "model/riscv_insts_zbb.sail";
-      "model/riscv_insts_zbc.sail";
-      "model/riscv_insts_zbs.sail";
-      "model/riscv_insts_zcb.sail";
-      "model/riscv_insts_zfh.sail";
-      "model/riscv_insts_zfa.sail";
-      "model/riscv_insts_zkn.sail";
-      "model/riscv_insts_zks.sail";
-      "model/riscv_insts_zbkb.sail";
-      "model/riscv_insts_zbkx.sail";
-      "model/riscv_insts_zicond.sail";
-      "model/riscv_insts_vext_utils.sail";
-      "model/riscv_insts_vext_vset.sail";
-      "model/riscv_insts_vext_arith.sail";
-      "model/riscv_insts_vext_fp.sail";
-      "model/riscv_insts_vext_mem.sail";
-      "model/riscv_insts_vext_mask.sail";
-      "model/riscv_insts_vext_vm.sail";
-      "model/riscv_insts_vext_red.sail";
-      "model/riscv_jalr_seq.sail";
-      "model/riscv_insts_end.sail";
-      "model/riscv_step_common.sail";
-      "model/riscv_step_ext.sail";
-      "model/riscv_decode_ext.sail";
-      "model/riscv_fetch.sail";
-      "model/riscv_step.sail";
-      "model/main.sail"*)
+    ( "-f",
+      Arg.Set_string paths_filename,
+      "Path to a file containing a list of input files, a filename on each line"
+    );
   ]
-let filepaths = List.map (function f -> "../sail-riscv/" ^ f) files
+let anon_arg_handler a =
+  print_endline ("Unrecognied argument " ^ a ^ ", ignoring...")
+
+let () = Arg.parse arg_spec anon_arg_handler usage_msg
+
+let read_filepaths name =
+  let names = ref [] in
+  let file_chnl = open_in name in
+  try
+    while true do
+      names := input_line file_chnl :: !names
+    done;
+    [""] (*UNREACHABLE, just to guide type checker*)
+  with
+  | End_of_file ->
+      close_in file_chnl;
+      List.rev !names
+  | e ->
+      close_in_noerr file_chnl;
+      raise e
+
+let filepaths = read_filepaths !paths_filename
 
 let initial_typeenv = Type_check.initial_env
 
@@ -104,6 +48,9 @@ let dummyoptions =
 let ast, types, side_effects =
   Frontend.load_files sailpath dummyoptions initial_typeenv filepaths
 
-let () =
-  print_endline
-    (Stringify.stringify_clike_typedef (Gen_clike_typedef.gen_def "ast" ast))
+let ctypedefs = Gen_clike_typedef.gen_def ast
+let n_ctypedefs = Gen_clike_typedef.name_nameless_defs ast ctypedefs
+
+let ctypedefs_str = Stringify.stringify_clike_typedef n_ctypedefs
+
+let () = print_endline ctypedefs_str

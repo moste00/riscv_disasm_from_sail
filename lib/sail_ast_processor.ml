@@ -1,7 +1,7 @@
 open Libsail
 open Ast
 
-type ast_node_processor = {
+type 'a ast_node_processor = {
   process_typedef : type_def_aux -> id -> unit;
   process_abbrev : type_def_aux -> id -> typquant -> typ_arg -> unit;
   process_record :
@@ -11,6 +11,7 @@ type ast_node_processor = {
   process_enum : type_def_aux -> id -> id list -> bool -> unit;
   process_bitfield :
     type_def_aux -> id -> typ -> (id * index_range) list -> unit;
+  process_function_clause : 'a funcl_aux -> id -> 'a pexp_funcl -> unit;
 }
 
 let default_processor =
@@ -21,4 +22,5 @@ let default_processor =
     process_union = (fun _ _ _ _ _ -> ());
     process_enum = (fun _ _ _ _ -> ());
     process_bitfield = (fun _ _ _ _ -> ());
+    process_function_clause = (fun _ _ _ -> ());
   }
