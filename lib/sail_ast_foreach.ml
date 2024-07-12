@@ -3,82 +3,85 @@ open Ast
 open Ast_defs
 open Sail_ast_processor
 
-let id_to_str id =
-  let (Id_aux (i, _)) = id in
-  match i with
-  | Id s -> s
-  | Operator _ -> failwith "Operator identifiers are not supported"
+let foreach_val node proc state =
+  let (VS_aux (child, _)) = node in
+  let (VS_val_spec (type_scheme, id, _)) = child in
+  let (TypSchm_aux (tschm, _)) = type_scheme in
+  let (TypSchm_ts (quantifier, typ)) = tschm in
+  proc.process_val state child id quantifier typ
 
-let foreach_fundef node proc =
+let foreach_fundef node proc state =
   let (FD_aux (child, _)) = node in
   let (FD_function (_, _, clauses)) = child in
   List.iter
     (fun c ->
       let (FCL_aux (clause, _)) = c in
       let (FCL_funcl (id, pexp)) = clause in
-      proc.process_function_clause clause id pexp
+      proc.process_function_clause state clause id pexp
     )
     clauses
 
-let foreach_mapdef node proc =
-  let (MD_aux (child, _)) = node in
-  let (MD_mapping (c1, _, _)) = child in
-  let (Id_aux (c2, _)) = c1 in
-  let (Id id) = c2 in
-  ()
+let foreach_mapdef node proc state =
+  let (MD_aux (mapping, _)) = node in
+  let (MD_mapping (id, tannot, clauses)) = mapping in
+  proc.process_mapping state mapping id tannot clauses;
+  List.iter
+    (fun cl ->
+      let (MCL_aux (clause, _)) = cl in
+      match clause with
+      | MCL_bidir (pat1, pat2) ->
+          proc.process_mapping_bidir_clause state clause id tannot pat1 pat2
+      | MCL_forwards (pat, exp) ->
+          proc.process_mapping_forward_clause state clause id tannot pat exp
+      | MCL_backwards (pat, exp) ->
+          proc.process_mapping_backwards_clause state clause id tannot pat exp
+    )
+    clauses
 
-let foreach_literal node proc =
-  let (L_aux (child, _)) = node in
-  match child with L_hex _ -> () | _ -> ()
+let foreach_let node proc state = match node with LB_aux (child, _) -> ()
 
-let foreach_expaux node proc =
-  match node with
-  | E_lit child -> foreach_literal child proc
-  | E_app (id, args) -> print_endline (id_to_str id)
-  | _ -> ()
-
-let foreach_exp node proc =
-  match node with E_aux (child, _) -> foreach_expaux child proc
-
-let foreach_letbind_aux node proc =
-  match node with LB_val (_, child) -> foreach_exp child proc
-
-let foreach_let node proc =
-  match node with LB_aux (child, _) -> foreach_letbind_aux child proc
-
-let foreach_typedef_aux node proc =
+let foreach_typedef_aux node proc state =
   match node with
   | TD_abbrev (id, typquant, arg) ->
-      proc.process_typedef node id;
-      proc.process_abbrev node id typquant arg
+      proc.process_typedef state node id;
+      proc.process_abbrev state node id typquant arg
   | TD_record (id, typquant, members, flg) ->
-      proc.process_typedef node id;
-      proc.process_record node id typquant members flg
-  | TD_variant (id, typquant, type_unions, flg) ->
-      proc.process_typedef node id;
-      proc.process_union node id typquant type_unions flg
+      proc.process_typedef state node id;
+      proc.process_record state node id typquant members flg
+  | TD_variant (id, typquant, clauses, flg) ->
+      proc.process_typedef state node id;
+      proc.process_union state node id typquant clauses flg;
+      List.iter
+        (fun tu ->
+          let (Tu_aux (type_union, _)) = tu in
+          let (Tu_ty_id (typ, clause_id)) = type_union in
+          proc.process_union_clause state type_union id clause_id typ
+        )
+        clauses
   | TD_enum (id, cases, flg) ->
-      proc.process_typedef node id;
-      proc.process_enum node id cases flg
+      proc.process_typedef state node id;
+      proc.process_enum state node id cases flg
   | TD_bitfield (id, typ, members) ->
-      proc.process_typedef node id;
-      proc.process_bitfield node id typ members
+      proc.process_typedef state node id;
+      proc.process_bitfield state node id typ members
 
-let foreach_typedef node proc =
-  match node with TD_aux (child, _) -> foreach_typedef_aux child proc
+let foreach_typedef node proc state =
+  match node with TD_aux (child, _) -> foreach_typedef_aux child proc state
 
-let foreach_defaux node proc =
+let foreach_defaux node proc state =
   match node with
-  | DEF_type child -> foreach_typedef child proc
-  | DEF_let child -> foreach_let child proc
-  | DEF_mapdef child -> foreach_mapdef child proc
-  | DEF_fundef child -> foreach_fundef child proc
+  | DEF_type child -> foreach_typedef child proc state
+  | DEF_let child -> foreach_let child proc state
+  | DEF_mapdef child -> foreach_mapdef child proc state
+  | DEF_fundef child -> foreach_fundef child proc state
+  | DEF_val child -> foreach_val child proc state
   | _ -> ()
 
-let foreach_def node proc =
-  match node with DEF_aux (child, _) -> foreach_defaux child proc
+let foreach_def node proc state =
+  match node with DEF_aux (child, _) -> foreach_defaux child proc state
 
-let foreach_defs node proc =
-  List.iter (fun def -> foreach_def def proc) node.defs
+let foreach_defs node proc state =
+  List.iter (fun def -> foreach_def def proc state) node.defs
 
-let foreach_node root processor = foreach_defs root processor
+let foreach_node root processor init_state =
+  foreach_defs root processor init_state

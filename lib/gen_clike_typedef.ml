@@ -1,18 +1,14 @@
 open Sail_ast_processor
 open Sail_ast_foreach
+open Sail_ast_utils
+
 open Libsail
 open Ast
+
 open Clike_typedef
 open Constants
 
 module StringMap = Map.Make (String)
-type type_registery = type_def_aux StringMap.t
-
-let id_to_str id =
-  let (Id_aux (i, _)) = id in
-  match i with
-  | Id s -> s
-  | Operator _ -> failwith "Operator identifiers are not supported"
 
 let collect_types ast =
   let registery : (string * type_def_aux) list ref = ref [] in
@@ -20,12 +16,12 @@ let collect_types ast =
     {
       default_processor with
       process_typedef =
-        (fun node typename ->
+        (fun _ node typename ->
           registery := (id_to_str typename, node) :: !registery
         );
     }
   in
-  let () = foreach_node ast types_collector in
+  foreach_node ast types_collector ();
   StringMap.of_seq (List.to_seq !registery)
 
 let split_union_into_names_and_bodies (union : type_def_aux) =
@@ -40,37 +36,24 @@ let split_union_into_names_and_bodies (union : type_def_aux) =
       List.fold_right split_single_union_case_into_name_and_body cases ([], [])
   | _ -> invalid_arg "Expected a TD_variant, found non-variant type"
 
-let bignum_to_clike_bitv_size bignum =
-  let size = Nat_big_num.to_int bignum in
-  if size = 1 then Clike_bit
-  else if size <= 8 then Clike_byte
-  else if size <= 16 then Clike_word
-  else if size <= 32 then Clike_dword
-  else if size <= 64 then Clike_qword
+let int64_to_clike_bitv_size size =
+  if size = 1L then Clike_bit
+  else if size <= 8L then Clike_byte
+  else if size <= 16L then Clike_word
+  else if size <= 32L then Clike_dword
+  else if size <= 64L then Clike_qword
   else
     failwith
       ("size constant too big, can't represent bitvec of size "
-     ^ string_of_int size
+     ^ Int64.to_string size
       )
 
 let gen_clike_builtin_from_bitvec_size_expr name arg =
-  let (A_aux (a, _)) = arg in
-  match a with
-  | A_nexp (Nexp_aux (nexp, _)) -> (
-      match nexp with
-      | Nexp_constant size ->
-          Clike_builtin (name, bignum_to_clike_bitv_size size)
-      | _ ->
-          failwith
-            "Unsupported size expression in call to built-in type constructor \
-             'bits', Only constants are supported"
-    )
-  | _ -> failwith "UNREACHABLE"
+  Clike_builtin (name, int64_to_clike_bitv_size (sail_bitv_size_to_int64 arg))
 
 let gen_clike_type_from_app name constructor args =
   match constructor with
-  | "bits" when List.length args = 1 ->
-      gen_clike_builtin_from_bitvec_size_expr name (List.nth args 0)
+  | "bits" -> gen_clike_builtin_from_bitvec_size_expr name (List.nth args 0)
   | _ -> failwith ("Unsupported type constructor call " ^ constructor)
 
 let rec gen_clike_type name type_reg typ =
@@ -131,7 +114,7 @@ let collect_case_names_and_member_names ast =
     {
       default_processor with
       process_function_clause =
-        (fun _ name (Pat_aux (pattern_expr, _)) ->
+        (fun _ _ name (Pat_aux (pattern_expr, _)) ->
           let name_str = id_to_str name in
           if name_str = ast_sail_destructuring_function then (
             match pattern_expr with
@@ -166,7 +149,7 @@ let collect_case_names_and_member_names ast =
         );
     }
   in
-  foreach_node ast names_collector;
+  foreach_node ast names_collector ();
   constructor_name_to_member_names
 
 let name_members members names_registery =

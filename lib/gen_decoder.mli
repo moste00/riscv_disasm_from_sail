@@ -1,7 +1,10 @@
 open Libsail
 open Type_check
-open Ast
 open Ast_defs
-open Decoder
 
-val gen_decoder : string -> tannot ast -> decoder
+open Decoder
+open Decode_procedure
+
+val gen_decoder : tannot ast -> decoder
+
+val gen_decode_proc : decoder -> decproc

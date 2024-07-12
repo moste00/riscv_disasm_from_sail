@@ -1,10 +1,11 @@
 open Clike_typedef
+open Decode_procedure
 
 let mk_indentation lvl =
   if lvl = 0 then ""
   else (
     let buff = Buffer.create (lvl * 2) in
-    for i = 1 to lvl do
+    for _ = 1 to lvl do
       Buffer.add_string buff "  " (* 2 spaces *)
     done;
     Buffer.contents buff
@@ -42,3 +43,8 @@ let rec stringify_clike_typedef ?(indentation_lvl = 0) clike_typdef =
       ^ String.concat ("\n" ^ indent) members_as_str
       ^ "\n" ^ ind ^ "} " ^ name ^ ";\n"
   | Clike_builtin (name, bitvec) -> stringify_clike_builin bitvec ^ name ^ " ;"
+
+
+(* let stringify_decode_procedure (Proc stmt) clike_typedef = 
+  stringfy_stmt stmt  *)
+ 

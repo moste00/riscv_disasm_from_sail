@@ -5,7 +5,7 @@ open Riscv_disasm_from_sail
 
 let sailpath = "/home/mostafa/.opam/default/share/sail/"
 
-let paths_filename = ref ""
+let paths_filename = ref "test_filepaths.txt"
 let usage_msg = "Usage: riscv_disasm_from_sail -f <path-to-list-of-input-files>"
 let arg_spec =
   [
@@ -15,7 +15,7 @@ let arg_spec =
     );
   ]
 let anon_arg_handler a =
-  print_endline ("Unrecognied argument " ^ a ^ ", ignoring...")
+  print_endline ("Unrecognized argument " ^ a ^ ", ignoring...")
 
 let () = Arg.parse arg_spec anon_arg_handler usage_msg
 
@@ -49,8 +49,13 @@ let ast, types, side_effects =
   Frontend.load_files sailpath dummyoptions initial_typeenv filepaths
 
 let ctypedefs = Gen_clike_typedef.gen_def ast
+
 let n_ctypedefs = Gen_clike_typedef.name_nameless_defs ast ctypedefs
 
 let ctypedefs_str = Stringify.stringify_clike_typedef n_ctypedefs
 
 let () = print_endline ctypedefs_str
+
+let dec = Gen_decoder.gen_decoder ast
+
+let __ = Gen_decoder.gen_decode_proc dec

@@ -2,6 +2,8 @@ let ast_sail_def_name = "ast"
 
 let ast_sail_destructuring_function = "execute"
 
+let ast_decode_mapping = "encdec"
+
 let generated_ast_enum_suffix = "_node_type"
 
 let generated_ast_payload_suffix = "_node"

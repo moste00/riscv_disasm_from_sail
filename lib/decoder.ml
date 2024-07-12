@@ -1,4 +1,4 @@
-(* The whole idea is this: represent a Sail decoder as a list of declarative rules
+(* The big idea is as follows : represent a Sail decoder as a list of declarative rules
       1- Each rule has several *conditions*, which are assertions on the input bitstream that must
          all evaluate to true in order for the rule to *fire*
 
@@ -26,8 +26,9 @@
 
           - Then, bind the next 5-bit slice to rs2
                 (( We know that rs2 must be a 5-bit slice from the type declaration of the ast clause,
-                   which declares the 2nd element it needs to be a regidx, elsewhere defined as a
-                   synonym of a 5-bit bitvec. Since rs2 is the second element supplied to the node's
+                   which declares the 2nd element in its argument list to be a regidx,
+                   a regidx is defined elsewhere in the RISC-V Sail model as a synonym for a
+                   5-bit bitvec. Since rs2 is the second element supplied to the node's
                    constructor in the LHS, that means its type is a regidx, i.e. a 5-bit bitvec ))
 
           - Then, bind the next 5-bit slice to rs1
@@ -48,7 +49,7 @@
       Bind conditions are always satisfied, but assert conditions can fail, and map-bind conditions
       can only fail if the mapping table they reference is not exhaustive.
 
-      4- If a rule didn't fire, the next rule in the decoder (which is nothing more but a list of
+      4- If a rule didn't fire, the next rule in the decoder (which is nothing but a list of
          rules) is checked.
 
       5-If a rule fires, its consequences describe what to do to obtain an ast node:
@@ -68,14 +69,13 @@
               - Assign the enum value size as the fourth value of the node
               - Assign boolean constants to the remaining values of the node
 
-        Each diassembler is effectively a little program in a domain-specific declarative language.
+        Each decoder is effectively a little program in a domain-specific declarative language.
         The language is a rule-based one where each program is simply a table of rules describing
         under what condition a certain action should be taken. *)
 
-module StringMap = Map.Make (String)
-type bv2enum_table = int64 StringMap.t
+type bv2enum_table = (int64, string) Hashtbl.t
 
-type len = int
+type len = int64
 
 type condition =
   | Assert of len * int64
@@ -84,11 +84,14 @@ type condition =
 
 type conditions = condition list
 
-type value = Bv_const of int64 | Bool_const of bool | Binding of string
+type value =
+  | Bv_const of int64
+  | Bool_const of bool
+  | Binding of string
+  | Enum_lit of string
+
 type consequence_head = Assign_node_type of string
-type consequence_body =
-  | Assign_node_value of value
-  | Concat_assign of value list
+type consequence_body = Push of value | Concat_push of value list
 
 type consequences = consequence_head * consequence_body list
 

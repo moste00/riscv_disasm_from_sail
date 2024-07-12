@@ -1,6 +1,5 @@
 open Libsail
 open Type_check
-open Ast
 open Ast_defs
 open Clike_typedef
 
