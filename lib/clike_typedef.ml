@@ -6,11 +6,12 @@
 *)
 
 type clike_bitvec =
-  | Clike_bit
+  | Clike_bitfield of int64
   | Clike_byte
   | Clike_word
   | Clike_dword
   | Clike_qword
+
 type clike_typedef =
   | Clike_enum of string * string * string list
     (* An enum having a possibly-empty type name, a possibly-empty instance name, and several members *)

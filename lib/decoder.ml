@@ -73,19 +73,19 @@
         The language is a rule-based one where each program is simply a table of rules describing
         under what condition a certain action should be taken. *)
 
-type bv2enum_table = (int64, string) Hashtbl.t
+type bv2enum_table = (string, string) Hashtbl.t
 
 type len = int64
 
 type condition =
-  | Assert of len * int64
+  | Assert of len * string
   | Bind of len * string
   | Map_bind of len * bv2enum_table * string
 
 type conditions = condition list
 
 type value =
-  | Bv_const of int64
+  | Bv_const of string
   | Bool_const of bool
   | Binding of string
   | Enum_lit of string

@@ -10,7 +10,7 @@ open Ast
 
 type union_case_arg = Named_type of string | Bitvec of int64
 
-type bitv2enum = (int64, string) Hashtbl.t
+type bitv2enum = (string, string) Hashtbl.t
 
 type 'a set = ('a, unit) Hashtbl.t
 
@@ -86,9 +86,16 @@ let collect_bitvec_abbreviations state _ abbrev _ typ =
         (sail_bitv_size_to_int64 (List.nth args 0))
   | _ -> ()
 
+let bitv_literal_to_str bitv_lit =
+  let (L_aux (lit, _)) = bitv_lit in
+  match lit with
+  | L_hex lit_str -> "0x" ^ lit_str
+  | L_bin lit_str -> "0b" ^ lit_str
+  | _ -> failwith "Expected a bitvec literal, found neither L_hex nor L_bin"
+
 let add_bitv2enum_entry tbl enum_id bitv_lit =
   let enum_name = id_to_str enum_id in
-  let const = bitv_literal_to_int64 bitv_lit in
+  let const = bitv_literal_to_str bitv_lit in
   Hashtbl.add tbl const enum_name
 
 let to_bitv2enum_hshtbl mapping_clauses =
@@ -187,7 +194,7 @@ let print_state state =
         ("+++++++++++ Mapping from " ^ name ^ " to bitvec @@@@@@@@@@@@@@@@@@");
       Hashtbl.iter
         (fun constant enum_str ->
-          print_endline (Int64.to_string constant ^ " <---> " ^ enum_str)
+          print_endline (constant ^ " <---> " ^ enum_str)
         )
         tbl
     )
@@ -286,13 +293,9 @@ let create_conditions state r arg_bindings =
                   let size, const =
                     match bv_lit with
                     | L_hex num_str ->
-                        ( Int64.of_int (String.length num_str),
-                          Int64.of_string num_str
-                        )
+                        (Int64.of_int (String.length num_str), num_str)
                     | L_bin num_str ->
-                        ( Int64.of_int (String.length num_str * 4),
-                          Int64.of_string num_str
-                        )
+                        (Int64.of_int (String.length num_str * 4), num_str)
                     | _ ->
                         failwith
                           "Unsupported literal, only bitvec literals make \
@@ -452,7 +455,7 @@ let gen_stmt_from_consequences consequences =
     List.map
       (fun body ->
         match body with
-        | Push v -> Set_ast_next_case_member (Some v, None)
+        | Push v -> Set_ast_next_case_member (Val v)
         | Concat_push vs ->
             let literals =
               List.map
@@ -465,7 +468,7 @@ let gen_stmt_from_consequences consequences =
                 )
                 vs
             in
-            Set_ast_next_case_member (None, Some (Concat literals))
+            Set_ast_next_case_member (Exp (Concat literals))
       )
       bodies
   in
