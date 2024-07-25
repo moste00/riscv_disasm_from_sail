@@ -1,7 +1,7 @@
 open Decoder
 
 type bv_val = string
-type bv_index = int64
+type bv_index = int
 type enum_val = string
 
 type bv_expr =

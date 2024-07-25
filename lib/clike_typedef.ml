@@ -6,7 +6,7 @@
 *)
 
 type clike_bitvec =
-  | Clike_bitfield of int64
+  | Clike_bitfield of int
   | Clike_byte
   | Clike_word
   | Clike_dword
@@ -19,4 +19,6 @@ type clike_typedef =
       string * string * clike_typedef list (* A struct having members *)
   | Clike_union of string * string * clike_typedef list
     (* An unsafe "union" or variant type, just like the semantics of C *)
-  | Clike_builtin of string * clike_bitvec (* A fixed-width machine type *)
+  | Clike_builtin of string * clike_bitvec
+  (* A fixed-width machine type *)
+  | Clike_void (* A non-existent type that stringifies to nothing*)

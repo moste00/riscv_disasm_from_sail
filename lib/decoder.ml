@@ -75,7 +75,7 @@
 
 type bv2enum_table = (string, string) Hashtbl.t
 
-type len = int64
+type len = int
 
 type condition =
   | Assert of len * string

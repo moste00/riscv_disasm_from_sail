@@ -16,14 +16,14 @@ let stringify_clike_builin name builtin =
   match builtin with
   | Clike_bitfield size ->
       let pow2_rounded_size =
-        if size < 8L then 8
-        else if size < 16L then 16
-        else if size < 32L then 32
+        if size < 8 then 8
+        else if size < 16 then 16
+        else if size < 32 then 32
         else 64
       in
       "uint"
       ^ string_of_int pow2_rounded_size
-      ^ "_t " ^ name ^ " : " ^ Int64.to_string size ^ " ;"
+      ^ "_t " ^ name ^ " : " ^ string_of_int size ^ " ;"
   | Clike_byte -> "uint8_t " ^ name ^ " ;"
   | Clike_word -> "uint16_t " ^ name ^ " ;"
   | Clike_dword -> "uint32_t " ^ name ^ " ;"
@@ -51,6 +51,7 @@ let rec stringify_clike_typedef ?(indentation_lvl = 0) clike_typdef =
       ^ String.concat ("\n" ^ indent) members_as_str
       ^ "\n" ^ ind ^ "} " ^ name ^ ";\n"
   | Clike_builtin (name, bitvec) -> stringify_clike_builin name bitvec
+  | Clike_void -> ""
 
 type decproc_stringification_state = {
   mutable current_case_name : string;
@@ -61,8 +62,7 @@ type decproc_stringification_state = {
 let stringify_bv e =
   match e with
   | Literal l -> l
-  | Binstr_slice (i_1, i_2) ->
-      let i1, i2 = (Int64.to_int i_1, Int64.to_int i_2) in
+  | Binstr_slice (i1, i2) ->
       let mask =
         0 :: List.init 63 (fun x -> x + 1)
         |> List.map (fun i -> if i >= i1 && i <= i2 then "1" else "0")

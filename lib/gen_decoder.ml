@@ -8,7 +8,7 @@ open Decode_procedure
 open Libsail
 open Ast
 
-type union_case_arg = Named_type of string | Bitvec of int64
+type union_case_arg = Named_type of string | Bitvec of int
 
 type bitv2enum = (string, string) Hashtbl.t
 
@@ -33,12 +33,12 @@ type decoder_gen_iteration_state = {
   (* Records the names of all enum types *)
   enum_names : string set;
   (* Maps every type equivalent to a bitvector into its bitv size *)
-  bitv_synonyms : (string, int64) Hashtbl.t;
+  bitv_synonyms : (string, int) Hashtbl.t;
   (* Records all tables mapping enums to bitvectors *)
   enum_bitv_mappings_registery : (string, bitv2enum) Hashtbl.t;
   mutable decode_rules : decoder;
   (* The length of the bitstream input to the decoder *)
-  mutable instr_length : int64 option;
+  mutable instr_length : int option;
 }
 
 let mk_case_arg_from_app id args =
@@ -47,7 +47,7 @@ let mk_case_arg_from_app id args =
     failwith ("Unsupported type application " ^ constructor_name)
   else (
     let size = List.nth args 0 in
-    Bitvec (sail_bitv_size_to_int64 size)
+    Bitvec (sail_bitv_size_to_int size)
   )
 
 let assoc_clause_with_args state _ union_id clause_id typ =
@@ -83,7 +83,7 @@ let collect_bitvec_abbreviations state _ abbrev _ typ =
   match ty with
   | A_typ (Typ_aux (Typ_app (id, args), _)) when id_to_str id = "bits" ->
       Hashtbl.add state.bitv_synonyms (id_to_str abbrev)
-        (sail_bitv_size_to_int64 (List.nth args 0))
+        (sail_bitv_size_to_int (List.nth args 0))
   | _ -> ()
 
 let bitv_literal_to_str bitv_lit =
@@ -142,11 +142,11 @@ let is_enum_bitv_mapping enum_names mapping_type_annotation =
       | Typ_app (id1, args), Typ_id id2
         when set_contains enum_names (id_to_str id2) && id_to_str id1 = "bits"
         ->
-          Some (id_to_str id2, sail_bitv_size_to_int64 (List.nth args 0))
+          Some (id_to_str id2, sail_bitv_size_to_int (List.nth args 0))
       | Typ_id id1, Typ_app (id2, args)
         when set_contains enum_names (id_to_str id1) && id_to_str id2 = "bits"
         ->
-          Some (id_to_str id1, sail_bitv_size_to_int64 (List.nth args 0))
+          Some (id_to_str id1, sail_bitv_size_to_int (List.nth args 0))
       | _ -> None
     )
   | _ -> None
@@ -169,7 +169,7 @@ let print_state state =
         (fun a ->
           match a with
           | Named_type name -> print_endline ("Named: " ^ name)
-          | Bitvec size -> print_endline ("Bitvec: " ^ Int64.to_string size)
+          | Bitvec size -> print_endline ("Bitvec: " ^ string_of_int size)
         )
         args;
       print_endline "------------------End Case---------------------"
@@ -182,9 +182,7 @@ let print_state state =
   Hashtbl.iter
     (fun name size ->
       print_endline
-        ("Type " ^ name ^ " synonomous to bitvec of size "
-       ^ Int64.to_string size
-        )
+        ("Type " ^ name ^ " synonomous to bitvec of size " ^ string_of_int size)
     )
     state.bitv_synonyms;
   print_endline "========================================";
@@ -201,15 +199,36 @@ let print_state state =
     state.enum_bitv_mappings_registery;
   print_endline "========================================";
   print_endline
-    ("Instruction Length :" ^ Int64.to_string (Option.get state.instr_length));
+    ("Instruction Length :" ^ string_of_int (Option.get state.instr_length));
   print_endline "========================================";
   List.iter
 
-let lit_to_consequence_body _ = failwith "aAAAAAAAAAAAAAAaa"
+let lit_to_consequence_body lit =
+  let (L_aux (literal, _)) = lit in
+  match literal with
+  | L_bin l | L_hex l -> Push (Bv_const l)
+  | L_true -> Push (Bool_const true)
+  | L_false -> Push (Bool_const false)
+  | _ -> failwith "Unsupported literal"
 
 let idstr_to_consequence_body idstr = Push (Binding idstr)
 
-let vec_concat_to_consequence_body _ = failwith "BBBBBBBBBBBBBBBBBBBBBBBB"
+let vec_concat_to_consequence_body slices =
+  Concat_push
+    (List.map
+       (fun s ->
+         let (MP_aux (slice, _)) = s in
+         match slice with
+         | MP_lit (L_aux (lit, _)) -> (
+             match lit with
+             | L_bin s | L_hex s -> Bv_const s
+             | _ -> failwith "UNREACHABLE"
+           )
+         | MP_id i -> Binding (id_to_str i)
+         | _ -> failwith "UNREACHABLE"
+       )
+       slices
+    )
 
 let bind_args_and_create_consequences state l =
   let (MPat_aux (left, _)) = l in
@@ -279,7 +298,7 @@ let create_conditions state r arg_bindings =
                     match typ with
                     | Typ_aux (Typ_app (id, args), _)
                       when id_to_str id = "bitvector" ->
-                        sail_bitv_size_to_int64 (List.nth args 0)
+                        sail_bitv_size_to_int (List.nth args 0)
                     | _ -> failwith "Type annotation cant be non-bitvec"
                   in
                   let idstr =
@@ -292,10 +311,8 @@ let create_conditions state r arg_bindings =
                   let (L_aux (bv_lit, _)) = lit in
                   let size, const =
                     match bv_lit with
-                    | L_hex num_str ->
-                        (Int64.of_int (String.length num_str), num_str)
-                    | L_bin num_str ->
-                        (Int64.of_int (String.length num_str * 4), num_str)
+                    | L_hex num_str -> (String.length num_str, num_str)
+                    | L_bin num_str -> (String.length num_str * 4, num_str)
                     | _ ->
                         failwith
                           "Unsupported literal, only bitvec literals make \
@@ -332,9 +349,9 @@ let calculate_instr_length typ =
       let (Typ_aux (type2, _)) = t2 in
       match (type1, type2) with
       | Typ_app (id, args), _ when id_to_str id = "bitvector" ->
-          sail_bitv_size_to_int64 (List.nth args 0)
+          sail_bitv_size_to_int (List.nth args 0)
       | _, Typ_app (id, args) when id_to_str id = "bitvector" ->
-          sail_bitv_size_to_int64 (List.nth args 0)
+          sail_bitv_size_to_int (List.nth args 0)
       | _ -> failwith errmsg
     )
   | _ -> failwith errmsg
@@ -404,20 +421,13 @@ let calculate_offsets conds =
         match cond with
         | Assert (len, _) | Bind (len, _) | Map_bind (len, _, _) -> (
             match roffs with
-            | curr :: rest -> Int64.add (Int64.sub len 1L) curr :: roffs
+            | curr :: rest -> (len - 1 + curr) :: roffs
             | [] -> failwith "UNREACHABLE"
           )
       )
-      [0L] conds
+      [0] conds
   in
   List.rev rev_offsets
-
-let curr_auto_var = ref 0
-
-let gen_var () =
-  let v = "_" ^ string_of_int !curr_auto_var in
-  curr_auto_var := !curr_auto_var + 1;
-  v
 
 let gen_mapbind_stmt offsets (i, cond) body =
   match cond with
