@@ -17,7 +17,7 @@ let write_c_file ?(optional_includes = []) name code =
 
 let sailpath = "/home/mostafa/.opam/default/share/sail/"
 
-let paths_filename = ref "test_filepaths.txt"
+let paths_filename = ref ""
 
 let usage_msg = "Usage: riscv_disasm_from_sail -f <path-to-list-of-input-files>"
 let arg_spec =
