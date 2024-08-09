@@ -75,24 +75,27 @@
 
 type bv2enum_table = (string, string) Hashtbl.t
 
-type len = int
-
-type condition =
-  | Assert of len * string
-  | Bind of len * string
-  | Map_bind of len * bv2enum_table * string
-
-type conditions = condition list
-
 type value =
   | Bv_const of string
   | Bool_const of bool
   | Binding of string
   | Enum_lit of string
 
+type kv_pairs = (string * value) list
+type bv2struct_table = (string, kv_pairs) Hashtbl.t
+
+type len = int
+
+type condition =
+  | Assert of len * string
+  | Bind of len * string
+  | Map_bind of len * bv2enum_table * string
+  | Struct_map_bind of len * string * bv2struct_table * string
+
+type conditions = condition list
+
 type consequence_head = Assign_node_type of string
 type consequence_body = Push of value | Concat_push of value list
-
 type consequences = consequence_head * consequence_body list
 
 type decode_rule = conditions * consequences

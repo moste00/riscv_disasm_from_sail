@@ -18,18 +18,19 @@ let collect_typedefs state node typename =
 
 let collect_case_names_and_member_names state _ name (Pat_aux (pat_expr, _)) =
   let name_str = id_to_str_noexn name in
+  let stringify_id_lowercase i = String.lowercase_ascii (id_to_str i) in
   if name_str = ast_sail_destructuring_function then (
     match pat_expr with
     | Pat_exp (P_aux (pattern, (loc, _)), _)
     | Pat_when (P_aux (pattern, (loc, _)), _, _) -> (
         match pattern with
         | P_app (case_name, [P_aux (P_tuple member_list, _)]) ->
-            let case_name_as_str = id_to_str case_name in
+            let case_name_as_str = stringify_id_lowercase case_name in
             let member_str_list =
               List.map
                 (fun m ->
                   match m with
-                  | P_aux (P_id i, _) -> id_to_str i
+                  | P_aux (P_id i, _) -> stringify_id_lowercase i
                   | _ ->
                       failwith
                         "Naming ast members failed: expected all args to the \
@@ -37,16 +38,15 @@ let collect_case_names_and_member_names state _ name (Pat_aux (pat_expr, _)) =
                 )
                 member_list
             in
-            Hashtbl.add state.constructor_names_to_member_names
-              (String.lowercase_ascii case_name_as_str)
+            Hashtbl.add state.constructor_names_to_member_names case_name_as_str
               member_str_list
         | P_app (case_name, [P_aux (P_id single_member, _)]) ->
             Hashtbl.add state.constructor_names_to_member_names
-              (String.lowercase_ascii (id_to_str case_name))
-              [id_to_str single_member]
+              (stringify_id_lowercase case_name)
+              [stringify_id_lowercase single_member]
         | P_app (case_name, [P_aux (P_lit _, _)]) ->
             Hashtbl.add state.constructor_names_to_member_names
-              (String.lowercase_ascii (id_to_str case_name))
+              (stringify_id_lowercase case_name)
               []
         | _ ->
             failwith

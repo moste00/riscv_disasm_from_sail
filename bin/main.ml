@@ -2,10 +2,23 @@ open Libsail
 open Type_check
 open Ast
 open Riscv_disasm_from_sail
+open Constants
+
+let write_c_file ?(optional_includes = []) name code = 
+  let oc = open_out name in 
+  let mk_include_lines incs = String.concat "\n" (List.map (fun i -> "#include " ^ i ^ "\n") incs) in 
+  let include_string = mk_include_lines Constants.includes in
+  let optional_includes_string = mk_include_lines optional_includes in 
+  Printf.fprintf oc "%s" include_string;
+  Printf.fprintf oc "%s" optional_includes_string;
+  Printf.fprintf oc "%s" "\n\n\n";
+  Printf.fprintf oc "%s" code;
+  close_out oc
 
 let sailpath = "/home/mostafa/.opam/default/share/sail/"
 
 let paths_filename = ref "test_filepaths.txt"
+
 let usage_msg = "Usage: riscv_disasm_from_sail -f <path-to-list-of-input-files>"
 let arg_spec =
   [
@@ -50,13 +63,13 @@ let ast, types, side_effects =
 
 let ctypedefs, case_names_to_members = Gen_clike_typedef.gen_def ast
 
-let ctypedefs_str = Stringify.stringify_clike_typedef ctypedefs
-
-let () = print_endline ctypedefs_str
+let ctypedefs_str = Stringify.stringify_typdef ctypedefs
 
 let dec = Gen_decoder.gen_decoder ast
 
-let __ = Gen_decoder.gen_decode_proc dec
+let proc_dec = Gen_decoder.gen_decode_proc dec
 
-let () =
-  print_endline (Stringify.stringify_decode_procedure __ case_names_to_members)
+let proc_dec_str = Stringify.stringify_decode_procedure proc_dec case_names_to_members
+
+let () = write_c_file Constants.ast_type_filename ctypedefs_str
+let () = write_c_file Constants.decode_logic_filename proc_dec_str ~optional_includes:["\"" ^ Constants.ast_type_filename ^ "\""] 

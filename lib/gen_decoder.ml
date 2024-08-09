@@ -8,10 +8,6 @@ open Decode_procedure
 open Libsail
 open Ast
 
-type union_case_arg = Named_type of string | Bitvec of int
-
-type bitv2enum = (string, string) Hashtbl.t
-
 type 'a set = ('a, unit) Hashtbl.t
 
 let set_add set thing = Hashtbl.add set thing ()
@@ -22,23 +18,40 @@ let set_contains set thing =
     true
   with Not_found -> false
 
-type decoder_gen_iteration_state = {
+type union_case_type = Named_type of string | Bitvec of int
+
+type sail_types_context = {
   (* Associates each ast case name with the types of its arguments
-     Currently assumes a very limited set of possible type arguments
-     although Sail union clauses actually allow a much richer language
+     Currently assumes a very limited set of possible type arguments:
+     justa a flat list of either bitvectors or type ids.
+     But Sail union clauses actually allow a much richer language
      e.g. MY_UNION_CASE(bits(32), (bits(16), (bits(8), bits(8))))
      is a valid union clause definition in Sail, but it's too
      complicated to record in this table *)
-  union_case_to_args : (string, union_case_arg list) Hashtbl.t;
+  union_case_to_arg_types : (string, union_case_type list) Hashtbl.t;
   (* Records the names of all enum types *)
   enum_names : string set;
+  (* Records the names of all struct types *)
+  struct_names : string set;
   (* Maps every type equivalent to a bitvector into its bitv size *)
   bitv_synonyms : (string, int) Hashtbl.t;
-  (* Records all tables mapping enums to bitvectors *)
-  enum_bitv_mappings_registery : (string, bitv2enum) Hashtbl.t;
-  mutable decode_rules : decoder;
-  (* The length of the bitstream input to the decoder *)
+}
+
+type sail_mappings_context = {
+  (* Records all tables mapping enums to bitvectors, keyed by mapping name *)
+  enum_bitv_mappings_registery : (string, bv2enum_table) Hashtbl.t;
+  (* Records all tables mapping structs to bitvector, keyed by mapping name
+     Also records the name of the struct type along with the table *)
+  struct_bitv_mappings_registery : (string, string * bv2struct_table) Hashtbl.t;
+}
+type decoder_gen_iteration_state = {
+  type_ctx : sail_types_context;
+  mapping_ctx : sail_mappings_context;
+  (* The length of the bitstream input to the decoder
+     option because it initializes to None, then is inferred from the type of the decode mapping *)
   mutable instr_length : int option;
+  (* The final output of the decoder generation process, gradually built up mutably during iteration of the ast*)
+  mutable decode_rules : decoder;
 }
 
 let mk_case_arg_from_app id args =
@@ -70,20 +83,30 @@ let assoc_clause_with_args state _ union_id clause_id typ =
             )
             args_typ
         in
-        Hashtbl.add state.union_case_to_args name args
+        Hashtbl.add state.type_ctx.union_case_to_arg_types name args
     | Typ_id id ->
-        Hashtbl.add state.union_case_to_args name [Named_type (id_to_str id)]
+        Hashtbl.add state.type_ctx.union_case_to_arg_types name
+          [Named_type (id_to_str id)]
+    | Typ_app (id, args)
+      when id_to_str id = "bits" || id_to_str id = "bitvector" ->
+        Hashtbl.add state.type_ctx.union_case_to_arg_types name
+          [Bitvec (sail_bitv_size_to_int (List.nth args 0))]
     | _ -> failwith ("Unsupported type expression after the union case " ^ name)
   )
 
-let collect_enums state _ id _ _ = set_add state.enum_names (id_to_str id)
+let collect_enum_names state _ id _ _ =
+  set_add state.type_ctx.enum_names (id_to_str id)
+
+let collect_struct_names state _ id _ _ _ =
+  set_add state.type_ctx.struct_names (id_to_str id)
 
 let collect_bitvec_abbreviations state _ abbrev _ typ =
   let (A_aux (ty, _)) = typ in
   match ty with
   | A_typ (Typ_aux (Typ_app (id, args), _)) when id_to_str id = "bits" ->
-      Hashtbl.add state.bitv_synonyms (id_to_str abbrev)
-        (sail_bitv_size_to_int (List.nth args 0))
+      let size = sail_bitv_size_to_int_noexn (List.nth args 0) in
+      if size <> -1 then
+        Hashtbl.add state.type_ctx.bitv_synonyms (id_to_str abbrev) size
   | _ -> ()
 
 let bitv_literal_to_str bitv_lit =
@@ -98,118 +121,166 @@ let add_bitv2enum_entry tbl enum_id bitv_lit =
   let const = bitv_literal_to_str bitv_lit in
   Hashtbl.add tbl const enum_name
 
-let to_bitv2enum_hshtbl mapping_clauses =
-  let bitv2enum_tbl = Hashtbl.create (List.length mapping_clauses) in
-  List.iter
-    (fun cl ->
-      let (MCL_aux (clause, _)) = cl in
-      match clause with
-      | MCL_bidir (l, r) -> (
-          let (MPat_aux (left, _)) = l in
-          let (MPat_aux (right, _)) = r in
-          match (left, right) with
-          | MPat_pat lpat, MPat_pat rpat -> (
-              let (MP_aux (p1, _)) = lpat in
-              let (MP_aux (p2, _)) = rpat in
-              match (p1, p2) with
-              | MP_id enum_id, MP_lit bitv_const ->
-                  add_bitv2enum_entry bitv2enum_tbl enum_id bitv_const
-              | MP_lit bitv_const, MP_id enum_id ->
-                  add_bitv2enum_entry bitv2enum_tbl enum_id bitv_const
-              | _ ->
-                  failwith
-                    "Expected an enum string to map to a bitvec literal in \
-                     enum<->bitvec mapping"
-            )
+let add_bitv2bool_entry tbl lit bitv_lit =
+  let name =
+    match lit with
+    | L_true -> "true"
+    | L_false -> "false"
+    | _ -> failwith "Expected literal to be a boolean literal"
+  in
+  Hashtbl.add tbl (bitv_literal_to_str bitv_lit) name
+
+let btv2enum_entry_from_mapping_clause bitv2enum_tbl cl =
+  let (MCL_aux (clause, _)) = cl in
+  match clause with
+  | MCL_bidir (l, r) -> (
+      let (MPat_aux (left, _)) = l in
+      let (MPat_aux (right, _)) = r in
+      match (left, right) with
+      | MPat_pat lpat, MPat_pat rpat -> (
+          let (MP_aux (p1, _)) = lpat in
+          let (MP_aux (p2, _)) = rpat in
+          match (p1, p2) with
+          | MP_id enum_id, MP_lit bitv_const ->
+              add_bitv2enum_entry bitv2enum_tbl enum_id bitv_const
+          | MP_lit bitv_const, MP_id enum_id ->
+              add_bitv2enum_entry bitv2enum_tbl enum_id bitv_const
+          | MP_lit (L_aux (bool_lit, _)), MP_lit bitv_const ->
+              add_bitv2bool_entry bitv2enum_tbl bool_lit bitv_const
           | _ ->
               failwith
-                "Both sides of a bidiectional enum<->bitvec mapping must be a \
-                 simple pattern"
+                "Expected an enum string to map to a bitvec literal in \
+                 enum<->bitvec mapping"
         )
       | _ ->
-          failwith "Non-bidirectional enum<->bitvec mappings are not supported"
+          failwith
+            "Both sides of a bidiectional enum<->bitvec mapping must be \n\
+            \             simple patterns"
     )
-    mapping_clauses;
+  | _ -> failwith "Non-bidirectional enum<->bitvec mappings are not supported"
+
+let struct_member_to_key_value_pair (id, MP_aux (pat, _)) =
+  let error_msg =
+    "Unsupported struct member: only bool constants, enum literals, and \
+     bitvector constants are supported"
+  in
+
+  let key = id_to_str id in
+  match pat with
+  | MP_lit (L_aux (lit, _) as literal) -> (
+      match lit with
+      | L_true -> (key, Bool_const true)
+      | L_false -> (key, Bool_const false)
+      | L_hex _ | L_bin _ -> (key, Bv_const (bitv_literal_to_str literal))
+      | _ -> failwith error_msg
+    )
+  | MP_id enum_lit -> (key, Enum_lit (id_to_str enum_lit))
+  | _ -> failwith error_msg
+
+let add_bitv2struct_entry bitv2struct_tbl struct_members bitv_constant =
+  let bitv_str = bitv_literal_to_str bitv_constant in
+  let key_values = List.map struct_member_to_key_value_pair struct_members in
+  Hashtbl.add bitv2struct_tbl bitv_str key_values
+
+let btv2struct_entry_from_mapping_clause bitv2struct_tbl cl =
+  let (MCL_aux (clause, _)) = cl in
+  match clause with
+  | MCL_bidir (l, r) -> (
+      let (MPat_aux (left, _)) = l in
+      let (MPat_aux (right, _)) = r in
+      match (left, right) with
+      | MPat_pat lpat, MPat_pat rpat -> (
+          let (MP_aux (p1, _)) = lpat in
+          let (MP_aux (p2, _)) = rpat in
+          match (p1, p2) with
+          | MP_struct members, MP_lit bitv_const ->
+              add_bitv2struct_entry bitv2struct_tbl members bitv_const
+          | MP_lit bitv_const, MP_struct members ->
+              add_bitv2struct_entry bitv2struct_tbl members bitv_const
+          | _ ->
+              failwith
+                "Expected a struct instance to map to a bitvec literal in \
+                 struct<->bitvec mapping"
+        )
+      | _ ->
+          failwith
+            "Both sides of a bidiectional struct<->bitvec mapping must be\n\
+            \             simple patterns"
+    )
+  | _ -> failwith "Non-bidirectional struct<->bitvec mappings are not supported"
+
+let mk_bitv2enum mapping_clauses =
+  let bitv2enum_tbl = Hashtbl.create (List.length mapping_clauses) in
+  List.iter (btv2enum_entry_from_mapping_clause bitv2enum_tbl) mapping_clauses;
   bitv2enum_tbl
 
-let is_enum_bitv_mapping enum_names mapping_type_annotation =
-  let (Typ_annot_opt_aux (tannot, _)) = mapping_type_annotation in
+let mk_bitv2struct mapping_clauses =
+  let bitv2struct_tbl = Hashtbl.create (List.length mapping_clauses) in
+  List.iter
+    (btv2struct_entry_from_mapping_clause bitv2struct_tbl)
+    mapping_clauses;
+  bitv2struct_tbl
+
+let destructure_type_annotation type_annotation =
+  let (Typ_annot_opt_aux (tannot, _)) = type_annotation in
   match tannot with
-  | Typ_annot_opt_some (_, Typ_aux (Typ_bidir (t1, t2), _)) -> (
+  | Typ_annot_opt_some (_, Typ_aux (Typ_bidir (t1, t2), _)) ->
       let (Typ_aux (type1, _)) = t1 in
       let (Typ_aux (type2, _)) = t2 in
-      match (type1, type2) with
-      | Typ_app (id1, args), Typ_id id2
-        when set_contains enum_names (id_to_str id2) && id_to_str id1 = "bits"
-        ->
-          Some (id_to_str id2, sail_bitv_size_to_int (List.nth args 0))
-      | Typ_id id1, Typ_app (id2, args)
-        when set_contains enum_names (id_to_str id1) && id_to_str id2 = "bits"
-        ->
-          Some (id_to_str id1, sail_bitv_size_to_int (List.nth args 0))
-      | _ -> None
-    )
+      Some (type1, type2)
   | _ -> None
 
-let collect_enum_bitv_mapping state _ id typ_annot clauses =
-  match is_enum_bitv_mapping state.enum_names typ_annot with
+let is_enum_bitv_mapping enum_names mapping_type_annotation =
+  let types = destructure_type_annotation mapping_type_annotation in
+  match types with
+  | Some (Typ_app (id1, args), Typ_id id2)
+    when (id_to_str id2 = "bool" || set_contains enum_names (id_to_str id2))
+         && id_to_str id1 = "bits" ->
+      Some (id_to_str id2, sail_bitv_size_to_int (List.nth args 0))
+  | Some (Typ_id id1, Typ_app (id2, args))
+    when (id_to_str id1 = "bool" || set_contains enum_names (id_to_str id1))
+         && id_to_str id2 = "bits" ->
+      Some (id_to_str id1, sail_bitv_size_to_int (List.nth args 0))
+  | _ -> None
+
+let is_struct_bitv_mapping struct_names mapping_type_annotation =
+  let types = destructure_type_annotation mapping_type_annotation in
+  match types with
+  | Some (Typ_app (id1, args), Typ_id id2)
+    when set_contains struct_names (id_to_str id2) && id_to_str id1 = "bits" ->
+      Some (id_to_str id2, sail_bitv_size_to_int (List.nth args 0))
+  | Some (Typ_id id1, Typ_app (id2, args))
+    when set_contains struct_names (id_to_str id1) && id_to_str id2 = "bits" ->
+      Some (id_to_str id1, sail_bitv_size_to_int (List.nth args 0))
+  | _ -> None
+
+let collect_enum_bitv_mappings state _ id typ_annot clauses =
+  match is_enum_bitv_mapping state.type_ctx.enum_names typ_annot with
   | Some (enum_name, bitv_size) ->
-      Hashtbl.add state.enum_bitv_mappings_registery (id_to_str id)
-        (to_bitv2enum_hshtbl clauses);
-      Hashtbl.add state.bitv_synonyms enum_name bitv_size
+      Hashtbl.add state.mapping_ctx.enum_bitv_mappings_registery (id_to_str id)
+        (mk_bitv2enum clauses);
+      Hashtbl.add state.type_ctx.bitv_synonyms enum_name bitv_size
   | _ -> ()
 
-let print_state state =
-  print_endline "Union case to args ::";
-  Hashtbl.iter
-    (fun case_name args ->
-      print_endline "------------------Case-------------------------";
-      print_endline case_name;
-      List.iter
-        (fun a ->
-          match a with
-          | Named_type name -> print_endline ("Named: " ^ name)
-          | Bitvec size -> print_endline ("Bitvec: " ^ string_of_int size)
-        )
-        args;
-      print_endline "------------------End Case---------------------"
-    )
-    state.union_case_to_args;
-  print_endline "========================================";
-  print_endline "Enum Names:";
-  Hashtbl.iter (fun name _ -> print_endline name) state.enum_names;
-  print_endline "========================================";
-  Hashtbl.iter
-    (fun name size ->
-      print_endline
-        ("Type " ^ name ^ " synonomous to bitvec of size " ^ string_of_int size)
-    )
-    state.bitv_synonyms;
-  print_endline "========================================";
-  Hashtbl.iter
-    (fun name tbl ->
-      print_endline
-        ("+++++++++++ Mapping from " ^ name ^ " to bitvec @@@@@@@@@@@@@@@@@@");
-      Hashtbl.iter
-        (fun constant enum_str ->
-          print_endline (constant ^ " <---> " ^ enum_str)
-        )
-        tbl
-    )
-    state.enum_bitv_mappings_registery;
-  print_endline "========================================";
-  print_endline
-    ("Instruction Length :" ^ string_of_int (Option.get state.instr_length));
-  print_endline "========================================";
-  List.iter
+let collect_struct_bitv_mappings state _ id typ_annot clauses =
+  match is_struct_bitv_mapping state.type_ctx.struct_names typ_annot with
+  | Some (struct_name, bitv_size) ->
+      Hashtbl.add state.mapping_ctx.struct_bitv_mappings_registery (id_to_str id)
+        (struct_name, mk_bitv2struct clauses);
+      Hashtbl.add state.type_ctx.bitv_synonyms struct_name bitv_size
+  | _ -> ()
+
+let collect_mappings state __ id typ_annot clauses =
+  collect_enum_bitv_mappings state __ id typ_annot clauses;
+  collect_struct_bitv_mappings state __ id typ_annot clauses
 
 let lit_to_consequence_body lit =
-  let (L_aux (literal, _)) = lit in
+  let (L_aux (literal, loc)) = lit in
   match literal with
-  | L_bin l | L_hex l -> Push (Bv_const l)
+  | L_bin l | L_hex l -> Push (Bv_const (bitv_literal_to_str lit))
   | L_true -> Push (Bool_const true)
   | L_false -> Push (Bool_const false)
-  | _ -> failwith "Unsupported literal"
+  | _ -> failwith ("Unsupported literal @ " ^ stringify_sail_source_loc loc)
 
 let idstr_to_consequence_body idstr = Push (Binding idstr)
 
@@ -219,15 +290,16 @@ let vec_concat_to_consequence_body slices =
        (fun s ->
          let (MP_aux (slice, _)) = s in
          match slice with
-         | MP_lit (L_aux (lit, _)) -> (
+         | MP_lit (L_aux (lit, _) as l) -> (
              match lit with
-             | L_bin s | L_hex s -> Bv_const s
+             | L_bin s | L_hex s -> Bv_const (bitv_literal_to_str l)
              | _ -> failwith "UNREACHABLE"
            )
          | MP_id i -> Binding (id_to_str i)
+         | MP_typ (MP_aux (MP_id id, _), _) -> Binding (id_to_str id)
          | _ -> failwith "UNREACHABLE"
        )
-       slices
+       (List.rev slices)
     )
 
 let bind_args_and_create_consequences state l =
@@ -239,36 +311,44 @@ let bind_args_and_create_consequences state l =
       match pat with
       | MP_app (union_case_id, union_case_args) ->
           let case_name = id_to_str union_case_id in
-          let arg_types = Hashtbl.find state.union_case_to_args case_name in
+          let arg_types =
+            Hashtbl.find state.type_ctx.union_case_to_arg_types case_name
+          in
           let arg_sizes =
             List.map
               (fun arg ->
                 match arg with
-                | Named_type name -> Hashtbl.find state.bitv_synonyms name
+                | Named_type name -> (
+                    try Hashtbl.find state.type_ctx.bitv_synonyms name
+                    with Not_found -> -1
+                  )
                 | Bitvec size -> size
               )
               arg_types
           in
           let bodies =
-            List.mapi
-              (fun i a ->
-                let (MP_aux (arg, _)) = a in
-                match arg with
-                | MP_lit lit -> lit_to_consequence_body lit
-                | MP_id id ->
-                    let n = id_to_str id in
-                    let bitv_size = List.nth arg_sizes i in
-                    Hashtbl.add bindings n bitv_size;
-                    idstr_to_consequence_body n
-                | MP_vector_concat slices ->
-                    vec_concat_to_consequence_body slices
-                | _ ->
-                    failwith
-                      ("Unsupported pattern in argument " ^ string_of_int i
-                     ^ " to " ^ case_name
-                      )
-              )
-              union_case_args
+            match union_case_args with
+            | [MP_aux (MP_lit (L_aux (L_unit, _)), _)] -> []
+            | _ ->
+                List.mapi
+                  (fun i a ->
+                    let (MP_aux (arg, _)) = a in
+                    match arg with
+                    | MP_lit lit -> lit_to_consequence_body lit
+                    | MP_id id ->
+                        let n = id_to_str id in
+                        let bitv_size = List.nth arg_sizes i in
+                        Hashtbl.add bindings n bitv_size;
+                        idstr_to_consequence_body n
+                    | MP_vector_concat slices ->
+                        vec_concat_to_consequence_body slices
+                    | _ ->
+                        failwith
+                          ("Unsupported pattern in argument " ^ string_of_int i
+                         ^ " to " ^ case_name
+                          )
+                  )
+                  union_case_args
           in
           (bindings, (Assign_node_type case_name, bodies))
       | _ ->
@@ -287,7 +367,7 @@ let create_conditions state r arg_bindings =
       | MP_vector_concat pats ->
           List.map
             (fun p ->
-              let (MP_aux (pat, _)) = p in
+              let (MP_aux (pat, (loc, _))) = p in
               match pat with
               | MP_id id ->
                   let idstr = id_to_str id in
@@ -297,9 +377,23 @@ let create_conditions state r arg_bindings =
                   let size =
                     match typ with
                     | Typ_aux (Typ_app (id, args), _)
-                      when id_to_str id = "bitvector" ->
+                      when id_to_str id = "bitvector" || id_to_str id = "bits"
+                      ->
                         sail_bitv_size_to_int (List.nth args 0)
-                    | _ -> failwith "Type annotation cant be non-bitvec"
+                    | Typ_aux (Typ_id id, _) -> (
+                        try
+                          Hashtbl.find state.type_ctx.bitv_synonyms
+                            (id_to_str id)
+                        with Not_found ->
+                          failwith
+                            "Type annotation is a named type not synonymous \
+                             with bitvec "
+                      )
+                    | _ ->
+                        failwith
+                          ("Type annotation cant be non-bitvec @ "
+                          ^ stringify_sail_source_loc loc
+                          )
                   in
                   let idstr =
                     match pat with
@@ -311,17 +405,18 @@ let create_conditions state r arg_bindings =
                   let (L_aux (bv_lit, _)) = lit in
                   let size, const =
                     match bv_lit with
-                    | L_hex num_str -> (String.length num_str, num_str)
-                    | L_bin num_str -> (String.length num_str * 4, num_str)
+                    | L_hex num_str ->
+                        (String.length num_str * 4, "0x" ^ num_str)
+                    | L_bin num_str -> (String.length num_str, "0b" ^ num_str)
                     | _ ->
                         failwith
                           "Unsupported literal, only bitvec literals make \
                            sense here"
                   in
                   Assert (size, const)
-              | MP_app (id, args) ->
+              | MP_app (id, args) -> (
                   let mapping_name = id_to_str id in
-                  let enum_name =
+                  let arg_name =
                     match args with
                     | [MP_aux (MP_id i, _)] -> id_to_str i
                     | _ ->
@@ -329,14 +424,26 @@ let create_conditions state r arg_bindings =
                           "Unsupported mapping pattern, multiple arguments are \
                            not supported"
                   in
-                  let bv_to_enum =
-                    Hashtbl.find state.enum_bitv_mappings_registery mapping_name
-                  in
-                  let size = Hashtbl.find arg_bindings enum_name in
-                  Map_bind (size, bv_to_enum, enum_name)
+                  try
+                    let bv_to_enum =
+                      Hashtbl.find
+                        state.mapping_ctx.enum_bitv_mappings_registery
+                        mapping_name
+                    in
+                    let size = Hashtbl.find arg_bindings arg_name in
+                    Map_bind (size, bv_to_enum, arg_name)
+                  with Not_found ->
+                    let struct_name, bv_to_struct =
+                      Hashtbl.find
+                        state.mapping_ctx.struct_bitv_mappings_registery
+                        mapping_name
+                    in
+                    let size = Hashtbl.find arg_bindings arg_name in
+                    Struct_map_bind (size, struct_name, bv_to_struct, arg_name)
+                )
               | _ -> failwith ""
             )
-            pats
+            (List.rev pats)
       | _ -> failwith "-"
     )
 
@@ -357,7 +464,7 @@ let calculate_instr_length typ =
   | _ -> failwith errmsg
 
 let calculate_instr_len state _ id _ typ =
-  if id_to_str id = ast_decode_mapping then (
+  if id_to_str_noexn id = ast_decode_mapping then (
     assert (Option.is_none state.instr_length);
     state.instr_length <- Some (calculate_instr_length typ)
   )
@@ -372,10 +479,18 @@ let gen_decode_rule state _ id tannot left right =
 let gen_decoder ast =
   let state =
     {
-      union_case_to_args = Hashtbl.create 50;
-      enum_names = Hashtbl.create 100;
-      bitv_synonyms = Hashtbl.create 50;
-      enum_bitv_mappings_registery = Hashtbl.create 50;
+      type_ctx =
+        {
+          union_case_to_arg_types = Hashtbl.create 50;
+          enum_names = Hashtbl.create 100;
+          struct_names = Hashtbl.create 100;
+          bitv_synonyms = Hashtbl.create 50;
+        };
+      mapping_ctx =
+        {
+          enum_bitv_mappings_registery = Hashtbl.create 50;
+          struct_bitv_mappings_registery = Hashtbl.create 5;
+        };
       decode_rules = [];
       instr_length = None;
     }
@@ -385,8 +500,9 @@ let gen_decoder ast =
       default_processor with
       process_union_clause = assoc_clause_with_args;
       process_abbrev = collect_bitvec_abbreviations;
-      process_enum = collect_enums;
-      process_mapping = collect_enum_bitv_mapping;
+      process_enum = collect_enum_names;
+      process_record = collect_struct_names;
+      process_mapping = collect_mappings;
       process_mapping_bidir_clause = gen_decode_rule;
       process_val = calculate_instr_len;
     }
@@ -419,9 +535,12 @@ let calculate_offsets conds =
     List.fold_left
       (fun roffs cond ->
         match cond with
-        | Assert (len, _) | Bind (len, _) | Map_bind (len, _, _) -> (
+        | Assert (len, _)
+        | Bind (len, _)
+        | Map_bind (len, _, _)
+        | Struct_map_bind (len, _, _, _) -> (
             match roffs with
-            | curr :: rest -> (len - 1 + curr) :: roffs
+            | curr :: rest -> (len + curr) :: roffs
             | [] -> failwith "UNREACHABLE"
           )
       )
@@ -430,17 +549,27 @@ let calculate_offsets conds =
   List.rev rev_offsets
 
 let gen_mapbind_stmt offsets (i, cond) body =
+  let slice = Binstr_slice (List.nth offsets i, List.nth offsets (i + 1)) in
   match cond with
-  | Assert (_, _) | Bind (_, _) -> body
   | Map_bind (_, map_tbl, var_name) ->
       let values =
         Hashtbl.fold
           (fun bv_val enum_val vs -> (bv_val, enum_val) :: vs)
           map_tbl []
       in
-      let slice = Binstr_slice (List.nth offsets i, List.nth offsets (i + 1)) in
       let switch = Switch_assign (var_name, slice, values) in
       Block [switch; If (Is_enum_var_valid var_name, body)]
+  | Struct_map_bind (_, struct_name, map_tbl, var_name) ->
+      let values =
+        Hashtbl.fold
+          (fun bv_val kvs accumulator -> (bv_val, kvs) :: accumulator)
+          map_tbl []
+      in
+      let switch =
+        Switch_assign_struct (struct_name, var_name, slice, values)
+      in
+      Block [switch; If (Is_struct_var_valid var_name, body)]
+  | _ -> body
 
 let gen_stmt_from_conditions conds conseq_stmts =
   let offsets = calculate_offsets conds in
@@ -472,6 +601,7 @@ let gen_stmt_from_consequences consequences =
                 (fun v ->
                   match v with
                   | Bv_const bvc -> Literal bvc
+                  | Binding name -> Id name
                   | _ ->
                       failwith
                         "Type Error: concat undefined for non-bitvec values"
