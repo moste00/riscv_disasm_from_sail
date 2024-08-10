@@ -7,10 +7,12 @@ open Ast
 
 open Clike_typedef
 open Constants
+open Hashset
 
 type typedef_gen_iteration_state = {
   typenames_to_typedefs : (string, type_def_aux) Hashtbl.t;
   constructor_names_to_member_names : (string, string list) Hashtbl.t;
+  previously_defined_enums : string set;
 }
 
 let collect_typedefs state node typename =
@@ -87,8 +89,8 @@ let int_to_clike_bitv_size size =
 let gen_clike_builtin_from_bitvec_size_expr name arg =
   Clike_builtin (name, int_to_clike_bitv_size (sail_bitv_size_to_int arg))
 
-let gen_clike_type_from_enum name case_names =
-  Clike_enum ("", name, List.map id_to_str case_names)
+let gen_clike_type_from_enum enum_name name case_names =
+  Clike_enum (enum_name, name, List.map id_to_str case_names)
 
 let gen_clike_type_from_app name constructor args =
   match constructor with
@@ -113,7 +115,13 @@ and gen_clike_type_from_id name typgen_info id =
       match typ_def with
       | TD_abbrev (_, _, typarg) ->
           gen_clike_type_from_abbrev name typgen_info typarg
-      | TD_enum (_, case_names, _) -> gen_clike_type_from_enum name case_names
+      | TD_enum (id, case_names, _) ->
+        let enum_name = id_to_str id in 
+        if set_contains typgen_info.previously_defined_enums enum_name then 
+          Clike_typename ("enum " ^ enum_name, name)
+        else
+          (set_add typgen_info.previously_defined_enums enum_name ;  
+          gen_clike_type_from_enum enum_name name case_names)
       | TD_record (record_id, _, members, _) ->
           gen_clike_type_from_record name typgen_info record_id members
       | _ ->
@@ -167,11 +175,24 @@ let gen_clike_typedef ast_typename typgen_info =
       ]
     )
 
+let filter_builtin_union_cases clike_struct =
+  match clike_struct with
+  | Clike_struct (_, _, [_; Clike_union(_, _, members)]) ->
+      List.filter_map
+        (fun clike_type ->
+          match clike_type with
+          | Clike_builtin (name, _) -> Some name
+          | _ -> None
+        )
+        members
+  | _ -> []
+
 let gen_def ast =
   let state =
     {
       typenames_to_typedefs = Hashtbl.create 100;
       constructor_names_to_member_names = Hashtbl.create 50;
+      previously_defined_enums = Hashtbl.create 50;
     }
   in
   let processor =
@@ -182,6 +203,6 @@ let gen_def ast =
     }
   in
   foreach_node ast processor state;
-  ( gen_clike_typedef ast_sail_def_name state,
-    state.constructor_names_to_member_names
-  )
+  let typedef = gen_clike_typedef ast_sail_def_name state in
+  let builtin_members = filter_builtin_union_cases typedef in
+  (typedef, state.constructor_names_to_member_names, builtin_members)

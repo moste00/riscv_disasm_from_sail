@@ -4,19 +4,10 @@ open Sail_ast_utils
 open Constants
 open Decoder
 open Decode_procedure
+open Hashset
 
 open Libsail
 open Ast
-
-type 'a set = ('a, unit) Hashtbl.t
-
-let set_add set thing = Hashtbl.add set thing ()
-
-let set_contains set thing =
-  try
-    Hashtbl.find set thing;
-    true
-  with Not_found -> false
 
 type union_case_type = Named_type of string | Bitvec of int
 

@@ -4,11 +4,13 @@ open Ast
 open Riscv_disasm_from_sail
 open Constants
 
-let write_c_file ?(optional_includes = []) name code = 
-  let oc = open_out name in 
-  let mk_include_lines incs = String.concat "\n" (List.map (fun i -> "#include " ^ i ^ "\n") incs) in 
+let write_c_file ?(optional_includes = []) name code =
+  let oc = open_out name in
+  let mk_include_lines incs =
+    String.concat "\n" (List.map (fun i -> "#include " ^ i ^ "\n") incs)
+  in
   let include_string = mk_include_lines Constants.includes in
-  let optional_includes_string = mk_include_lines optional_includes in 
+  let optional_includes_string = mk_include_lines optional_includes in
   Printf.fprintf oc "%s" include_string;
   Printf.fprintf oc "%s" optional_includes_string;
   Printf.fprintf oc "%s" "\n\n\n";
@@ -61,7 +63,8 @@ let dummyoptions =
 let ast, types, side_effects =
   Frontend.load_files sailpath dummyoptions initial_typeenv filepaths
 
-let ctypedefs, case_names_to_members = Gen_clike_typedef.gen_def ast
+let ctypedefs, case_names_to_members, builtin_members =
+  Gen_clike_typedef.gen_def ast
 
 let ctypedefs_str = Stringify.stringify_typdef ctypedefs
 
@@ -69,7 +72,11 @@ let dec = Gen_decoder.gen_decoder ast
 
 let proc_dec = Gen_decoder.gen_decode_proc dec
 
-let proc_dec_str = Stringify.stringify_decode_procedure proc_dec case_names_to_members
+let proc_dec_str =
+  Stringify.stringify_decode_procedure proc_dec case_names_to_members
+    builtin_members
 
 let () = write_c_file Constants.ast_type_filename ctypedefs_str
-let () = write_c_file Constants.decode_logic_filename proc_dec_str ~optional_includes:["\"" ^ Constants.ast_type_filename ^ "\""] 
+let () =
+  write_c_file Constants.decode_logic_filename proc_dec_str
+    ~optional_includes:["\"" ^ Constants.ast_type_filename ^ "\""]

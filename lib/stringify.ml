@@ -53,14 +53,17 @@ let rec stringify_clike_typedef ?(indentation_lvl = 0) clike_typdef =
       ^ "\n" ^ ind ^ "} " ^ name ^ ";\n"
   | Clike_builtin (name, bitvec) -> stringify_clike_builin name bitvec
   | Clike_void -> ""
+  | Clike_typename (typname, name) -> typname ^ " " ^ name ^ ";"
 
-let stringify_typdef typdef = "\n\n\n enum {false = 0, true = 1}; \n" ^ stringify_clike_typedef typdef
+let stringify_typdef typdef =
+  "enum {false = 0, true = 1}; \n" ^ stringify_clike_typedef typdef
 
 type decproc_stringification_state = {
   mutable current_case_name : string;
   mutable current_case_members : string list;
   constructor_names_to_member_names : (string, string list) Hashtbl.t;
   currently_defined_bv_sizes : (string, int) Hashtbl.t;
+  builtin_cases : string list;
 }
 
 let rec bv_len vars bv =
@@ -149,7 +152,7 @@ let rec stringify_stmt ?(indentation_lvl = 0) str_state stmt =
       var_decl ^ switch_start ^ String.concat "" cases ^ " \n" ^ ind ^ "}\n"
   | Switch_assign_struct (typ, var, exp, cases) ->
       let var_decl =
-        ind ^ "struct " ^  typ ^ " " ^ var ^ " ;\n" ^ ind ^ "uint8_t " ^ var
+        ind ^ "struct " ^ typ ^ " " ^ var ^ " ;\n" ^ ind ^ "uint8_t " ^ var
         ^ "_is_valid = 0 ;\n"
       in
       let switch_start =
@@ -162,14 +165,15 @@ let rec stringify_stmt ?(indentation_lvl = 0) str_state stmt =
                  kvs
                  |> List.map (fun (k, v) ->
                         indent ^ var ^ "." ^ k ^ " = "
-                        ^
-                        match v with
-                        | Bool_const c -> if c then "1" else "0"
-                        | Bv_const s | Binding s | Enum_lit s -> s
+                        ^ ( match v with
+                          | Bool_const c -> if c then "1" else "0"
+                          | Bv_const s | Binding s | Enum_lit s -> s
+                          )
+                        ^ ";"
                     )
                in
                indent ^ "case " ^ bval ^ ": \n"
-               ^ String.concat ";\n" member_assignments
+               ^ String.concat "\n" member_assignments
                ^ "\n" ^ indent ^ var ^ "_is_valid = 1 ; \n" ^ indent
                ^ "break; \n"
            )
@@ -200,16 +204,26 @@ let rec stringify_stmt ?(indentation_lvl = 0) str_state stmt =
           )
         | Exp bv_expr -> stringify_bv str_state bv_expr
       in
+      let member_access =
+        if
+          List.exists
+            (fun c -> c = str_state.current_case_name)
+            str_state.builtin_cases
+        then
+           ""
+        else "." ^ member_c_name
+      in
       ind ^ ast_c_parameter ^ "->"
       ^ (ast_sail_def_name ^ generated_ast_payload_suffix)
-      ^ "." ^ str_state.current_case_name ^ "." ^ member_c_name ^ " = "
-      ^ rhs_string ^ ";\n"
+      ^ "." ^ str_state.current_case_name ^ member_access ^ " = " ^ rhs_string
+      ^ ";\n"
   | Ret_ast -> ind ^ "return " ^ ";\n"
   | Block stmts ->
       String.concat ""
         (List.map (stringify_stmt ~indentation_lvl str_state) stmts)
 
-let stringify_decode_procedure (Proc stmt) case_names_to_members =
+let stringify_decode_procedure (Proc stmt) case_names_to_members builtin_members
+    =
   let procedure_start =
     "void decode(struct " ^ ast_sail_def_name ^ " *" ^ ast_c_parameter
     ^ ", uint64_t " ^ binary_stream_c_parameter ^ ") {\n"
@@ -221,6 +235,7 @@ let stringify_decode_procedure (Proc stmt) case_names_to_members =
       current_case_members = [];
       constructor_names_to_member_names = case_names_to_members;
       currently_defined_bv_sizes = Hashtbl.create 100;
+      builtin_cases = builtin_members;
     }
   in
   let procedure_body = stringify_stmt initial_state stmt in

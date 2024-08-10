@@ -22,3 +22,4 @@ type clike_typedef =
   | Clike_builtin of string * clike_bitvec
   (* A fixed-width machine type *)
   | Clike_void (* A non-existent type that stringifies to nothing*)
+  | Clike_typename of string * string (* A name to an already defined type *)

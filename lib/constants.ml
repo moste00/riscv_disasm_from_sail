@@ -12,10 +12,8 @@ let ast_c_parameter = "tree"
 
 let binary_stream_c_parameter = "binary_stream"
 
-let includes = [
-  "<stdint.h>"
-]
+let includes = ["<stdint.h>"]
 
 let ast_type_filename = "riscv_ast.gen.inc"
 
-let decode_logic_filename = "riscv_decode.gen.inc" 
+let decode_logic_filename = "riscv_decode.gen.inc"
