@@ -10,3 +10,11 @@ jobs:
                 sudo apt-get install bubblewrap
                 echo "" | bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"
                 echo "1" | opam init
+                opam install dune
+            
+            - name: hello ocaml
+              run: |
+                dune init proj hello
+                cd hello
+                dune build
+                dune exec hello
