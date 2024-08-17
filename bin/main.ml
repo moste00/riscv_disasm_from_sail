@@ -63,8 +63,7 @@ let dummyoptions =
 let ast, types, side_effects =
   Frontend.load_files sailpath dummyoptions initial_typeenv filepaths
 
-let ctypedefs, case_names_to_members, builtin_members =
-  Gen_clike_typedef.gen_def ast
+let ctypedefs, typdefwalker = Gen_clike_typedef.gen_def ast
 
 let ctypedefs_str = Stringify.stringify_typdef ctypedefs
 
@@ -72,9 +71,7 @@ let dec = Gen_decoder.gen_decoder ast
 
 let proc_dec = Gen_decoder.gen_decode_proc dec
 
-let proc_dec_str =
-  Stringify.stringify_decode_procedure proc_dec case_names_to_members
-    builtin_members
+let proc_dec_str = Stringify.stringify_decode_procedure proc_dec typdefwalker
 
 let () = write_c_file Constants.ast_type_filename ctypedefs_str
 let () =

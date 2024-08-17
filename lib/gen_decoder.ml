@@ -100,13 +100,6 @@ let collect_bitvec_abbreviations state _ abbrev _ typ =
         Hashtbl.add state.type_ctx.bitv_synonyms (id_to_str abbrev) size
   | _ -> ()
 
-let bitv_literal_to_str bitv_lit =
-  let (L_aux (lit, _)) = bitv_lit in
-  match lit with
-  | L_hex lit_str -> "0x" ^ lit_str
-  | L_bin lit_str -> "0b" ^ lit_str
-  | _ -> failwith "Expected a bitvec literal, found neither L_hex nor L_bin"
-
 let add_bitv2enum_entry tbl enum_id bitv_lit =
   let enum_name = id_to_str enum_id in
   let const = bitv_literal_to_str bitv_lit in
@@ -393,16 +386,8 @@ let create_conditions state r arg_bindings =
                   in
                   Bind (size, idstr)
               | MP_lit lit ->
-                  let (L_aux (bv_lit, _)) = lit in
-                  let size, const =
-                    match bv_lit with
-                    | L_hex num_str ->
-                        (String.length num_str * 4, "0x" ^ num_str)
-                    | L_bin num_str -> (String.length num_str, "0b" ^ num_str)
-                    | _ ->
-                        failwith
-                          "Unsupported literal, only bitvec literals make \
-                           sense here"
+                  let const = bitv_literal_to_str lit in
+                  let size = bitv_literal_size lit
                   in
                   Assert (size, const)
               | MP_app (id, args) -> (

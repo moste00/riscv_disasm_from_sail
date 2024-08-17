@@ -2,6 +2,7 @@ open Clike_typedef
 open Decoder
 open Decode_procedure
 open Constants
+open Gen_clike_typedef
 
 let mk_indentation lvl =
   if lvl = 0 then ""
@@ -59,11 +60,8 @@ let stringify_typdef typdef =
   "enum {false = 0, true = 1}; \n" ^ stringify_clike_typedef typdef
 
 type decproc_stringification_state = {
-  mutable current_case_name : string;
-  mutable current_case_members : string list;
-  constructor_names_to_member_names : (string, string list) Hashtbl.t;
+  typedef_walker : typedef_walker;
   currently_defined_bv_sizes : (string, int) Hashtbl.t;
-  builtin_cases : string list;
 }
 
 let rec bv_len vars bv =
@@ -82,9 +80,9 @@ let rec stringify_bv vars e =
       let mask =
         0 :: List.init 63 (fun x -> x + 1)
         |> List.map (fun i -> if i >= i1 && i < i2 then "1" else "0")
-        |> List.rev |> String.concat ""
+        |> List.rev |> String.concat "" |> Sail_ast_utils.binary_str_to_hex_str
       in
-      let masking_expr = binary_stream_c_parameter ^ " & 0b" ^ mask in
+      let masking_expr = binary_stream_c_parameter ^ " & 0x" ^ mask in
       if i1 <> 0 then "(" ^ masking_expr ^ ")" ^ ">>" ^ string_of_int i1
       else masking_expr
   | Concat bvs ->
@@ -180,21 +178,9 @@ let rec stringify_stmt ?(indentation_lvl = 0) str_state stmt =
       in
       var_decl ^ switch_start ^ String.concat "\n" c_cases ^ ind ^ "}\n"
   | Set_ast_case case ->
-      str_state.current_case_name <- String.lowercase_ascii case;
-      str_state.current_case_members <-
-        Hashtbl.find str_state.constructor_names_to_member_names
-          str_state.current_case_name;
-      ind ^ ast_c_parameter ^ "->"
-      ^ (ast_sail_def_name ^ generated_ast_enum_suffix)
-      ^ " = " ^ case ^ " ;\n"
+      let case_setter_path = set_walker_case str_state.typedef_walker case in
+      ind ^ ast_c_parameter ^ "->" ^ case_setter_path ^ " = " ^ case ^ " ;\n"
   | Set_ast_next_case_member member_rhs ->
-      let member_c_name =
-        match str_state.current_case_members with
-        | first :: rest ->
-            str_state.current_case_members <- rest;
-            first
-        | _ -> failwith "UNREACHABLE"
-      in
       let rhs_string =
         match member_rhs with
         | Val v -> (
@@ -204,39 +190,24 @@ let rec stringify_stmt ?(indentation_lvl = 0) str_state stmt =
           )
         | Exp bv_expr -> stringify_bv str_state bv_expr
       in
-      let member_access =
-        if
-          List.exists
-            (fun c -> c = str_state.current_case_name)
-            str_state.builtin_cases
-        then
-           ""
-        else "." ^ member_c_name
-      in
-      ind ^ ast_c_parameter ^ "->"
-      ^ (ast_sail_def_name ^ generated_ast_payload_suffix)
-      ^ "." ^ str_state.current_case_name ^ member_access ^ " = " ^ rhs_string
-      ^ ";\n"
+      (match (walk str_state.typedef_walker) with 
+      | Some (setter_path) -> ind ^ ast_c_parameter ^ "->"
+      ^ setter_path 
+      ^ " = " ^ rhs_string ^ ";\n"
+      | None -> failwith "Error assigning to an ast member")
   | Ret_ast -> ind ^ "return " ^ ";\n"
   | Block stmts ->
       String.concat ""
         (List.map (stringify_stmt ~indentation_lvl str_state) stmts)
 
-let stringify_decode_procedure (Proc stmt) case_names_to_members builtin_members
-    =
+let stringify_decode_procedure (Proc stmt) walker =
   let procedure_start =
     "void decode(struct " ^ ast_sail_def_name ^ " *" ^ ast_c_parameter
     ^ ", uint64_t " ^ binary_stream_c_parameter ^ ") {\n"
   in
   let procedure_end = "}" in
   let initial_state =
-    {
-      current_case_name = "";
-      current_case_members = [];
-      constructor_names_to_member_names = case_names_to_members;
-      currently_defined_bv_sizes = Hashtbl.create 100;
-      builtin_cases = builtin_members;
-    }
+    { typedef_walker = walker; currently_defined_bv_sizes = Hashtbl.create 100 }
   in
   let procedure_body = stringify_stmt initial_state stmt in
   procedure_start ^ procedure_body ^ procedure_end

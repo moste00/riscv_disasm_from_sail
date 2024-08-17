@@ -116,12 +116,13 @@ and gen_clike_type_from_id name typgen_info id =
       | TD_abbrev (_, _, typarg) ->
           gen_clike_type_from_abbrev name typgen_info typarg
       | TD_enum (id, case_names, _) ->
-        let enum_name = id_to_str id in 
-        if set_contains typgen_info.previously_defined_enums enum_name then 
-          Clike_typename ("enum " ^ enum_name, name)
-        else
-          (set_add typgen_info.previously_defined_enums enum_name ;  
-          gen_clike_type_from_enum enum_name name case_names)
+          let enum_name = id_to_str id in
+          if set_contains typgen_info.previously_defined_enums enum_name then
+            Clike_typename ("enum " ^ enum_name, name)
+          else (
+            set_add typgen_info.previously_defined_enums enum_name;
+            gen_clike_type_from_enum enum_name name case_names
+          )
       | TD_record (record_id, _, members, _) ->
           gen_clike_type_from_record name typgen_info record_id members
       | _ ->
@@ -175,17 +176,52 @@ let gen_clike_typedef ast_typename typgen_info =
       ]
     )
 
-let filter_builtin_union_cases clike_struct =
+let filter_primitive_union_cases clike_struct =
+  let cases = Hashtbl.create 50 in
   match clike_struct with
-  | Clike_struct (_, _, [_; Clike_union(_, _, members)]) ->
-      List.filter_map
+  | Clike_struct (_, _, [_; Clike_union (_, _, members)]) ->
+      List.iter
         (fun clike_type ->
           match clike_type with
-          | Clike_builtin (name, _) -> Some name
-          | _ -> None
+          | Clike_builtin (name, _) -> set_add cases name
+          | _ -> ()
         )
-        members
-  | _ -> []
+        members;
+      cases
+  | _ -> cases
+
+type typedef_walker = {
+  case_names_to_member_names : (string, string list) Hashtbl.t;
+  primitive_cases : string set;
+  (* mutable state *)
+  mutable curr_case : string;
+  mutable curr_case_remaining_member : string list;
+  mutable curr_case_is_primitive : bool;
+  mutable curr_primitive_case_already_walked : bool;
+}
+
+let set_walker_case walker case =
+  walker.curr_case <- String.lowercase_ascii case;
+  walker.curr_case_remaining_member <-
+    Hashtbl.find walker.case_names_to_member_names walker.curr_case;
+  walker.curr_case_is_primitive <- set_contains walker.primitive_cases walker.curr_case;
+  walker.curr_primitive_case_already_walked <- false;
+  ast_sail_def_name ^ generated_ast_enum_suffix
+
+let walk walker =
+  if walker.curr_case_is_primitive then
+    if walker.curr_primitive_case_already_walked then None
+    else (
+      walker.curr_primitive_case_already_walked <- true;
+      Some (ast_sail_def_name ^ generated_ast_payload_suffix ^ "." ^ walker.curr_case)
+    )
+  else (
+    match walker.curr_case_remaining_member with
+    | [] -> None
+    | next :: rest ->
+        walker.curr_case_remaining_member <- rest;
+        Some (ast_sail_def_name ^ generated_ast_payload_suffix ^ "." ^ walker.curr_case ^ "."  ^ next)
+  )
 
 let gen_def ast =
   let state =
@@ -204,5 +240,15 @@ let gen_def ast =
   in
   foreach_node ast processor state;
   let typedef = gen_clike_typedef ast_sail_def_name state in
-  let builtin_members = filter_builtin_union_cases typedef in
-  (typedef, state.constructor_names_to_member_names, builtin_members)
+  let walker =
+    {
+      case_names_to_member_names = state.constructor_names_to_member_names;
+      primitive_cases = filter_primitive_union_cases typedef;
+      curr_case = "";
+      curr_case_remaining_member = [];
+      curr_case_is_primitive = false;
+      curr_primitive_case_already_walked = false;
+    }
+  in
+
+  (typedef, walker)
