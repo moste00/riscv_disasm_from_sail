@@ -18,7 +18,7 @@ jobs:
             - name: Running the generator
               run: |
                 source ~/.bash_profile
-                opam install . --deps-only
+                yes | opam install . --deps-only
 
                 rm *.gen.inc
                 dune exec --profile release -- riscv_disasm_from_sail -f bin/sail.filepaths.txt
