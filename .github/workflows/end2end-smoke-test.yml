@@ -5,17 +5,22 @@ jobs:
     smoke-test:
         runs-on: ubuntu-latest
         steps:
-            - name: set up the Ocaml toolchain
+            - name: Set up the Ocaml toolchain
               run: |
                 sudo apt-get install bubblewrap
                 echo "" | bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"
                 echo "1" | opam init
                 opam install dune
             
-            - name: hello ocaml
+            - name: Fetching the generator sources 
+              uses: actions/checkout@v4
+
+            - name: Running the generator
               run: |
+                cd riscv_disasm_from_sail
+
                 source ~/.bash_profile
-                dune init proj hello
-                cd hello
-                dune build
-                dune exec hello
+                opam install . --deps-only
+
+                rm *.gen.inc
+                dune exec --profile release -- riscv_disasm_from_sail -f bin/sail.filepaths.txt
