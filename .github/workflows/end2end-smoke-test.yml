@@ -17,6 +17,7 @@ jobs:
 
             - name: Running the generator
               run: |
+                ls
                 cd riscv_disasm_from_sail
 
                 source ~/.bash_profile
