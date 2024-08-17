@@ -1,0 +1,11 @@
+on: 
+    - push 
+
+jobs:
+    smoke-test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: set up the Ocaml toolchain
+              run: |
+                bash -c "sh <(curl -fsSL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)"
+                yes | opam init
