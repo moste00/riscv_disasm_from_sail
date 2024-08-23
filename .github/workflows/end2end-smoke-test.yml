@@ -19,7 +19,8 @@ jobs:
               run: |
                 source ~/.bash_profile
                 export OPAMCONFIRMLEVEL=yes
-                opam install . --deps-only --locked
+                opam install . --deps-only 
+                opam install libsail.opam.locked
 
                 rm *.gen.inc
                 dune exec --profile release -- riscv_disasm_from_sail -f bin/sail.filepaths.txt
