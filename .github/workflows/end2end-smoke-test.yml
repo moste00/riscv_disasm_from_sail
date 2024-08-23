@@ -20,6 +20,7 @@ jobs:
                 source ~/.bash_profile
                 export OPAMCONFIRMLEVEL=yes
                 opam install ./libsail.opam.locked
-
+                ocamlfind query libsail
+                echo ":: :::::::::::::::::::::: TRYING TO BUILD...."
                 rm *.gen.inc
                 dune exec --profile release -- riscv_disasm_from_sail -f bin/sail.filepaths.txt
