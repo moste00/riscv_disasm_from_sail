@@ -19,7 +19,7 @@
  (name riscv_disasm_from_sail)
  (synopsis "A short synopsis")
  (description "A longer description")
- (depends ocaml dune libsail)
+ (depends ocaml dune (libsail (= 0.17.1)))
  (tags
   (topics "to describe" your project)))
 
