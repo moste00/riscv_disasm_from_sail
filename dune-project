@@ -5,11 +5,11 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github moste00/riscv_disasm_from_sail))
 
 (authors "Mostafa Kamal")
 
-(maintainers "Maintainer Name")
+(maintainers "Mostafa Kamal")
 
 (license LICENSE)
 
