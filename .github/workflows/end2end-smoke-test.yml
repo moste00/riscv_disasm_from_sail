@@ -19,7 +19,6 @@ jobs:
               run: |
                 source ~/.bash_profile
                 export OPAMCONFIRMLEVEL=yes
-                opam install . --deps-only 
                 opam install ./libsail.opam.locked
 
                 rm *.gen.inc
