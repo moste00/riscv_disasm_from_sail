@@ -19,7 +19,10 @@ jobs:
               run: |
                 source ~/.bash_profile
                 export OPAMCONFIRMLEVEL=yes
+                export OCAMLRUNPARAM=b
+
                 opam install . --deps-only
                 opam install sail=0.17.1
+                
                 rm *.gen.inc
                 dune exec --profile release -- riscv_disasm_from_sail -f bin/sail.filepaths.txt
