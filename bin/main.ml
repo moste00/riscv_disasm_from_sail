@@ -19,6 +19,8 @@ let write_c_file ?(optional_includes = []) name code =
 
 let sailpath = (Unix.getenv "HOME") ^ "/.opam/default/share/sail/"
 
+let () = print_endline ("\n\n SAIL STDLIB PATH : " ^ sailpath ^ " \n-------------------\n")
+
 let paths_filename = ref ""
 
 let usage_msg = "Usage: riscv_disasm_from_sail -f <path-to-list-of-input-files>"
