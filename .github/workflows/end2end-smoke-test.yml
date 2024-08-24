@@ -23,6 +23,7 @@ jobs:
 
                 opam install . --deps-only
                 opam install sail=0.17.1
-                
+                ll ~/.opam/default/share/sail
+                ll ~/.opam/default/share/sail/lib
                 rm *.gen.inc
                 dune exec --profile release -- riscv_disasm_from_sail -f bin/sail.filepaths.txt
