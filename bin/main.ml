@@ -3,6 +3,7 @@ open Type_check
 open Ast
 open Riscv_disasm_from_sail
 open Constants
+open Printexc
 
 let write_c_file ?(optional_includes = []) name code =
   let oc = open_out name in
@@ -17,9 +18,11 @@ let write_c_file ?(optional_includes = []) name code =
   Printf.fprintf oc "%s" code;
   close_out oc
 
-let sailpath = (Unix.getenv "HOME") ^ "/.opam/default/share/sail/"
+let sailpath = Unix.getenv "HOME" ^ "/.opam/default/share/sail/"
 
-let () = print_endline ("\n\n SAIL STDLIB PATH : " ^ sailpath ^ " \n-------------------\n")
+let () =
+  print_endline
+    ("\n\n SAIL STDLIB PATH : " ^ sailpath ^ " \n-------------------\n")
 
 let paths_filename = ref ""
 
@@ -63,7 +66,10 @@ let dummyoptions =
   ]
 
 let ast, types, side_effects =
-  Frontend.load_files sailpath dummyoptions initial_typeenv filepaths
+  try Frontend.load_files sailpath dummyoptions initial_typeenv filepaths
+  with Reporting.Fatal_error e as ex ->
+    Reporting.print_error e;
+    raise ex
 
 let ctypedefs, typdefwalker = Gen_clike_typedef.gen_def ast
 

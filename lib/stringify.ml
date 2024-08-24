@@ -180,7 +180,7 @@ let rec stringify_stmt ?(indentation_lvl = 0) str_state stmt =
   | Set_ast_case case ->
       let case_setter_path = set_walker_case str_state.typedef_walker case in
       ind ^ ast_c_parameter ^ "->" ^ case_setter_path ^ " = " ^ case ^ " ;\n"
-  | Set_ast_next_case_member member_rhs ->
+  | Set_ast_next_case_member member_rhs -> (
       let rhs_string =
         match member_rhs with
         | Val v -> (
@@ -190,11 +190,12 @@ let rec stringify_stmt ?(indentation_lvl = 0) str_state stmt =
           )
         | Exp bv_expr -> stringify_bv str_state bv_expr
       in
-      (match (walk str_state.typedef_walker) with 
-      | Some (setter_path) -> ind ^ ast_c_parameter ^ "->"
-      ^ setter_path 
-      ^ " = " ^ rhs_string ^ ";\n"
-      | None -> failwith "Error assigning to an ast member")
+      match walk str_state.typedef_walker with
+      | Some setter_path ->
+          ind ^ ast_c_parameter ^ "->" ^ setter_path ^ " = " ^ rhs_string
+          ^ ";\n"
+      | None -> failwith "Error assigning to an ast member"
+    )
   | Ret_ast -> ind ^ "return " ^ ";\n"
   | Block stmts ->
       String.concat ""

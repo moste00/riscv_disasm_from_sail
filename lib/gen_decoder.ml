@@ -387,8 +387,7 @@ let create_conditions state r arg_bindings =
                   Bind (size, idstr)
               | MP_lit lit ->
                   let const = bitv_literal_to_str lit in
-                  let size = bitv_literal_size lit
-                  in
+                  let size = bitv_literal_size lit in
                   Assert (size, const)
               | MP_app (id, args) -> (
                   let mapping_name = id_to_str id in

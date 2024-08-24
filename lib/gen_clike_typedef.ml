@@ -204,7 +204,8 @@ let set_walker_case walker case =
   walker.curr_case <- String.lowercase_ascii case;
   walker.curr_case_remaining_member <-
     Hashtbl.find walker.case_names_to_member_names walker.curr_case;
-  walker.curr_case_is_primitive <- set_contains walker.primitive_cases walker.curr_case;
+  walker.curr_case_is_primitive <-
+    set_contains walker.primitive_cases walker.curr_case;
   walker.curr_primitive_case_already_walked <- false;
   ast_sail_def_name ^ generated_ast_enum_suffix
 
@@ -213,14 +214,20 @@ let walk walker =
     if walker.curr_primitive_case_already_walked then None
     else (
       walker.curr_primitive_case_already_walked <- true;
-      Some (ast_sail_def_name ^ generated_ast_payload_suffix ^ "." ^ walker.curr_case)
+      Some
+        (ast_sail_def_name ^ generated_ast_payload_suffix ^ "."
+       ^ walker.curr_case
+        )
     )
   else (
     match walker.curr_case_remaining_member with
     | [] -> None
     | next :: rest ->
         walker.curr_case_remaining_member <- rest;
-        Some (ast_sail_def_name ^ generated_ast_payload_suffix ^ "." ^ walker.curr_case ^ "."  ^ next)
+        Some
+          (ast_sail_def_name ^ generated_ast_payload_suffix ^ "."
+         ^ walker.curr_case ^ "." ^ next
+          )
   )
 
 let gen_def ast =
