@@ -19,7 +19,7 @@ jobs:
 
             - name: Get the hash of the riscv sail model to fetch
               id: sail-riscv-model-get-hash
-              run: echo "h=$(cat sail.hash.txt)" >> "$GITHUB_OUTPUT"
+              run: cd generator && echo "h=$(cat sail.hash.txt)" >> "$GITHUB_OUTPUT" && echo "Fetching version $(cat sail.hash.txt) of the riscv sail model"
             
             - name: Fetch the riscv sail model 
               uses: actions/checkout@v4
@@ -31,8 +31,7 @@ jobs:
             
             - name: Install generator dependencies
               run: |
-                cd generator
-                source ~/.bash_profile
+                cd generator && source ~/.bash_profile
                 export OPAMCONFIRMLEVEL=yes
 
                 opam install . --deps-only
@@ -41,7 +40,7 @@ jobs:
 
             - name: Running the generator
               run: |
-                cd generator
+                cd generator && source ~/.bash_profile                
                 mv riscv_ast.gen.inc old_riscv_ast.gen.inc
                 mv riscv_decode.gen.inc old_riscv_decode.gen.inc
 
