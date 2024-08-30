@@ -41,6 +41,7 @@ jobs:
 
             - name: Running the generator
               run: |
+                cd generator
                 mv riscv_ast.gen.inc old_riscv_ast.gen.inc
                 mv riscv_decode.gen.inc old_riscv_decode.gen.inc
 
@@ -48,6 +49,7 @@ jobs:
 
             - name: Checking the generated code compiles and is identical to the committed generated code
               run: |
+                cd generator
                 echo '#include "riscv_decode.gen.inc" void main() {}' > test_main.c
                 gcc test_main.c || { echo "Failure: Trying to compile the tool-generated C code failed."; exit 1; }
 
