@@ -12,16 +12,16 @@ jobs:
                 echo "1" | opam init
                 opam install dune
             
-            - name: Fetching the generator sources 
+            - name: Fetch the generator sources 
               uses: actions/checkout@v4
               with:
                 path: generator
 
-            - name: Getting the hash of the riscv sail model to fetch
+            - name: Get the hash of the riscv sail model to fetch
               id: sail-riscv-model-get-hash
               run: echo "h=$(cat sail.hash.txt)" >> "$GITHUB_OUTPUT"
             
-            - name: Fetching the riscv sail model 
+            - name: Fetch the riscv sail model 
               uses: actions/checkout@v4
               with:
                 repository: riscv/sail-riscv
@@ -29,24 +29,27 @@ jobs:
                 path: sail-riscv/
                 sparse-checkout: model
             
-            - name: Running the generator
+            - name: Install generator dependencies
               run: |
                 cd generator
                 source ~/.bash_profile
                 export OPAMCONFIRMLEVEL=yes
-                export OCAMLRUNPARAM=b
 
                 opam install . --deps-only
                 opam install sail=0.17.1
                 sudo apt-get install z3
-                
+
+            - name: Running the generator
+              run: |
                 mv riscv_ast.gen.inc old_riscv_ast.gen.inc
                 mv riscv_decode.gen.inc old_riscv_decode.gen.inc
 
                 dune exec --profile release -- riscv_disasm_from_sail -f sail.filepaths.txt
-                
-                echo '#include "riscv_decode.gen.inc" \n void main() {}' > test_main.c
-                gcc test_main.c || echo "Failure: Trying to compile the tool-generated C code failed."
+
+            - name: Checking the generated code compiles and is identical to the committed generated code
+              run: |
+                echo '#include "riscv_decode.gen.inc" void main() {}' > test_main.c
+                gcc test_main.c || { echo "Failure: Trying to compile the tool-generated C code failed."; exit 1; }
 
                 if diff -q riscv_ast.gen.inc old_riscv_ast.gen.inc > /dev/null 2>&1; then
                   if diff -q riscv_decode.gen.inc old_riscv_decode.gen.inc > /dev/null 2>&1; then
