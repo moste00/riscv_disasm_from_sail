@@ -14,6 +14,8 @@ jobs:
             
             - name: Fetching the generator sources 
               uses: actions/checkout@v4
+              with:
+                path: generator
 
             - name: Getting the hash of the riscv sail model to fetch
               id: sail-riscv-model-get-hash
@@ -24,11 +26,13 @@ jobs:
               with:
                 repository: riscv/sail-riscv
                 ref: ${{ steps.sail-riscv-model-get-hash.outputs.h }}
-                path: ../sail-riscv/
+                path: sail-riscv/
                 sparse-checkout: model
             
             - name: Running the generator
               run: |
+                ls -R
+                cd generator
                 source ~/.bash_profile
                 export OPAMCONFIRMLEVEL=yes
                 export OCAMLRUNPARAM=b
