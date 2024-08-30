@@ -76,6 +76,8 @@
 ../sail-riscv/model/riscv_insts_vext_fp_vm.sail
 ../sail-riscv/model/riscv_insts_vext_red.sail
 ../sail-riscv/model/riscv_insts_vext_fp_red.sail
+../sail-riscv/model/riscv_insts_zicbom.sail
+../sail-riscv/model/riscv_insts_zicboz.sail
 ../sail-riscv/model/riscv_jalr_seq.sail
 ../sail-riscv/model/riscv_insts_end.sail
 ../sail-riscv/model/riscv_step_common.sail

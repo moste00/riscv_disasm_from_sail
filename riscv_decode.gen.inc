@@ -7018,6 +7018,34 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           return ;
       }
   }
+  if ((binary_stream & 0x000000000000007F == 0x0F) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x2)) { 
+      uint64_t cbop = 0xFFFFFFFFFFFFFFFF ;
+      switch ((binary_stream & 0x00000000FFF00000)>>20) {
+        case 0x000: 
+                cbop = CBO_INVAL ;
+        break; 
+        case 0x002: 
+                cbop = CBO_FLUSH ;
+        break; 
+        case 0x001: 
+                cbop = CBO_CLEAN ;
+        break; 
+ 
+      }
+      if (cbop != 0xFFFFFFFFFFFFFFFF) { 
+          uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
+          tree->ast_node_type = RISCV_ZICBOM ;
+          tree->ast_node.riscv_zicbom.cbop = cbop;
+          tree->ast_node.riscv_zicbom.rs1 = rs1;
+          return ;
+      }
+  }
+  if ((binary_stream & 0x000000000000007F == 0x0F) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x2) && ((binary_stream & 0x00000000FFF00000)>>20 == 0x004)) { 
+      uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
+      tree->ast_node_type = RISCV_ZICBOZ ;
+      tree->ast_node.riscv_zicboz = rs1;
+      return ;
+  }
     uint64_t s = binary_stream & 0x00000000FFFFFFFF ;
     tree->ast_node_type = ILLEGAL ;
     tree->ast_node.illegal = s;

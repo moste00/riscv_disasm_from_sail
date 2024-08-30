@@ -297,7 +297,9 @@ struct ast {
     FVFMTYPE,
     RIVVTYPE,
     RMVVTYPE,
-    RFVVTYPE
+    RFVVTYPE,
+    RISCV_ZICBOM,
+    RISCV_ZICBOZ
   } ast_node_type;
 
   union  {
@@ -2690,6 +2692,17 @@ struct ast {
       uint8_t vd /* bits : 5 */;
     } rfvvtype;
 
+    struct  {
+      enum cbop_zicbom {
+        CBO_CLEAN,
+        CBO_FLUSH,
+        CBO_INVAL
+      } cbop;
+
+      uint8_t rs1 /* bits : 5 */;
+    } riscv_zicbom;
+
+    uint8_t riscv_zicboz /* bits : 5 */;
   } ast_node;
 
 } ;
