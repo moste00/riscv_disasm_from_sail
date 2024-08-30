@@ -31,7 +31,6 @@ jobs:
             
             - name: Running the generator
               run: |
-                ls -R
                 cd generator
                 source ~/.bash_profile
                 export OPAMCONFIRMLEVEL=yes
@@ -39,6 +38,7 @@ jobs:
 
                 opam install . --deps-only
                 opam install sail=0.17.1
+                sudo apt-get install z3
                 
                 mv riscv_ast.gen.inc old_riscv_ast.gen.inc
                 mv riscv_decode.gen.inc old_riscv_decode.gen.inc
