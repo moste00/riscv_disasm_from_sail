@@ -49,7 +49,11 @@ jobs:
             - name: Checking the generated code compiles and is identical to the committed generated code
               run: |
                 cd generator
-                echo '#include "riscv_decode.gen.inc" void main() {}' > test_main.c
+                touch test_main.c
+                echo '#include "riscv_decode.gen.inc"' >> test_main.c 
+                echo >> test_main.c
+                echo 'void main() {}' >> test_main.c
+
                 gcc test_main.c || { echo "Failure: Trying to compile the tool-generated C code failed."; exit 1; }
 
                 if diff -q riscv_ast.gen.inc old_riscv_ast.gen.inc > /dev/null 2>&1; then
