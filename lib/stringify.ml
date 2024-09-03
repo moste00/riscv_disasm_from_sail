@@ -3,6 +3,7 @@ open Decoder
 open Decode_procedure
 open Constants
 open Gen_clike_typedef
+open Sail_ast_utils
 
 let mk_indentation lvl =
   if lvl = 0 then ""
@@ -57,7 +58,9 @@ let rec stringify_clike_typedef ?(indentation_lvl = 0) clike_typdef =
   | Clike_typename (typname, name) -> typname ^ " " ^ name ^ ";"
 
 let stringify_typdef typdef =
-  "enum {false = 0, true = 1}; \n" ^ stringify_clike_typedef typdef
+  "enum {" ^ identifier_prefix ^ "false = 0, " ^ identifier_prefix
+  ^ "true = 1}; \n\n"
+  ^ stringify_clike_typedef typdef
 
 type decproc_stringification_state = {
   typedef_walker : typedef_walker;
@@ -143,7 +146,8 @@ let rec stringify_stmt ?(indentation_lvl = 0) str_state stmt =
         List.map
           (fun (bval, enmval) ->
             indent ^ "case " ^ bval ^ ": \n" ^ indent ^ indent ^ var ^ " = "
-            ^ enmval ^ " ;\n" ^ indent ^ "break; \n"
+            ^ add_prefix_unless_exists identifier_prefix enmval
+            ^ " ;\n" ^ indent ^ "break; \n"
           )
           cases
       in
@@ -165,7 +169,9 @@ let rec stringify_stmt ?(indentation_lvl = 0) str_state stmt =
                         indent ^ var ^ "." ^ k ^ " = "
                         ^ ( match v with
                           | Bool_const c -> if c then "1" else "0"
-                          | Bv_const s | Binding s | Enum_lit s -> s
+                          | Bv_const s | Binding s -> s
+                          | Enum_lit s ->
+                              add_prefix_unless_exists identifier_prefix s
                           )
                         ^ ";"
                     )
@@ -179,14 +185,17 @@ let rec stringify_stmt ?(indentation_lvl = 0) str_state stmt =
       var_decl ^ switch_start ^ String.concat "\n" c_cases ^ ind ^ "}\n"
   | Set_ast_case case ->
       let case_setter_path = set_walker_case str_state.typedef_walker case in
-      ind ^ ast_c_parameter ^ "->" ^ case_setter_path ^ " = " ^ case ^ " ;\n"
+      ind ^ ast_c_parameter ^ "->" ^ case_setter_path ^ " = "
+      ^ add_prefix_unless_exists identifier_prefix case
+      ^ " ;\n"
   | Set_ast_next_case_member member_rhs -> (
       let rhs_string =
         match member_rhs with
         | Val v -> (
             match v with
             | Bool_const c -> if c then "1" else "0"
-            | Bv_const s | Binding s | Enum_lit s -> s
+            | Bv_const s | Binding s -> s
+            | Enum_lit s -> add_prefix_unless_exists identifier_prefix s
           )
         | Exp bv_expr -> stringify_bv str_state bv_expr
       in

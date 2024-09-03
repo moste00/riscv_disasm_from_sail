@@ -266,7 +266,9 @@ let lit_to_consequence_body lit =
   | L_false -> Push (Bool_const false)
   | _ -> failwith ("Unsupported literal @ " ^ stringify_sail_source_loc loc)
 
-let idstr_to_consequence_body idstr = Push (Binding idstr)
+let idstr_to_consequence_body idstr =
+  if idstr = String.capitalize_ascii idstr then Push (Enum_lit idstr)
+  else Push (Binding idstr)
 
 let vec_concat_to_consequence_body slices =
   Concat_push

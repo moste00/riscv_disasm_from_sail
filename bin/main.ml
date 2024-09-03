@@ -5,16 +5,16 @@ open Riscv_disasm_from_sail
 open Constants
 open Printexc
 
-let write_c_file ?(optional_includes = []) name code =
+let write_c_file ?(additional_includes = []) name code =
   let oc = open_out name in
   let mk_include_lines incs =
     String.concat "\n" (List.map (fun i -> "#include " ^ i ^ "\n") incs)
   in
   let include_string = mk_include_lines Constants.includes in
-  let optional_includes_string = mk_include_lines optional_includes in
+  let additional_includes_string = mk_include_lines additional_includes in
   Printf.fprintf oc "%s" include_string;
-  Printf.fprintf oc "%s" optional_includes_string;
-  Printf.fprintf oc "%s" "\n\n\n";
+  Printf.fprintf oc "%s" additional_includes_string;
+  Printf.fprintf oc "%s" "\n\n";
   Printf.fprintf oc "%s" code;
   close_out oc
 
@@ -84,4 +84,4 @@ let proc_dec_str = Stringify.stringify_decode_procedure proc_dec typdefwalker
 let () = write_c_file Constants.ast_type_filename ctypedefs_str
 let () =
   write_c_file Constants.decode_logic_filename proc_dec_str
-    ~optional_includes:["\"" ^ Constants.ast_type_filename ^ "\""]
+    ~additional_includes:["\"" ^ Constants.ast_type_filename ^ "\""]

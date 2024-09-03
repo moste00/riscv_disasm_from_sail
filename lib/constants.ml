@@ -17,3 +17,5 @@ let includes = ["<stdint.h>"]
 let ast_type_filename = "riscv_ast.gen.inc"
 
 let decode_logic_filename = "riscv_decode.gen.inc"
+
+let identifier_prefix = "RISCV_"

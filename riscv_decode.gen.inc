@@ -2,7 +2,6 @@
 #include "riscv_ast.gen.inc"
 
 
-
 void decode(struct ast *tree, uint64_t binary_stream) {
     uint64_t op = 0xFFFFFFFFFFFFFFFF ;
     switch (binary_stream & 0x000000000000007F) {
@@ -17,7 +16,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
     if (op != 0xFFFFFFFFFFFFFFFF) { 
         uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
         uint64_t imm = (binary_stream & 0x00000000FFFFF000)>>12 ;
-        tree->ast_node_type = UTYPE ;
+        tree->ast_node_type = RISCV_UTYPE ;
         tree->ast_node.utype.imm = imm;
         tree->ast_node.utype.rd = rd;
         tree->ast_node.utype.op = op;
@@ -75,7 +74,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t imm7_5_0 = (binary_stream & 0x000000007E000000)>>25 ;
           uint64_t imm7_6 = (binary_stream & 0x0000000080000000)>>31 ;
-          tree->ast_node_type = BTYPE ;
+          tree->ast_node_type = RISCV_BTYPE ;
           tree->ast_node.btype.imm = (imm7_6 << 15) | (imm5_0 << 14) | (imm7_5_0 << 8) | (imm5_4_1 << 4) | (0x0 << 0);
           tree->ast_node.btype.rs2 = rs2;
           tree->ast_node.btype.rs1 = rs1;
@@ -110,7 +109,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t imm = (binary_stream & 0x00000000FFF00000)>>20 ;
-          tree->ast_node_type = ITYPE ;
+          tree->ast_node_type = RISCV_ITYPE ;
           tree->ast_node.itype.imm = imm;
           tree->ast_node.itype.rs1 = rs1;
           tree->ast_node.itype.rd = rd;
@@ -122,7 +121,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t shamt = (binary_stream & 0x0000000003F00000)>>20 ;
-      tree->ast_node_type = SHIFTIOP ;
+      tree->ast_node_type = RISCV_SHIFTIOP ;
       tree->ast_node.shiftiop.shamt = shamt;
       tree->ast_node.shiftiop.rs1 = rs1;
       tree->ast_node.shiftiop.rd = rd;
@@ -133,7 +132,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t shamt = (binary_stream & 0x0000000003F00000)>>20 ;
-      tree->ast_node_type = SHIFTIOP ;
+      tree->ast_node_type = RISCV_SHIFTIOP ;
       tree->ast_node.shiftiop.shamt = shamt;
       tree->ast_node.shiftiop.rs1 = rs1;
       tree->ast_node.shiftiop.rd = rd;
@@ -144,7 +143,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t shamt = (binary_stream & 0x0000000003F00000)>>20 ;
-      tree->ast_node_type = SHIFTIOP ;
+      tree->ast_node_type = RISCV_SHIFTIOP ;
       tree->ast_node.shiftiop.shamt = shamt;
       tree->ast_node.shiftiop.rs1 = rs1;
       tree->ast_node.shiftiop.rd = rd;
@@ -155,7 +154,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPE ;
+      tree->ast_node_type = RISCV_RTYPE ;
       tree->ast_node.rtype.rs2 = rs2;
       tree->ast_node.rtype.rs1 = rs1;
       tree->ast_node.rtype.rd = rd;
@@ -166,7 +165,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPE ;
+      tree->ast_node_type = RISCV_RTYPE ;
       tree->ast_node.rtype.rs2 = rs2;
       tree->ast_node.rtype.rs1 = rs1;
       tree->ast_node.rtype.rd = rd;
@@ -177,7 +176,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPE ;
+      tree->ast_node_type = RISCV_RTYPE ;
       tree->ast_node.rtype.rs2 = rs2;
       tree->ast_node.rtype.rs1 = rs1;
       tree->ast_node.rtype.rd = rd;
@@ -188,7 +187,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPE ;
+      tree->ast_node_type = RISCV_RTYPE ;
       tree->ast_node.rtype.rs2 = rs2;
       tree->ast_node.rtype.rs1 = rs1;
       tree->ast_node.rtype.rd = rd;
@@ -199,7 +198,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPE ;
+      tree->ast_node_type = RISCV_RTYPE ;
       tree->ast_node.rtype.rs2 = rs2;
       tree->ast_node.rtype.rs1 = rs1;
       tree->ast_node.rtype.rd = rd;
@@ -210,7 +209,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPE ;
+      tree->ast_node_type = RISCV_RTYPE ;
       tree->ast_node.rtype.rs2 = rs2;
       tree->ast_node.rtype.rs1 = rs1;
       tree->ast_node.rtype.rd = rd;
@@ -221,7 +220,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPE ;
+      tree->ast_node_type = RISCV_RTYPE ;
       tree->ast_node.rtype.rs2 = rs2;
       tree->ast_node.rtype.rs1 = rs1;
       tree->ast_node.rtype.rd = rd;
@@ -232,7 +231,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPE ;
+      tree->ast_node_type = RISCV_RTYPE ;
       tree->ast_node.rtype.rs2 = rs2;
       tree->ast_node.rtype.rs1 = rs1;
       tree->ast_node.rtype.rd = rd;
@@ -243,7 +242,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPE ;
+      tree->ast_node_type = RISCV_RTYPE ;
       tree->ast_node.rtype.rs2 = rs2;
       tree->ast_node.rtype.rs1 = rs1;
       tree->ast_node.rtype.rd = rd;
@@ -254,7 +253,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPE ;
+      tree->ast_node_type = RISCV_RTYPE ;
       tree->ast_node.rtype.rs2 = rs2;
       tree->ast_node.rtype.rs1 = rs1;
       tree->ast_node.rtype.rd = rd;
@@ -265,16 +264,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t size = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000003000)>>12) {
         case 0x1: 
-                size = HALF ;
+                size = RISCV_HALF ;
         break; 
         case 0x3: 
-                size = DOUBLE ;
+                size = RISCV_DOUBLE ;
         break; 
         case 0x2: 
-                size = WORD ;
+                size = RISCV_WORD ;
         break; 
         case 0x0: 
-                size = BYTE ;
+                size = RISCV_BYTE ;
         break; 
  
       }
@@ -282,10 +281,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t is_unsigned = 0xFFFFFFFFFFFFFFFF ;
           switch ((binary_stream & 0x0000000000004000)>>14) {
             case 0x1: 
-                        is_unsigned = true ;
+                        is_unsigned = RISCV_true ;
             break; 
             case 0x0: 
-                        is_unsigned = false ;
+                        is_unsigned = RISCV_false ;
             break; 
  
           }
@@ -293,7 +292,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
               uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
               uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
               uint64_t imm = (binary_stream & 0x00000000FFF00000)>>20 ;
-              tree->ast_node_type = LOAD ;
+              tree->ast_node_type = RISCV_LOAD ;
               tree->ast_node.load.imm = imm;
               tree->ast_node.load.rs1 = rs1;
               tree->ast_node.load.rd = rd;
@@ -309,16 +308,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t size = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000003000)>>12) {
         case 0x1: 
-                size = HALF ;
+                size = RISCV_HALF ;
         break; 
         case 0x3: 
-                size = DOUBLE ;
+                size = RISCV_DOUBLE ;
         break; 
         case 0x2: 
-                size = WORD ;
+                size = RISCV_WORD ;
         break; 
         case 0x0: 
-                size = BYTE ;
+                size = RISCV_BYTE ;
         break; 
  
       }
@@ -327,7 +326,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t imm7 = (binary_stream & 0x00000000FE000000)>>25 ;
-          tree->ast_node_type = STORE ;
+          tree->ast_node_type = RISCV_STORE ;
           tree->ast_node.store.imm = (imm7 << 5) | (imm5 << 0);
           tree->ast_node.store.rs2 = rs2;
           tree->ast_node.store.rs1 = rs1;
@@ -341,7 +340,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t imm = (binary_stream & 0x00000000FFF00000)>>20 ;
-      tree->ast_node_type = ADDIW ;
+      tree->ast_node_type = RISCV_ADDIW ;
       tree->ast_node.addiw.imm = imm;
       tree->ast_node.addiw.rs1 = rs1;
       tree->ast_node.addiw.rd = rd;
@@ -351,7 +350,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPEW ;
+      tree->ast_node_type = RISCV_RTYPEW ;
       tree->ast_node.rtypew.rs2 = rs2;
       tree->ast_node.rtypew.rs1 = rs1;
       tree->ast_node.rtypew.rd = rd;
@@ -362,7 +361,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPEW ;
+      tree->ast_node_type = RISCV_RTYPEW ;
       tree->ast_node.rtypew.rs2 = rs2;
       tree->ast_node.rtypew.rs1 = rs1;
       tree->ast_node.rtypew.rd = rd;
@@ -373,7 +372,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPEW ;
+      tree->ast_node_type = RISCV_RTYPEW ;
       tree->ast_node.rtypew.rs2 = rs2;
       tree->ast_node.rtypew.rs1 = rs1;
       tree->ast_node.rtypew.rd = rd;
@@ -384,7 +383,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPEW ;
+      tree->ast_node_type = RISCV_RTYPEW ;
       tree->ast_node.rtypew.rs2 = rs2;
       tree->ast_node.rtypew.rs1 = rs1;
       tree->ast_node.rtypew.rd = rd;
@@ -395,7 +394,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = RTYPEW ;
+      tree->ast_node_type = RISCV_RTYPEW ;
       tree->ast_node.rtypew.rs2 = rs2;
       tree->ast_node.rtypew.rs1 = rs1;
       tree->ast_node.rtypew.rd = rd;
@@ -406,7 +405,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t shamt = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = SHIFTIWOP ;
+      tree->ast_node_type = RISCV_SHIFTIWOP ;
       tree->ast_node.shiftiwop.shamt = shamt;
       tree->ast_node.shiftiwop.rs1 = rs1;
       tree->ast_node.shiftiwop.rd = rd;
@@ -417,7 +416,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t shamt = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = SHIFTIWOP ;
+      tree->ast_node_type = RISCV_SHIFTIWOP ;
       tree->ast_node.shiftiwop.shamt = shamt;
       tree->ast_node.shiftiwop.rs1 = rs1;
       tree->ast_node.shiftiwop.rd = rd;
@@ -428,7 +427,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t shamt = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = SHIFTIWOP ;
+      tree->ast_node_type = RISCV_SHIFTIWOP ;
       tree->ast_node.shiftiwop.shamt = shamt;
       tree->ast_node.shiftiwop.rs1 = rs1;
       tree->ast_node.shiftiwop.rd = rd;
@@ -438,7 +437,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x0F) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x00000000F0000000)>>28 == 0x0)) { 
       uint64_t succ = (binary_stream & 0x0000000000F00000)>>20 ;
       uint64_t pred = (binary_stream & 0x000000000F000000)>>24 ;
-      tree->ast_node_type = FENCE ;
+      tree->ast_node_type = RISCV_FENCE ;
       tree->ast_node.fence.pred = pred;
       tree->ast_node.fence.succ = succ;
       return ;
@@ -446,39 +445,39 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x0F) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x00000000F0000000)>>28 == 0x8)) { 
       uint64_t succ = (binary_stream & 0x0000000000F00000)>>20 ;
       uint64_t pred = (binary_stream & 0x000000000F000000)>>24 ;
-      tree->ast_node_type = FENCE_TSO ;
+      tree->ast_node_type = RISCV_FENCE_TSO ;
       tree->ast_node.fence_tso.pred = pred;
       tree->ast_node.fence_tso.succ = succ;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x0F) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x00000000FFF00000)>>20 == 0x000)) { 
-      tree->ast_node_type = FENCEI ;
+      tree->ast_node_type = RISCV_FENCEI ;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x73) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x00000000FFF00000)>>20 == 0x000)) { 
-      tree->ast_node_type = ECALL ;
+      tree->ast_node_type = RISCV_ECALL ;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x73) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x0000000001F00000)>>20 == 0x02) && ((binary_stream & 0x00000000FE000000)>>25 == 0x18)) { 
-      tree->ast_node_type = MRET ;
+      tree->ast_node_type = RISCV_MRET ;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x73) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x0000000001F00000)>>20 == 0x02) && ((binary_stream & 0x00000000FE000000)>>25 == 0x08)) { 
-      tree->ast_node_type = SRET ;
+      tree->ast_node_type = RISCV_SRET ;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x73) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x00000000FFF00000)>>20 == 0x001)) { 
-      tree->ast_node_type = EBREAK ;
+      tree->ast_node_type = RISCV_EBREAK ;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x73) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x00000000FFF00000)>>20 == 0x105)) { 
-      tree->ast_node_type = WFI ;
+      tree->ast_node_type = RISCV_WFI ;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x73) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000FE000000)>>25 == 0x09)) { 
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = SFENCE_VMA ;
+      tree->ast_node_type = RISCV_SFENCE_VMA ;
       tree->ast_node.sfence_vma.rs1 = rs1;
       tree->ast_node.sfence_vma.rs2 = rs2;
       return ;
@@ -487,16 +486,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t size = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000003000)>>12) {
         case 0x1: 
-                size = HALF ;
+                size = RISCV_HALF ;
         break; 
         case 0x3: 
-                size = DOUBLE ;
+                size = RISCV_DOUBLE ;
         break; 
         case 0x2: 
-                size = WORD ;
+                size = RISCV_WORD ;
         break; 
         case 0x0: 
-                size = BYTE ;
+                size = RISCV_BYTE ;
         break; 
  
       }
@@ -504,10 +503,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rl = 0xFFFFFFFFFFFFFFFF ;
           switch ((binary_stream & 0x0000000002000000)>>25) {
             case 0x1: 
-                        rl = true ;
+                        rl = RISCV_true ;
             break; 
             case 0x0: 
-                        rl = false ;
+                        rl = RISCV_false ;
             break; 
  
           }
@@ -515,17 +514,17 @@ void decode(struct ast *tree, uint64_t binary_stream) {
               uint64_t aq = 0xFFFFFFFFFFFFFFFF ;
               switch ((binary_stream & 0x0000000004000000)>>26) {
                 case 0x1: 
-                                aq = true ;
+                                aq = RISCV_true ;
                 break; 
                 case 0x0: 
-                                aq = false ;
+                                aq = RISCV_false ;
                 break; 
  
               }
               if (aq != 0xFFFFFFFFFFFFFFFF) { 
                   uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
                   uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-                  tree->ast_node_type = LOADRES ;
+                  tree->ast_node_type = RISCV_LOADRES ;
                   tree->ast_node.loadres.aq = aq;
                   tree->ast_node.loadres.rl = rl;
                   tree->ast_node.loadres.rs1 = rs1;
@@ -540,16 +539,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t size = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000003000)>>12) {
         case 0x1: 
-                size = HALF ;
+                size = RISCV_HALF ;
         break; 
         case 0x3: 
-                size = DOUBLE ;
+                size = RISCV_DOUBLE ;
         break; 
         case 0x2: 
-                size = WORD ;
+                size = RISCV_WORD ;
         break; 
         case 0x0: 
-                size = BYTE ;
+                size = RISCV_BYTE ;
         break; 
  
       }
@@ -557,10 +556,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rl = 0xFFFFFFFFFFFFFFFF ;
           switch ((binary_stream & 0x0000000002000000)>>25) {
             case 0x1: 
-                        rl = true ;
+                        rl = RISCV_true ;
             break; 
             case 0x0: 
-                        rl = false ;
+                        rl = RISCV_false ;
             break; 
  
           }
@@ -568,10 +567,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
               uint64_t aq = 0xFFFFFFFFFFFFFFFF ;
               switch ((binary_stream & 0x0000000004000000)>>26) {
                 case 0x1: 
-                                aq = true ;
+                                aq = RISCV_true ;
                 break; 
                 case 0x0: 
-                                aq = false ;
+                                aq = RISCV_false ;
                 break; 
  
               }
@@ -579,7 +578,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
                   uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
                   uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
                   uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-                  tree->ast_node_type = STORECON ;
+                  tree->ast_node_type = RISCV_STORECON ;
                   tree->ast_node.storecon.aq = aq;
                   tree->ast_node.storecon.rl = rl;
                   tree->ast_node.storecon.rs2 = rs2;
@@ -595,16 +594,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t size = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000003000)>>12) {
         case 0x1: 
-                size = HALF ;
+                size = RISCV_HALF ;
         break; 
         case 0x3: 
-                size = DOUBLE ;
+                size = RISCV_DOUBLE ;
         break; 
         case 0x2: 
-                size = WORD ;
+                size = RISCV_WORD ;
         break; 
         case 0x0: 
-                size = BYTE ;
+                size = RISCV_BYTE ;
         break; 
  
       }
@@ -612,10 +611,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rl = 0xFFFFFFFFFFFFFFFF ;
           switch ((binary_stream & 0x0000000002000000)>>25) {
             case 0x1: 
-                        rl = true ;
+                        rl = RISCV_true ;
             break; 
             case 0x0: 
-                        rl = false ;
+                        rl = RISCV_false ;
             break; 
  
           }
@@ -623,10 +622,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
               uint64_t aq = 0xFFFFFFFFFFFFFFFF ;
               switch ((binary_stream & 0x0000000004000000)>>26) {
                 case 0x1: 
-                                aq = true ;
+                                aq = RISCV_true ;
                 break; 
                 case 0x0: 
-                                aq = false ;
+                                aq = RISCV_false ;
                 break; 
  
               }
@@ -634,31 +633,31 @@ void decode(struct ast *tree, uint64_t binary_stream) {
                   uint64_t op = 0xFFFFFFFFFFFFFFFF ;
                   switch ((binary_stream & 0x00000000F8000000)>>27) {
                     case 0x08: 
-                                        op = AMOOR ;
+                                        op = RISCV_AMOOR ;
                     break; 
                     case 0x01: 
-                                        op = AMOSWAP ;
+                                        op = RISCV_AMOSWAP ;
                     break; 
                     case 0x04: 
-                                        op = AMOXOR ;
+                                        op = RISCV_AMOXOR ;
                     break; 
                     case 0x10: 
-                                        op = AMOMIN ;
+                                        op = RISCV_AMOMIN ;
                     break; 
                     case 0x1C: 
-                                        op = AMOMAXU ;
+                                        op = RISCV_AMOMAXU ;
                     break; 
                     case 0x14: 
-                                        op = AMOMAX ;
+                                        op = RISCV_AMOMAX ;
                     break; 
                     case 0x00: 
-                                        op = AMOADD ;
+                                        op = RISCV_AMOADD ;
                     break; 
                     case 0x0C: 
-                                        op = AMOAND ;
+                                        op = RISCV_AMOAND ;
                     break; 
                     case 0x18: 
-                                        op = AMOMINU ;
+                                        op = RISCV_AMOMINU ;
                     break; 
  
                   }
@@ -666,7 +665,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
                       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
                       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
                       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-                      tree->ast_node_type = AMO ;
+                      tree->ast_node_type = RISCV_AMO ;
                       tree->ast_node.amo.op = op;
                       tree->ast_node.amo.aq = aq;
                       tree->ast_node.amo.rl = rl;
@@ -716,7 +715,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = MUL ;
+          tree->ast_node_type = RISCV_MUL ;
           tree->ast_node.mul.rs2 = rs2;
           tree->ast_node.mul.rs1 = rs1;
           tree->ast_node.mul.rd = rd;
@@ -728,10 +727,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t s = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000001000)>>12) {
         case 0x1: 
-                s = false ;
+                s = RISCV_false ;
         break; 
         case 0x0: 
-                s = true ;
+                s = RISCV_true ;
         break; 
  
       }
@@ -739,7 +738,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = DIV ;
+          tree->ast_node_type = RISCV_DIV ;
           tree->ast_node.div.rs2 = rs2;
           tree->ast_node.div.rs1 = rs1;
           tree->ast_node.div.rd = rd;
@@ -751,10 +750,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t s = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000001000)>>12) {
         case 0x1: 
-                s = false ;
+                s = RISCV_false ;
         break; 
         case 0x0: 
-                s = true ;
+                s = RISCV_true ;
         break; 
  
       }
@@ -762,7 +761,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = REM ;
+          tree->ast_node_type = RISCV_REM ;
           tree->ast_node.rem.rs2 = rs2;
           tree->ast_node.rem.rs1 = rs1;
           tree->ast_node.rem.rd = rd;
@@ -774,7 +773,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = MULW ;
+      tree->ast_node_type = RISCV_MULW ;
       tree->ast_node.mulw.rs2 = rs2;
       tree->ast_node.mulw.rs1 = rs1;
       tree->ast_node.mulw.rd = rd;
@@ -784,10 +783,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t s = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000001000)>>12) {
         case 0x1: 
-                s = false ;
+                s = RISCV_false ;
         break; 
         case 0x0: 
-                s = true ;
+                s = RISCV_true ;
         break; 
  
       }
@@ -795,7 +794,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = DIVW ;
+          tree->ast_node_type = RISCV_DIVW ;
           tree->ast_node.divw.rs2 = rs2;
           tree->ast_node.divw.rs1 = rs1;
           tree->ast_node.divw.rd = rd;
@@ -807,10 +806,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t s = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000001000)>>12) {
         case 0x1: 
-                s = false ;
+                s = RISCV_false ;
         break; 
         case 0x0: 
-                s = true ;
+                s = RISCV_true ;
         break; 
  
       }
@@ -818,7 +817,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = REMW ;
+          tree->ast_node_type = RISCV_REMW ;
           tree->ast_node.remw.rs2 = rs2;
           tree->ast_node.remw.rs1 = rs1;
           tree->ast_node.remw.rd = rd;
@@ -830,13 +829,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t op = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000003000)>>12) {
         case 0x1: 
-                op = CSRRW ;
+                op = RISCV_CSRRW ;
         break; 
         case 0x3: 
-                op = CSRRC ;
+                op = RISCV_CSRRC ;
         break; 
         case 0x2: 
-                op = CSRRS ;
+                op = RISCV_CSRRS ;
         break; 
  
       }
@@ -844,10 +843,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t is_imm = 0xFFFFFFFFFFFFFFFF ;
           switch ((binary_stream & 0x0000000000004000)>>14) {
             case 0x1: 
-                        is_imm = true ;
+                        is_imm = RISCV_true ;
             break; 
             case 0x0: 
-                        is_imm = false ;
+                        is_imm = RISCV_false ;
             break; 
  
           }
@@ -855,7 +854,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
               uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
               uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
               uint64_t csr = (binary_stream & 0x00000000FFF00000)>>20 ;
-              tree->ast_node_type = CSR ;
+              tree->ast_node_type = RISCV_CSR ;
               tree->ast_node.csr.csr = csr;
               tree->ast_node.csr.rs1 = rs1;
               tree->ast_node.csr.rd = rd;
@@ -866,7 +865,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       }
   }
   if ((binary_stream & 0x000000000000007F == 0x73) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x0000000001F00000)>>20 == 0x02) && ((binary_stream & 0x00000000FE000000)>>25 == 0x00)) { 
-      tree->ast_node_type = URET ;
+      tree->ast_node_type = RISCV_URET ;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x0F) && ((binary_stream & 0x0000000000007000)>>12 == 0x0)) { 
@@ -875,7 +874,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t succ = (binary_stream & 0x0000000000F00000)>>20 ;
       uint64_t pred = (binary_stream & 0x000000000F000000)>>24 ;
       uint64_t fm = (binary_stream & 0x00000000F0000000)>>28 ;
-      tree->ast_node_type = FENCE_RESERVED ;
+      tree->ast_node_type = RISCV_FENCE_RESERVED ;
       tree->ast_node.fence_reserved.fm = fm;
       tree->ast_node.fence_reserved.pred = pred;
       tree->ast_node.fence_reserved.succ = succ;
@@ -887,7 +886,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t imm = (binary_stream & 0x00000000FFF00000)>>20 ;
-      tree->ast_node_type = FENCEI_RESERVED ;
+      tree->ast_node_type = RISCV_FENCEI_RESERVED ;
       tree->ast_node.fencei_reserved.imm = imm;
       tree->ast_node.fencei_reserved.rs = rs;
       tree->ast_node.fencei_reserved.rd = rd;
@@ -897,33 +896,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t imm = (binary_stream & 0x00000000FFF00000)>>20 ;
-      tree->ast_node_type = LOAD_FP ;
+      tree->ast_node_type = RISCV_LOAD_FP ;
       tree->ast_node.load_fp.imm = imm;
       tree->ast_node.load_fp.rs1 = rs1;
       tree->ast_node.load_fp.rd = rd;
-      tree->ast_node.load_fp.width = HALF;
+      tree->ast_node.load_fp.width = RISCV_HALF;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x07) && ((binary_stream & 0x0000000000007000)>>12 == 0x2)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t imm = (binary_stream & 0x00000000FFF00000)>>20 ;
-      tree->ast_node_type = LOAD_FP ;
+      tree->ast_node_type = RISCV_LOAD_FP ;
       tree->ast_node.load_fp.imm = imm;
       tree->ast_node.load_fp.rs1 = rs1;
       tree->ast_node.load_fp.rd = rd;
-      tree->ast_node.load_fp.width = WORD;
+      tree->ast_node.load_fp.width = RISCV_WORD;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x07) && ((binary_stream & 0x0000000000007000)>>12 == 0x3)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t imm = (binary_stream & 0x00000000FFF00000)>>20 ;
-      tree->ast_node_type = LOAD_FP ;
+      tree->ast_node_type = RISCV_LOAD_FP ;
       tree->ast_node.load_fp.imm = imm;
       tree->ast_node.load_fp.rs1 = rs1;
       tree->ast_node.load_fp.rd = rd;
-      tree->ast_node.load_fp.width = DOUBLE;
+      tree->ast_node.load_fp.width = RISCV_DOUBLE;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x27) && ((binary_stream & 0x0000000000007000)>>12 == 0x1)) { 
@@ -931,11 +930,11 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t imm7 = (binary_stream & 0x00000000FE000000)>>25 ;
-      tree->ast_node_type = STORE_FP ;
+      tree->ast_node_type = RISCV_STORE_FP ;
       tree->ast_node.store_fp.imm = (imm7 << 5) | (imm5 << 0);
       tree->ast_node.store_fp.rs2 = rs2;
       tree->ast_node.store_fp.rs1 = rs1;
-      tree->ast_node.store_fp.width = HALF;
+      tree->ast_node.store_fp.width = RISCV_HALF;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x27) && ((binary_stream & 0x0000000000007000)>>12 == 0x2)) { 
@@ -943,11 +942,11 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t imm7 = (binary_stream & 0x00000000FE000000)>>25 ;
-      tree->ast_node_type = STORE_FP ;
+      tree->ast_node_type = RISCV_STORE_FP ;
       tree->ast_node.store_fp.imm = (imm7 << 5) | (imm5 << 0);
       tree->ast_node.store_fp.rs2 = rs2;
       tree->ast_node.store_fp.rs1 = rs1;
-      tree->ast_node.store_fp.width = WORD;
+      tree->ast_node.store_fp.width = RISCV_WORD;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x27) && ((binary_stream & 0x0000000000007000)>>12 == 0x3)) { 
@@ -955,33 +954,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t imm7 = (binary_stream & 0x00000000FE000000)>>25 ;
-      tree->ast_node_type = STORE_FP ;
+      tree->ast_node_type = RISCV_STORE_FP ;
       tree->ast_node.store_fp.imm = (imm7 << 5) | (imm5 << 0);
       tree->ast_node.store_fp.rs2 = rs2;
       tree->ast_node.store_fp.rs1 = rs1;
-      tree->ast_node.store_fp.width = DOUBLE;
+      tree->ast_node.store_fp.width = RISCV_DOUBLE;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x43) && ((binary_stream & 0x0000000006000000)>>25 == 0x0)) { 
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -990,13 +989,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_S ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_S ;
           tree->ast_node.f_madd_type_s.rs3 = rs3;
           tree->ast_node.f_madd_type_s.rs2 = rs2;
           tree->ast_node.f_madd_type_s.rs1 = rs1;
           tree->ast_node.f_madd_type_s.rm = rm;
           tree->ast_node.f_madd_type_s.rd = rd;
-          tree->ast_node.f_madd_type_s.op = FMADD_S;
+          tree->ast_node.f_madd_type_s.op = RISCV_FMADD_S;
           return ;
       }
   }
@@ -1004,22 +1003,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1028,13 +1027,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_S ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_S ;
           tree->ast_node.f_madd_type_s.rs3 = rs3;
           tree->ast_node.f_madd_type_s.rs2 = rs2;
           tree->ast_node.f_madd_type_s.rs1 = rs1;
           tree->ast_node.f_madd_type_s.rm = rm;
           tree->ast_node.f_madd_type_s.rd = rd;
-          tree->ast_node.f_madd_type_s.op = FMSUB_S;
+          tree->ast_node.f_madd_type_s.op = RISCV_FMSUB_S;
           return ;
       }
   }
@@ -1042,22 +1041,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1066,13 +1065,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_S ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_S ;
           tree->ast_node.f_madd_type_s.rs3 = rs3;
           tree->ast_node.f_madd_type_s.rs2 = rs2;
           tree->ast_node.f_madd_type_s.rs1 = rs1;
           tree->ast_node.f_madd_type_s.rm = rm;
           tree->ast_node.f_madd_type_s.rd = rd;
-          tree->ast_node.f_madd_type_s.op = FNMSUB_S;
+          tree->ast_node.f_madd_type_s.op = RISCV_FNMSUB_S;
           return ;
       }
   }
@@ -1080,22 +1079,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1104,13 +1103,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_S ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_S ;
           tree->ast_node.f_madd_type_s.rs3 = rs3;
           tree->ast_node.f_madd_type_s.rs2 = rs2;
           tree->ast_node.f_madd_type_s.rs1 = rs1;
           tree->ast_node.f_madd_type_s.rm = rm;
           tree->ast_node.f_madd_type_s.rd = rd;
-          tree->ast_node.f_madd_type_s.op = FNMADD_S;
+          tree->ast_node.f_madd_type_s.op = RISCV_FNMADD_S;
           return ;
       }
   }
@@ -1118,22 +1117,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1141,12 +1140,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_S ;
           tree->ast_node.f_bin_rm_type_s.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_s.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_s.rm = rm;
           tree->ast_node.f_bin_rm_type_s.rd = rd;
-          tree->ast_node.f_bin_rm_type_s.op = FADD_S;
+          tree->ast_node.f_bin_rm_type_s.op = RISCV_FADD_S;
           return ;
       }
   }
@@ -1154,22 +1153,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1177,12 +1176,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_S ;
           tree->ast_node.f_bin_rm_type_s.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_s.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_s.rm = rm;
           tree->ast_node.f_bin_rm_type_s.rd = rd;
-          tree->ast_node.f_bin_rm_type_s.op = FSUB_S;
+          tree->ast_node.f_bin_rm_type_s.op = RISCV_FSUB_S;
           return ;
       }
   }
@@ -1190,22 +1189,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1213,12 +1212,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_S ;
           tree->ast_node.f_bin_rm_type_s.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_s.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_s.rm = rm;
           tree->ast_node.f_bin_rm_type_s.rd = rd;
-          tree->ast_node.f_bin_rm_type_s.op = FMUL_S;
+          tree->ast_node.f_bin_rm_type_s.op = RISCV_FMUL_S;
           return ;
       }
   }
@@ -1226,22 +1225,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1249,12 +1248,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_S ;
           tree->ast_node.f_bin_rm_type_s.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_s.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_s.rm = rm;
           tree->ast_node.f_bin_rm_type_s.rd = rd;
-          tree->ast_node.f_bin_rm_type_s.op = FDIV_S;
+          tree->ast_node.f_bin_rm_type_s.op = RISCV_FDIV_S;
           return ;
       }
   }
@@ -1262,33 +1261,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_S ;
           tree->ast_node.f_un_rm_type_s.rs1 = rs1;
           tree->ast_node.f_un_rm_type_s.rm = rm;
           tree->ast_node.f_un_rm_type_s.rd = rd;
-          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = FSQRT_S;
+          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = RISCV_FSQRT_S;
           return ;
       }
   }
@@ -1296,33 +1295,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_S ;
           tree->ast_node.f_un_rm_type_s.rs1 = rs1;
           tree->ast_node.f_un_rm_type_s.rm = rm;
           tree->ast_node.f_un_rm_type_s.rd = rd;
-          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = FCVT_W_S;
+          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = RISCV_FCVT_W_S;
           return ;
       }
   }
@@ -1330,33 +1329,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_S ;
           tree->ast_node.f_un_rm_type_s.rs1 = rs1;
           tree->ast_node.f_un_rm_type_s.rm = rm;
           tree->ast_node.f_un_rm_type_s.rd = rd;
-          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = FCVT_WU_S;
+          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = RISCV_FCVT_WU_S;
           return ;
       }
   }
@@ -1364,33 +1363,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_S ;
           tree->ast_node.f_un_rm_type_s.rs1 = rs1;
           tree->ast_node.f_un_rm_type_s.rm = rm;
           tree->ast_node.f_un_rm_type_s.rd = rd;
-          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = FCVT_S_W;
+          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = RISCV_FCVT_S_W;
           return ;
       }
   }
@@ -1398,33 +1397,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_S ;
           tree->ast_node.f_un_rm_type_s.rs1 = rs1;
           tree->ast_node.f_un_rm_type_s.rm = rm;
           tree->ast_node.f_un_rm_type_s.rd = rd;
-          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = FCVT_S_WU;
+          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = RISCV_FCVT_S_WU;
           return ;
       }
   }
@@ -1432,33 +1431,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_S ;
           tree->ast_node.f_un_rm_type_s.rs1 = rs1;
           tree->ast_node.f_un_rm_type_s.rm = rm;
           tree->ast_node.f_un_rm_type_s.rd = rd;
-          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = FCVT_L_S;
+          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = RISCV_FCVT_L_S;
           return ;
       }
   }
@@ -1466,33 +1465,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_S ;
           tree->ast_node.f_un_rm_type_s.rs1 = rs1;
           tree->ast_node.f_un_rm_type_s.rm = rm;
           tree->ast_node.f_un_rm_type_s.rd = rd;
-          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = FCVT_LU_S;
+          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = RISCV_FCVT_LU_S;
           return ;
       }
   }
@@ -1500,33 +1499,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_S ;
           tree->ast_node.f_un_rm_type_s.rs1 = rs1;
           tree->ast_node.f_un_rm_type_s.rm = rm;
           tree->ast_node.f_un_rm_type_s.rd = rd;
-          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = FCVT_S_L;
+          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = RISCV_FCVT_S_L;
           return ;
       }
   }
@@ -1534,33 +1533,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_S ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_S ;
           tree->ast_node.f_un_rm_type_s.rs1 = rs1;
           tree->ast_node.f_un_rm_type_s.rm = rm;
           tree->ast_node.f_un_rm_type_s.rd = rd;
-          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = FCVT_S_LU;
+          tree->ast_node.f_un_rm_type_s.fcvt_s_lu = RISCV_FCVT_S_LU;
           return ;
       }
   }
@@ -1568,137 +1567,137 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_S ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_S ;
       tree->ast_node.f_bin_type_s.rs2 = rs2;
       tree->ast_node.f_bin_type_s.rs1 = rs1;
       tree->ast_node.f_bin_type_s.rd = rd;
-      tree->ast_node.f_bin_type_s.fle_s = FSGNJ_S;
+      tree->ast_node.f_bin_type_s.fle_s = RISCV_FSGNJ_S;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000FE000000)>>25 == 0x10)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_S ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_S ;
       tree->ast_node.f_bin_type_s.rs2 = rs2;
       tree->ast_node.f_bin_type_s.rs1 = rs1;
       tree->ast_node.f_bin_type_s.rd = rd;
-      tree->ast_node.f_bin_type_s.fle_s = FSGNJN_S;
+      tree->ast_node.f_bin_type_s.fle_s = RISCV_FSGNJN_S;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x2) && ((binary_stream & 0x00000000FE000000)>>25 == 0x10)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_S ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_S ;
       tree->ast_node.f_bin_type_s.rs2 = rs2;
       tree->ast_node.f_bin_type_s.rs1 = rs1;
       tree->ast_node.f_bin_type_s.rd = rd;
-      tree->ast_node.f_bin_type_s.fle_s = FSGNJX_S;
+      tree->ast_node.f_bin_type_s.fle_s = RISCV_FSGNJX_S;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000FE000000)>>25 == 0x14)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_S ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_S ;
       tree->ast_node.f_bin_type_s.rs2 = rs2;
       tree->ast_node.f_bin_type_s.rs1 = rs1;
       tree->ast_node.f_bin_type_s.rd = rd;
-      tree->ast_node.f_bin_type_s.fle_s = FMIN_S;
+      tree->ast_node.f_bin_type_s.fle_s = RISCV_FMIN_S;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000FE000000)>>25 == 0x14)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_S ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_S ;
       tree->ast_node.f_bin_type_s.rs2 = rs2;
       tree->ast_node.f_bin_type_s.rs1 = rs1;
       tree->ast_node.f_bin_type_s.rd = rd;
-      tree->ast_node.f_bin_type_s.fle_s = FMAX_S;
+      tree->ast_node.f_bin_type_s.fle_s = RISCV_FMAX_S;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x2) && ((binary_stream & 0x00000000FE000000)>>25 == 0x50)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_S ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_S ;
       tree->ast_node.f_bin_type_s.rs2 = rs2;
       tree->ast_node.f_bin_type_s.rs1 = rs1;
       tree->ast_node.f_bin_type_s.rd = rd;
-      tree->ast_node.f_bin_type_s.fle_s = FEQ_S;
+      tree->ast_node.f_bin_type_s.fle_s = RISCV_FEQ_S;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000FE000000)>>25 == 0x50)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_S ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_S ;
       tree->ast_node.f_bin_type_s.rs2 = rs2;
       tree->ast_node.f_bin_type_s.rs1 = rs1;
       tree->ast_node.f_bin_type_s.rd = rd;
-      tree->ast_node.f_bin_type_s.fle_s = FLT_S;
+      tree->ast_node.f_bin_type_s.fle_s = RISCV_FLT_S;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000FE000000)>>25 == 0x50)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_S ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_S ;
       tree->ast_node.f_bin_type_s.rs2 = rs2;
       tree->ast_node.f_bin_type_s.rs1 = rs1;
       tree->ast_node.f_bin_type_s.rd = rd;
-      tree->ast_node.f_bin_type_s.fle_s = FLE_S;
+      tree->ast_node.f_bin_type_s.fle_s = RISCV_FLE_S;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x70)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = F_UN_TYPE_S ;
+      tree->ast_node_type = RISCV_F_UN_TYPE_S ;
       tree->ast_node.f_un_type_s.rs1 = rs1;
       tree->ast_node.f_un_type_s.rd = rd;
-      tree->ast_node.f_un_type_s.fmv_w_x = FCLASS_S;
+      tree->ast_node.f_un_type_s.fmv_w_x = RISCV_FCLASS_S;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x70)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = F_UN_TYPE_S ;
+      tree->ast_node_type = RISCV_F_UN_TYPE_S ;
       tree->ast_node.f_un_type_s.rs1 = rs1;
       tree->ast_node.f_un_type_s.rd = rd;
-      tree->ast_node.f_un_type_s.fmv_w_x = FMV_X_W;
+      tree->ast_node.f_un_type_s.fmv_w_x = RISCV_FMV_X_W;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x78)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = F_UN_TYPE_S ;
+      tree->ast_node_type = RISCV_F_UN_TYPE_S ;
       tree->ast_node.f_un_type_s.rs1 = rs1;
       tree->ast_node.f_un_type_s.rd = rd;
-      tree->ast_node.f_un_type_s.fmv_w_x = FMV_W_X;
+      tree->ast_node.f_un_type_s.fmv_w_x = RISCV_FMV_W_X;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x43) && ((binary_stream & 0x0000000006000000)>>25 == 0x1)) { 
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1707,13 +1706,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_D ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_D ;
           tree->ast_node.f_madd_type_d.rs3 = rs3;
           tree->ast_node.f_madd_type_d.rs2 = rs2;
           tree->ast_node.f_madd_type_d.rs1 = rs1;
           tree->ast_node.f_madd_type_d.rm = rm;
           tree->ast_node.f_madd_type_d.rd = rd;
-          tree->ast_node.f_madd_type_d.op = FMADD_D;
+          tree->ast_node.f_madd_type_d.op = RISCV_FMADD_D;
           return ;
       }
   }
@@ -1721,22 +1720,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1745,13 +1744,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_D ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_D ;
           tree->ast_node.f_madd_type_d.rs3 = rs3;
           tree->ast_node.f_madd_type_d.rs2 = rs2;
           tree->ast_node.f_madd_type_d.rs1 = rs1;
           tree->ast_node.f_madd_type_d.rm = rm;
           tree->ast_node.f_madd_type_d.rd = rd;
-          tree->ast_node.f_madd_type_d.op = FMSUB_D;
+          tree->ast_node.f_madd_type_d.op = RISCV_FMSUB_D;
           return ;
       }
   }
@@ -1759,22 +1758,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1783,13 +1782,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_D ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_D ;
           tree->ast_node.f_madd_type_d.rs3 = rs3;
           tree->ast_node.f_madd_type_d.rs2 = rs2;
           tree->ast_node.f_madd_type_d.rs1 = rs1;
           tree->ast_node.f_madd_type_d.rm = rm;
           tree->ast_node.f_madd_type_d.rd = rd;
-          tree->ast_node.f_madd_type_d.op = FNMSUB_D;
+          tree->ast_node.f_madd_type_d.op = RISCV_FNMSUB_D;
           return ;
       }
   }
@@ -1797,22 +1796,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1821,13 +1820,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_D ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_D ;
           tree->ast_node.f_madd_type_d.rs3 = rs3;
           tree->ast_node.f_madd_type_d.rs2 = rs2;
           tree->ast_node.f_madd_type_d.rs1 = rs1;
           tree->ast_node.f_madd_type_d.rm = rm;
           tree->ast_node.f_madd_type_d.rd = rd;
-          tree->ast_node.f_madd_type_d.op = FNMADD_D;
+          tree->ast_node.f_madd_type_d.op = RISCV_FNMADD_D;
           return ;
       }
   }
@@ -1835,22 +1834,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1858,12 +1857,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_D ;
           tree->ast_node.f_bin_rm_type_d.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_d.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_d.rm = rm;
           tree->ast_node.f_bin_rm_type_d.rd = rd;
-          tree->ast_node.f_bin_rm_type_d.op = FADD_D;
+          tree->ast_node.f_bin_rm_type_d.op = RISCV_FADD_D;
           return ;
       }
   }
@@ -1871,22 +1870,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1894,12 +1893,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_D ;
           tree->ast_node.f_bin_rm_type_d.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_d.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_d.rm = rm;
           tree->ast_node.f_bin_rm_type_d.rd = rd;
-          tree->ast_node.f_bin_rm_type_d.op = FSUB_D;
+          tree->ast_node.f_bin_rm_type_d.op = RISCV_FSUB_D;
           return ;
       }
   }
@@ -1907,22 +1906,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1930,12 +1929,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_D ;
           tree->ast_node.f_bin_rm_type_d.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_d.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_d.rm = rm;
           tree->ast_node.f_bin_rm_type_d.rd = rd;
-          tree->ast_node.f_bin_rm_type_d.op = FMUL_D;
+          tree->ast_node.f_bin_rm_type_d.op = RISCV_FMUL_D;
           return ;
       }
   }
@@ -1943,22 +1942,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -1966,12 +1965,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_D ;
           tree->ast_node.f_bin_rm_type_d.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_d.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_d.rm = rm;
           tree->ast_node.f_bin_rm_type_d.rd = rd;
-          tree->ast_node.f_bin_rm_type_d.op = FDIV_D;
+          tree->ast_node.f_bin_rm_type_d.op = RISCV_FDIV_D;
           return ;
       }
   }
@@ -1979,33 +1978,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_D ;
           tree->ast_node.f_un_rm_type_d.rs1 = rs1;
           tree->ast_node.f_un_rm_type_d.rm = rm;
           tree->ast_node.f_un_rm_type_d.rd = rd;
-          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = FSQRT_D;
+          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = RISCV_FSQRT_D;
           return ;
       }
   }
@@ -2013,33 +2012,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_D ;
           tree->ast_node.f_un_rm_type_d.rs1 = rs1;
           tree->ast_node.f_un_rm_type_d.rm = rm;
           tree->ast_node.f_un_rm_type_d.rd = rd;
-          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = FCVT_W_D;
+          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = RISCV_FCVT_W_D;
           return ;
       }
   }
@@ -2047,33 +2046,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_D ;
           tree->ast_node.f_un_rm_type_d.rs1 = rs1;
           tree->ast_node.f_un_rm_type_d.rm = rm;
           tree->ast_node.f_un_rm_type_d.rd = rd;
-          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = FCVT_WU_D;
+          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = RISCV_FCVT_WU_D;
           return ;
       }
   }
@@ -2081,33 +2080,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_D ;
           tree->ast_node.f_un_rm_type_d.rs1 = rs1;
           tree->ast_node.f_un_rm_type_d.rm = rm;
           tree->ast_node.f_un_rm_type_d.rd = rd;
-          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = FCVT_D_W;
+          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = RISCV_FCVT_D_W;
           return ;
       }
   }
@@ -2115,33 +2114,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_D ;
           tree->ast_node.f_un_rm_type_d.rs1 = rs1;
           tree->ast_node.f_un_rm_type_d.rm = rm;
           tree->ast_node.f_un_rm_type_d.rd = rd;
-          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = FCVT_D_WU;
+          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = RISCV_FCVT_D_WU;
           return ;
       }
   }
@@ -2149,33 +2148,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_D ;
           tree->ast_node.f_un_rm_type_d.rs1 = rs1;
           tree->ast_node.f_un_rm_type_d.rm = rm;
           tree->ast_node.f_un_rm_type_d.rd = rd;
-          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = FCVT_S_D;
+          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = RISCV_FCVT_S_D;
           return ;
       }
   }
@@ -2183,33 +2182,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_D ;
           tree->ast_node.f_un_rm_type_d.rs1 = rs1;
           tree->ast_node.f_un_rm_type_d.rm = rm;
           tree->ast_node.f_un_rm_type_d.rd = rd;
-          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = FCVT_D_S;
+          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = RISCV_FCVT_D_S;
           return ;
       }
   }
@@ -2217,33 +2216,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_D ;
           tree->ast_node.f_un_rm_type_d.rs1 = rs1;
           tree->ast_node.f_un_rm_type_d.rm = rm;
           tree->ast_node.f_un_rm_type_d.rd = rd;
-          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = FCVT_L_D;
+          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = RISCV_FCVT_L_D;
           return ;
       }
   }
@@ -2251,33 +2250,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_D ;
           tree->ast_node.f_un_rm_type_d.rs1 = rs1;
           tree->ast_node.f_un_rm_type_d.rm = rm;
           tree->ast_node.f_un_rm_type_d.rd = rd;
-          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = FCVT_LU_D;
+          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = RISCV_FCVT_LU_D;
           return ;
       }
   }
@@ -2285,33 +2284,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_D ;
           tree->ast_node.f_un_rm_type_d.rs1 = rs1;
           tree->ast_node.f_un_rm_type_d.rm = rm;
           tree->ast_node.f_un_rm_type_d.rd = rd;
-          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = FCVT_D_L;
+          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = RISCV_FCVT_D_L;
           return ;
       }
   }
@@ -2319,33 +2318,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_D ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_D ;
           tree->ast_node.f_un_rm_type_d.rs1 = rs1;
           tree->ast_node.f_un_rm_type_d.rm = rm;
           tree->ast_node.f_un_rm_type_d.rd = rd;
-          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = FCVT_D_LU;
+          tree->ast_node.f_un_rm_type_d.fcvt_d_lu = RISCV_FCVT_D_LU;
           return ;
       }
   }
@@ -2353,131 +2352,131 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_D ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_D ;
       tree->ast_node.f_bin_type_d.rs2 = rs2;
       tree->ast_node.f_bin_type_d.rs1 = rs1;
       tree->ast_node.f_bin_type_d.rd = rd;
-      tree->ast_node.f_bin_type_d.fle_d = FSGNJ_D;
+      tree->ast_node.f_bin_type_d.fle_d = RISCV_FSGNJ_D;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000FE000000)>>25 == 0x11)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_D ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_D ;
       tree->ast_node.f_bin_type_d.rs2 = rs2;
       tree->ast_node.f_bin_type_d.rs1 = rs1;
       tree->ast_node.f_bin_type_d.rd = rd;
-      tree->ast_node.f_bin_type_d.fle_d = FSGNJN_D;
+      tree->ast_node.f_bin_type_d.fle_d = RISCV_FSGNJN_D;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x2) && ((binary_stream & 0x00000000FE000000)>>25 == 0x11)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_D ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_D ;
       tree->ast_node.f_bin_type_d.rs2 = rs2;
       tree->ast_node.f_bin_type_d.rs1 = rs1;
       tree->ast_node.f_bin_type_d.rd = rd;
-      tree->ast_node.f_bin_type_d.fle_d = FSGNJX_D;
+      tree->ast_node.f_bin_type_d.fle_d = RISCV_FSGNJX_D;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000FE000000)>>25 == 0x15)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_D ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_D ;
       tree->ast_node.f_bin_type_d.rs2 = rs2;
       tree->ast_node.f_bin_type_d.rs1 = rs1;
       tree->ast_node.f_bin_type_d.rd = rd;
-      tree->ast_node.f_bin_type_d.fle_d = FMIN_D;
+      tree->ast_node.f_bin_type_d.fle_d = RISCV_FMIN_D;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000FE000000)>>25 == 0x15)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_D ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_D ;
       tree->ast_node.f_bin_type_d.rs2 = rs2;
       tree->ast_node.f_bin_type_d.rs1 = rs1;
       tree->ast_node.f_bin_type_d.rd = rd;
-      tree->ast_node.f_bin_type_d.fle_d = FMAX_D;
+      tree->ast_node.f_bin_type_d.fle_d = RISCV_FMAX_D;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x2) && ((binary_stream & 0x00000000FE000000)>>25 == 0x51)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_D ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_D ;
       tree->ast_node.f_bin_type_d.rs2 = rs2;
       tree->ast_node.f_bin_type_d.rs1 = rs1;
       tree->ast_node.f_bin_type_d.rd = rd;
-      tree->ast_node.f_bin_type_d.fle_d = FEQ_D;
+      tree->ast_node.f_bin_type_d.fle_d = RISCV_FEQ_D;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000FE000000)>>25 == 0x51)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_D ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_D ;
       tree->ast_node.f_bin_type_d.rs2 = rs2;
       tree->ast_node.f_bin_type_d.rs1 = rs1;
       tree->ast_node.f_bin_type_d.rd = rd;
-      tree->ast_node.f_bin_type_d.fle_d = FLT_D;
+      tree->ast_node.f_bin_type_d.fle_d = RISCV_FLT_D;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000FE000000)>>25 == 0x51)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_D ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_D ;
       tree->ast_node.f_bin_type_d.rs2 = rs2;
       tree->ast_node.f_bin_type_d.rs1 = rs1;
       tree->ast_node.f_bin_type_d.rd = rd;
-      tree->ast_node.f_bin_type_d.fle_d = FLE_D;
+      tree->ast_node.f_bin_type_d.fle_d = RISCV_FLE_D;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x71)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = F_UN_TYPE_D ;
+      tree->ast_node_type = RISCV_F_UN_TYPE_D ;
       tree->ast_node.f_un_type_d.rs1 = rs1;
       tree->ast_node.f_un_type_d.rd = rd;
-      tree->ast_node.f_un_type_d.fmv_d_x = FCLASS_D;
+      tree->ast_node.f_un_type_d.fmv_d_x = RISCV_FCLASS_D;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x71)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = F_UN_TYPE_D ;
+      tree->ast_node_type = RISCV_F_UN_TYPE_D ;
       tree->ast_node.f_un_type_d.rs1 = rs1;
       tree->ast_node.f_un_type_d.rd = rd;
-      tree->ast_node.f_un_type_d.fmv_d_x = FMV_X_D;
+      tree->ast_node.f_un_type_d.fmv_d_x = RISCV_FMV_X_D;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x79)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = F_UN_TYPE_D ;
+      tree->ast_node_type = RISCV_F_UN_TYPE_D ;
       tree->ast_node.f_un_type_d.rs1 = rs1;
       tree->ast_node.f_un_type_d.rd = rd;
-      tree->ast_node.f_un_type_d.fmv_d_x = FMV_D_X;
+      tree->ast_node.f_un_type_d.fmv_d_x = RISCV_FMV_D_X;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x73) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000FE000000)>>25 == 0x0B)) { 
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = SINVAL_VMA ;
+      tree->ast_node_type = RISCV_SINVAL_VMA ;
       tree->ast_node.sinval_vma.rs1 = rs1;
       tree->ast_node.sinval_vma.rs2 = rs2;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x73) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x0C)) { 
-      tree->ast_node_type = SFENCE_W_INVAL ;
+      tree->ast_node_type = RISCV_SFENCE_W_INVAL ;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x73) && ((binary_stream & 0x0000000000000F80)>>7 == 0x00) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x0000000001F00000)>>20 == 0x01) && ((binary_stream & 0x00000000FE000000)>>25 == 0x0C)) { 
-      tree->ast_node_type = SFENCE_INVAL_IR ;
+      tree->ast_node_type = RISCV_SFENCE_INVAL_IR ;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x1B) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000FC000000)>>26 == 0x02)) { 
@@ -2494,7 +2493,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBA_RTYPEUW ;
+      tree->ast_node_type = RISCV_ZBA_RTYPEUW ;
       tree->ast_node.zba_rtypeuw.rs2 = rs2;
       tree->ast_node.zba_rtypeuw.rs1 = rs1;
       tree->ast_node.zba_rtypeuw.rd = rd;
@@ -2505,7 +2504,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBA_RTYPEUW ;
+      tree->ast_node_type = RISCV_ZBA_RTYPEUW ;
       tree->ast_node.zba_rtypeuw.rs2 = rs2;
       tree->ast_node.zba_rtypeuw.rs1 = rs1;
       tree->ast_node.zba_rtypeuw.rd = rd;
@@ -2516,7 +2515,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBA_RTYPEUW ;
+      tree->ast_node_type = RISCV_ZBA_RTYPEUW ;
       tree->ast_node.zba_rtypeuw.rs2 = rs2;
       tree->ast_node.zba_rtypeuw.rs1 = rs1;
       tree->ast_node.zba_rtypeuw.rd = rd;
@@ -2527,7 +2526,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBA_RTYPEUW ;
+      tree->ast_node_type = RISCV_ZBA_RTYPEUW ;
       tree->ast_node.zba_rtypeuw.rs2 = rs2;
       tree->ast_node.zba_rtypeuw.rs1 = rs1;
       tree->ast_node.zba_rtypeuw.rd = rd;
@@ -2538,7 +2537,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBA_RTYPE ;
+      tree->ast_node_type = RISCV_ZBA_RTYPE ;
       tree->ast_node.zba_rtype.rs2 = rs2;
       tree->ast_node.zba_rtype.rs1 = rs1;
       tree->ast_node.zba_rtype.rd = rd;
@@ -2549,7 +2548,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBA_RTYPE ;
+      tree->ast_node_type = RISCV_ZBA_RTYPE ;
       tree->ast_node.zba_rtype.rs2 = rs2;
       tree->ast_node.zba_rtype.rs1 = rs1;
       tree->ast_node.zba_rtype.rd = rd;
@@ -2560,7 +2559,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBA_RTYPE ;
+      tree->ast_node_type = RISCV_ZBA_RTYPE ;
       tree->ast_node.zba_rtype.rs2 = rs2;
       tree->ast_node.zba_rtype.rs1 = rs1;
       tree->ast_node.zba_rtype.rd = rd;
@@ -2591,7 +2590,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBB_RTYPEW ;
+      tree->ast_node_type = RISCV_ZBB_RTYPEW ;
       tree->ast_node.zbb_rtypew.rs2 = rs2;
       tree->ast_node.zbb_rtypew.rs1 = rs1;
       tree->ast_node.zbb_rtypew.rd = rd;
@@ -2602,7 +2601,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBB_RTYPEW ;
+      tree->ast_node_type = RISCV_ZBB_RTYPEW ;
       tree->ast_node.zbb_rtypew.rs2 = rs2;
       tree->ast_node.zbb_rtypew.rs1 = rs1;
       tree->ast_node.zbb_rtypew.rd = rd;
@@ -2613,7 +2612,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBB_RTYPE ;
+      tree->ast_node_type = RISCV_ZBB_RTYPE ;
       tree->ast_node.zbb_rtype.rs2 = rs2;
       tree->ast_node.zbb_rtype.rs1 = rs1;
       tree->ast_node.zbb_rtype.rd = rd;
@@ -2624,7 +2623,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBB_RTYPE ;
+      tree->ast_node_type = RISCV_ZBB_RTYPE ;
       tree->ast_node.zbb_rtype.rs2 = rs2;
       tree->ast_node.zbb_rtype.rs1 = rs1;
       tree->ast_node.zbb_rtype.rd = rd;
@@ -2635,7 +2634,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBB_RTYPE ;
+      tree->ast_node_type = RISCV_ZBB_RTYPE ;
       tree->ast_node.zbb_rtype.rs2 = rs2;
       tree->ast_node.zbb_rtype.rs1 = rs1;
       tree->ast_node.zbb_rtype.rd = rd;
@@ -2646,7 +2645,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBB_RTYPE ;
+      tree->ast_node_type = RISCV_ZBB_RTYPE ;
       tree->ast_node.zbb_rtype.rs2 = rs2;
       tree->ast_node.zbb_rtype.rs1 = rs1;
       tree->ast_node.zbb_rtype.rd = rd;
@@ -2657,7 +2656,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBB_RTYPE ;
+      tree->ast_node_type = RISCV_ZBB_RTYPE ;
       tree->ast_node.zbb_rtype.rs2 = rs2;
       tree->ast_node.zbb_rtype.rs1 = rs1;
       tree->ast_node.zbb_rtype.rd = rd;
@@ -2668,7 +2667,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBB_RTYPE ;
+      tree->ast_node_type = RISCV_ZBB_RTYPE ;
       tree->ast_node.zbb_rtype.rs2 = rs2;
       tree->ast_node.zbb_rtype.rs1 = rs1;
       tree->ast_node.zbb_rtype.rd = rd;
@@ -2679,7 +2678,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBB_RTYPE ;
+      tree->ast_node_type = RISCV_ZBB_RTYPE ;
       tree->ast_node.zbb_rtype.rs2 = rs2;
       tree->ast_node.zbb_rtype.rs1 = rs1;
       tree->ast_node.zbb_rtype.rd = rd;
@@ -2690,7 +2689,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBB_RTYPE ;
+      tree->ast_node_type = RISCV_ZBB_RTYPE ;
       tree->ast_node.zbb_rtype.rs2 = rs2;
       tree->ast_node.zbb_rtype.rs1 = rs1;
       tree->ast_node.zbb_rtype.rd = rd;
@@ -2701,7 +2700,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBB_RTYPE ;
+      tree->ast_node_type = RISCV_ZBB_RTYPE ;
       tree->ast_node.zbb_rtype.rs2 = rs2;
       tree->ast_node.zbb_rtype.rs1 = rs1;
       tree->ast_node.zbb_rtype.rd = rd;
@@ -2711,7 +2710,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x04) && ((binary_stream & 0x00000000FE000000)>>25 == 0x30)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = ZBB_EXTOP ;
+      tree->ast_node_type = RISCV_ZBB_EXTOP ;
       tree->ast_node.zbb_extop.rs1 = rs1;
       tree->ast_node.zbb_extop.rd = rd;
       tree->ast_node.zbb_extop.op = RISCV_SEXTB;
@@ -2720,7 +2719,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x05) && ((binary_stream & 0x00000000FE000000)>>25 == 0x30)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = ZBB_EXTOP ;
+      tree->ast_node_type = RISCV_ZBB_EXTOP ;
       tree->ast_node.zbb_extop.rs1 = rs1;
       tree->ast_node.zbb_extop.rd = rd;
       tree->ast_node.zbb_extop.op = RISCV_SEXTH;
@@ -2729,7 +2728,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x33) && ((binary_stream & 0x0000000000007000)>>12 == 0x4) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x04)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = ZBB_EXTOP ;
+      tree->ast_node_type = RISCV_ZBB_EXTOP ;
       tree->ast_node.zbb_extop.rs1 = rs1;
       tree->ast_node.zbb_extop.rd = rd;
       tree->ast_node.zbb_extop.op = RISCV_ZEXTH;
@@ -2738,7 +2737,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x3B) && ((binary_stream & 0x0000000000007000)>>12 == 0x4) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x04)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = ZBB_EXTOP ;
+      tree->ast_node_type = RISCV_ZBB_EXTOP ;
       tree->ast_node.zbb_extop.rs1 = rs1;
       tree->ast_node.zbb_extop.rd = rd;
       tree->ast_node.zbb_extop.op = RISCV_ZEXTH;
@@ -2850,7 +2849,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t shamt = (binary_stream & 0x0000000003F00000)>>20 ;
-      tree->ast_node_type = ZBS_IOP ;
+      tree->ast_node_type = RISCV_ZBS_IOP ;
       tree->ast_node.zbs_iop.shamt = shamt;
       tree->ast_node.zbs_iop.rs1 = rs1;
       tree->ast_node.zbs_iop.rd = rd;
@@ -2861,7 +2860,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t shamt = (binary_stream & 0x0000000003F00000)>>20 ;
-      tree->ast_node_type = ZBS_IOP ;
+      tree->ast_node_type = RISCV_ZBS_IOP ;
       tree->ast_node.zbs_iop.shamt = shamt;
       tree->ast_node.zbs_iop.rs1 = rs1;
       tree->ast_node.zbs_iop.rd = rd;
@@ -2872,7 +2871,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t shamt = (binary_stream & 0x0000000003F00000)>>20 ;
-      tree->ast_node_type = ZBS_IOP ;
+      tree->ast_node_type = RISCV_ZBS_IOP ;
       tree->ast_node.zbs_iop.shamt = shamt;
       tree->ast_node.zbs_iop.rs1 = rs1;
       tree->ast_node.zbs_iop.rd = rd;
@@ -2883,7 +2882,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t shamt = (binary_stream & 0x0000000003F00000)>>20 ;
-      tree->ast_node_type = ZBS_IOP ;
+      tree->ast_node_type = RISCV_ZBS_IOP ;
       tree->ast_node.zbs_iop.shamt = shamt;
       tree->ast_node.zbs_iop.rs1 = rs1;
       tree->ast_node.zbs_iop.rd = rd;
@@ -2894,7 +2893,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBS_RTYPE ;
+      tree->ast_node_type = RISCV_ZBS_RTYPE ;
       tree->ast_node.zbs_rtype.rs2 = rs2;
       tree->ast_node.zbs_rtype.rs1 = rs1;
       tree->ast_node.zbs_rtype.rd = rd;
@@ -2905,7 +2904,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBS_RTYPE ;
+      tree->ast_node_type = RISCV_ZBS_RTYPE ;
       tree->ast_node.zbs_rtype.rs2 = rs2;
       tree->ast_node.zbs_rtype.rs1 = rs1;
       tree->ast_node.zbs_rtype.rd = rd;
@@ -2916,7 +2915,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBS_RTYPE ;
+      tree->ast_node_type = RISCV_ZBS_RTYPE ;
       tree->ast_node.zbs_rtype.rs2 = rs2;
       tree->ast_node.zbs_rtype.rs1 = rs1;
       tree->ast_node.zbs_rtype.rd = rd;
@@ -2927,7 +2926,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBS_RTYPE ;
+      tree->ast_node_type = RISCV_ZBS_RTYPE ;
       tree->ast_node.zbs_rtype.rs2 = rs2;
       tree->ast_node.zbs_rtype.rs1 = rs1;
       tree->ast_node.zbs_rtype.rd = rd;
@@ -2938,22 +2937,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -2961,12 +2960,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_H ;
           tree->ast_node.f_bin_rm_type_h.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_h.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_h.rm = rm;
           tree->ast_node.f_bin_rm_type_h.rd = rd;
-          tree->ast_node.f_bin_rm_type_h.op = FADD_H;
+          tree->ast_node.f_bin_rm_type_h.op = RISCV_FADD_H;
           return ;
       }
   }
@@ -2974,22 +2973,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -2997,12 +2996,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_H ;
           tree->ast_node.f_bin_rm_type_h.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_h.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_h.rm = rm;
           tree->ast_node.f_bin_rm_type_h.rd = rd;
-          tree->ast_node.f_bin_rm_type_h.op = FSUB_H;
+          tree->ast_node.f_bin_rm_type_h.op = RISCV_FSUB_H;
           return ;
       }
   }
@@ -3010,22 +3009,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -3033,12 +3032,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_H ;
           tree->ast_node.f_bin_rm_type_h.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_h.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_h.rm = rm;
           tree->ast_node.f_bin_rm_type_h.rd = rd;
-          tree->ast_node.f_bin_rm_type_h.op = FMUL_H;
+          tree->ast_node.f_bin_rm_type_h.op = RISCV_FMUL_H;
           return ;
       }
   }
@@ -3046,22 +3045,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -3069,12 +3068,12 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = F_BIN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_BIN_RM_TYPE_H ;
           tree->ast_node.f_bin_rm_type_h.rs2 = rs2;
           tree->ast_node.f_bin_rm_type_h.rs1 = rs1;
           tree->ast_node.f_bin_rm_type_h.rm = rm;
           tree->ast_node.f_bin_rm_type_h.rd = rd;
-          tree->ast_node.f_bin_rm_type_h.op = FDIV_H;
+          tree->ast_node.f_bin_rm_type_h.op = RISCV_FDIV_H;
           return ;
       }
   }
@@ -3082,22 +3081,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -3106,13 +3105,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_H ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_H ;
           tree->ast_node.f_madd_type_h.rs3 = rs3;
           tree->ast_node.f_madd_type_h.rs2 = rs2;
           tree->ast_node.f_madd_type_h.rs1 = rs1;
           tree->ast_node.f_madd_type_h.rm = rm;
           tree->ast_node.f_madd_type_h.rd = rd;
-          tree->ast_node.f_madd_type_h.op = FMADD_H;
+          tree->ast_node.f_madd_type_h.op = RISCV_FMADD_H;
           return ;
       }
   }
@@ -3120,22 +3119,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -3144,13 +3143,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_H ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_H ;
           tree->ast_node.f_madd_type_h.rs3 = rs3;
           tree->ast_node.f_madd_type_h.rs2 = rs2;
           tree->ast_node.f_madd_type_h.rs1 = rs1;
           tree->ast_node.f_madd_type_h.rm = rm;
           tree->ast_node.f_madd_type_h.rd = rd;
-          tree->ast_node.f_madd_type_h.op = FMSUB_H;
+          tree->ast_node.f_madd_type_h.op = RISCV_FMSUB_H;
           return ;
       }
   }
@@ -3158,22 +3157,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -3182,13 +3181,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_H ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_H ;
           tree->ast_node.f_madd_type_h.rs3 = rs3;
           tree->ast_node.f_madd_type_h.rs2 = rs2;
           tree->ast_node.f_madd_type_h.rs1 = rs1;
           tree->ast_node.f_madd_type_h.rm = rm;
           tree->ast_node.f_madd_type_h.rd = rd;
-          tree->ast_node.f_madd_type_h.op = FNMSUB_H;
+          tree->ast_node.f_madd_type_h.op = RISCV_FNMSUB_H;
           return ;
       }
   }
@@ -3196,22 +3195,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -3220,13 +3219,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t rs3 = (binary_stream & 0x00000000F8000000)>>27 ;
-          tree->ast_node_type = F_MADD_TYPE_H ;
+          tree->ast_node_type = RISCV_F_MADD_TYPE_H ;
           tree->ast_node.f_madd_type_h.rs3 = rs3;
           tree->ast_node.f_madd_type_h.rs2 = rs2;
           tree->ast_node.f_madd_type_h.rs1 = rs1;
           tree->ast_node.f_madd_type_h.rm = rm;
           tree->ast_node.f_madd_type_h.rd = rd;
-          tree->ast_node.f_madd_type_h.op = FNMADD_H;
+          tree->ast_node.f_madd_type_h.op = RISCV_FNMADD_H;
           return ;
       }
   }
@@ -3234,121 +3233,121 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_H ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_H ;
       tree->ast_node.f_bin_type_h.rs2 = rs2;
       tree->ast_node.f_bin_type_h.rs1 = rs1;
       tree->ast_node.f_bin_type_h.rd = rd;
-      tree->ast_node.f_bin_type_h.fle_h = FSGNJ_H;
+      tree->ast_node.f_bin_type_h.fle_h = RISCV_FSGNJ_H;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000FE000000)>>25 == 0x12)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_H ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_H ;
       tree->ast_node.f_bin_type_h.rs2 = rs2;
       tree->ast_node.f_bin_type_h.rs1 = rs1;
       tree->ast_node.f_bin_type_h.rd = rd;
-      tree->ast_node.f_bin_type_h.fle_h = FSGNJN_H;
+      tree->ast_node.f_bin_type_h.fle_h = RISCV_FSGNJN_H;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x2) && ((binary_stream & 0x00000000FE000000)>>25 == 0x12)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_H ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_H ;
       tree->ast_node.f_bin_type_h.rs2 = rs2;
       tree->ast_node.f_bin_type_h.rs1 = rs1;
       tree->ast_node.f_bin_type_h.rd = rd;
-      tree->ast_node.f_bin_type_h.fle_h = FSGNJX_H;
+      tree->ast_node.f_bin_type_h.fle_h = RISCV_FSGNJX_H;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000FE000000)>>25 == 0x16)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_H ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_H ;
       tree->ast_node.f_bin_type_h.rs2 = rs2;
       tree->ast_node.f_bin_type_h.rs1 = rs1;
       tree->ast_node.f_bin_type_h.rd = rd;
-      tree->ast_node.f_bin_type_h.fle_h = FMIN_H;
+      tree->ast_node.f_bin_type_h.fle_h = RISCV_FMIN_H;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000FE000000)>>25 == 0x16)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_H ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_H ;
       tree->ast_node.f_bin_type_h.rs2 = rs2;
       tree->ast_node.f_bin_type_h.rs1 = rs1;
       tree->ast_node.f_bin_type_h.rd = rd;
-      tree->ast_node.f_bin_type_h.fle_h = FMAX_H;
+      tree->ast_node.f_bin_type_h.fle_h = RISCV_FMAX_H;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x2) && ((binary_stream & 0x00000000FE000000)>>25 == 0x52)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_H ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_H ;
       tree->ast_node.f_bin_type_h.rs2 = rs2;
       tree->ast_node.f_bin_type_h.rs1 = rs1;
       tree->ast_node.f_bin_type_h.rd = rd;
-      tree->ast_node.f_bin_type_h.fle_h = FEQ_H;
+      tree->ast_node.f_bin_type_h.fle_h = RISCV_FEQ_H;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000FE000000)>>25 == 0x52)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_H ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_H ;
       tree->ast_node.f_bin_type_h.rs2 = rs2;
       tree->ast_node.f_bin_type_h.rs1 = rs1;
       tree->ast_node.f_bin_type_h.rd = rd;
-      tree->ast_node.f_bin_type_h.fle_h = FLT_H;
+      tree->ast_node.f_bin_type_h.fle_h = RISCV_FLT_H;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x00000000FE000000)>>25 == 0x52)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = F_BIN_TYPE_H ;
+      tree->ast_node_type = RISCV_F_BIN_TYPE_H ;
       tree->ast_node.f_bin_type_h.rs2 = rs2;
       tree->ast_node.f_bin_type_h.rs1 = rs1;
       tree->ast_node.f_bin_type_h.rd = rd;
-      tree->ast_node.f_bin_type_h.fle_h = FLE_H;
+      tree->ast_node.f_bin_type_h.fle_h = RISCV_FLE_H;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x2E)) { 
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FSQRT_H;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FSQRT_H;
           return ;
       }
   }
@@ -3356,33 +3355,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_W_H;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_W_H;
           return ;
       }
   }
@@ -3390,33 +3389,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_WU_H;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_WU_H;
           return ;
       }
   }
@@ -3424,33 +3423,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_H_W;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_H_W;
           return ;
       }
   }
@@ -3458,33 +3457,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_H_WU;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_H_WU;
           return ;
       }
   }
@@ -3492,33 +3491,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_H_S;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_H_S;
           return ;
       }
   }
@@ -3526,33 +3525,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_H_D;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_H_D;
           return ;
       }
   }
@@ -3560,33 +3559,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_S_H;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_S_H;
           return ;
       }
   }
@@ -3594,33 +3593,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_D_H;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_D_H;
           return ;
       }
   }
@@ -3628,33 +3627,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_L_H;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_L_H;
           return ;
       }
   }
@@ -3662,33 +3661,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_LU_H;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_LU_H;
           return ;
       }
   }
@@ -3696,33 +3695,33 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_H_L;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_H_L;
           return ;
       }
   }
@@ -3730,61 +3729,61 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
       if (rm != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = F_UN_RM_TYPE_H ;
+          tree->ast_node_type = RISCV_F_UN_RM_TYPE_H ;
           tree->ast_node.f_un_rm_type_h.rs1 = rs1;
           tree->ast_node.f_un_rm_type_h.rm = rm;
           tree->ast_node.f_un_rm_type_h.rd = rd;
-          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = FCVT_H_LU;
+          tree->ast_node.f_un_rm_type_h.fcvt_h_lu = RISCV_FCVT_H_LU;
           return ;
       }
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x72)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = F_UN_TYPE_H ;
+      tree->ast_node_type = RISCV_F_UN_TYPE_H ;
       tree->ast_node.f_un_type_h.rs1 = rs1;
       tree->ast_node.f_un_type_h.rd = rd;
-      tree->ast_node.f_un_type_h.fmv_h_x = FCLASS_H;
+      tree->ast_node.f_un_type_h.fmv_h_x = RISCV_FCLASS_H;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x72)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = F_UN_TYPE_H ;
+      tree->ast_node_type = RISCV_F_UN_TYPE_H ;
       tree->ast_node.f_un_type_h.rs1 = rs1;
       tree->ast_node.f_un_type_h.rd = rd;
-      tree->ast_node.f_un_type_h.fmv_h_x = FMV_X_H;
+      tree->ast_node.f_un_type_h.fmv_h_x = RISCV_FMV_X_H;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FE000000)>>25 == 0x7A)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = F_UN_TYPE_H ;
+      tree->ast_node_type = RISCV_F_UN_TYPE_H ;
       tree->ast_node.f_un_type_h.rs1 = rs1;
       tree->ast_node.f_un_type_h.rd = rd;
-      tree->ast_node.f_un_type_h.fmv_h_x = FMV_H_X;
+      tree->ast_node.f_un_type_h.fmv_h_x = RISCV_FMV_H_X;
       return ;
   }
   if ((binary_stream & 0x000000000000007F == 0x53) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x0000000001F00000)>>20 == 0x01) && ((binary_stream & 0x00000000FE000000)>>25 == 0x7A)) { 
@@ -3875,22 +3874,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -3908,22 +3907,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -3941,22 +3940,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -3974,22 +3973,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -4007,22 +4006,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -4040,22 +4039,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rm = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                rm = RM_DYN ;
+                rm = RISCV_RM_DYN ;
         break; 
         case 0x1: 
-                rm = RM_RTZ ;
+                rm = RISCV_RM_RTZ ;
         break; 
         case 0x3: 
-                rm = RM_RUP ;
+                rm = RISCV_RM_RUP ;
         break; 
         case 0x2: 
-                rm = RM_RDN ;
+                rm = RISCV_RM_RDN ;
         break; 
         case 0x4: 
-                rm = RM_RMM ;
+                rm = RISCV_RM_RMM ;
         break; 
         case 0x0: 
-                rm = RM_RNE ;
+                rm = RISCV_RM_RNE ;
         break; 
  
       }
@@ -4158,7 +4157,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x000000003E000000)>>25 == 0x08) && ((binary_stream & 0x00000000C0000000)>>30 == 0x0)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = SHA256SUM0 ;
+      tree->ast_node_type = RISCV_SHA256SUM0 ;
       tree->ast_node.sha256sum0.rs1 = rs1;
       tree->ast_node.sha256sum0.rd = rd;
       return ;
@@ -4166,7 +4165,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x01) && ((binary_stream & 0x000000003E000000)>>25 == 0x08) && ((binary_stream & 0x00000000C0000000)>>30 == 0x0)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = SHA256SUM1 ;
+      tree->ast_node_type = RISCV_SHA256SUM1 ;
       tree->ast_node.sha256sum1.rs1 = rs1;
       tree->ast_node.sha256sum1.rd = rd;
       return ;
@@ -4174,7 +4173,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x02) && ((binary_stream & 0x000000003E000000)>>25 == 0x08) && ((binary_stream & 0x00000000C0000000)>>30 == 0x0)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = SHA256SIG0 ;
+      tree->ast_node_type = RISCV_SHA256SIG0 ;
       tree->ast_node.sha256sig0.rs1 = rs1;
       tree->ast_node.sha256sig0.rd = rd;
       return ;
@@ -4182,7 +4181,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x03) && ((binary_stream & 0x000000003E000000)>>25 == 0x08) && ((binary_stream & 0x00000000C0000000)>>30 == 0x0)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = SHA256SIG1 ;
+      tree->ast_node_type = RISCV_SHA256SIG1 ;
       tree->ast_node.sha256sig1.rs1 = rs1;
       tree->ast_node.sha256sig1.rd = rd;
       return ;
@@ -4192,7 +4191,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t bs = (binary_stream & 0x00000000C0000000)>>30 ;
-      tree->ast_node_type = AES32ESMI ;
+      tree->ast_node_type = RISCV_AES32ESMI ;
       tree->ast_node.aes32esmi.bs = bs;
       tree->ast_node.aes32esmi.rs2 = rs2;
       tree->ast_node.aes32esmi.rs1 = rs1;
@@ -4204,7 +4203,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t bs = (binary_stream & 0x00000000C0000000)>>30 ;
-      tree->ast_node_type = AES32ESI ;
+      tree->ast_node_type = RISCV_AES32ESI ;
       tree->ast_node.aes32esi.bs = bs;
       tree->ast_node.aes32esi.rs2 = rs2;
       tree->ast_node.aes32esi.rs1 = rs1;
@@ -4216,7 +4215,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t bs = (binary_stream & 0x00000000C0000000)>>30 ;
-      tree->ast_node_type = AES32DSMI ;
+      tree->ast_node_type = RISCV_AES32DSMI ;
       tree->ast_node.aes32dsmi.bs = bs;
       tree->ast_node.aes32dsmi.rs2 = rs2;
       tree->ast_node.aes32dsmi.rs1 = rs1;
@@ -4228,7 +4227,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t bs = (binary_stream & 0x00000000C0000000)>>30 ;
-      tree->ast_node_type = AES32DSI ;
+      tree->ast_node_type = RISCV_AES32DSI ;
       tree->ast_node.aes32dsi.bs = bs;
       tree->ast_node.aes32dsi.rs2 = rs2;
       tree->ast_node.aes32dsi.rs1 = rs1;
@@ -4239,7 +4238,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = SHA512SUM0R ;
+      tree->ast_node_type = RISCV_SHA512SUM0R ;
       tree->ast_node.sha512sum0r.rs2 = rs2;
       tree->ast_node.sha512sum0r.rs1 = rs1;
       tree->ast_node.sha512sum0r.rd = rd;
@@ -4249,7 +4248,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = SHA512SUM1R ;
+      tree->ast_node_type = RISCV_SHA512SUM1R ;
       tree->ast_node.sha512sum1r.rs2 = rs2;
       tree->ast_node.sha512sum1r.rs1 = rs1;
       tree->ast_node.sha512sum1r.rd = rd;
@@ -4259,7 +4258,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = SHA512SIG0L ;
+      tree->ast_node_type = RISCV_SHA512SIG0L ;
       tree->ast_node.sha512sig0l.rs2 = rs2;
       tree->ast_node.sha512sig0l.rs1 = rs1;
       tree->ast_node.sha512sig0l.rd = rd;
@@ -4269,7 +4268,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = SHA512SIG0H ;
+      tree->ast_node_type = RISCV_SHA512SIG0H ;
       tree->ast_node.sha512sig0h.rs2 = rs2;
       tree->ast_node.sha512sig0h.rs1 = rs1;
       tree->ast_node.sha512sig0h.rd = rd;
@@ -4279,7 +4278,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = SHA512SIG1L ;
+      tree->ast_node_type = RISCV_SHA512SIG1L ;
       tree->ast_node.sha512sig1l.rs2 = rs2;
       tree->ast_node.sha512sig1l.rs1 = rs1;
       tree->ast_node.sha512sig1l.rd = rd;
@@ -4289,7 +4288,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = SHA512SIG1H ;
+      tree->ast_node_type = RISCV_SHA512SIG1H ;
       tree->ast_node.sha512sig1h.rs2 = rs2;
       tree->ast_node.sha512sig1h.rs1 = rs1;
       tree->ast_node.sha512sig1h.rd = rd;
@@ -4299,7 +4298,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rnum = (binary_stream & 0x0000000000F00000)>>20 ;
-      tree->ast_node_type = AES64KS1I ;
+      tree->ast_node_type = RISCV_AES64KS1I ;
       tree->ast_node.aes64ks1i.rnum = rnum;
       tree->ast_node.aes64ks1i.rs1 = rs1;
       tree->ast_node.aes64ks1i.rd = rd;
@@ -4308,7 +4307,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x000000003E000000)>>25 == 0x18) && ((binary_stream & 0x00000000C0000000)>>30 == 0x0)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = AES64IM ;
+      tree->ast_node_type = RISCV_AES64IM ;
       tree->ast_node.aes64im.rs1 = rs1;
       tree->ast_node.aes64im.rd = rd;
       return ;
@@ -4317,7 +4316,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = AES64KS2 ;
+      tree->ast_node_type = RISCV_AES64KS2 ;
       tree->ast_node.aes64ks2.rs2 = rs2;
       tree->ast_node.aes64ks2.rs1 = rs1;
       tree->ast_node.aes64ks2.rd = rd;
@@ -4327,7 +4326,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = AES64ESM ;
+      tree->ast_node_type = RISCV_AES64ESM ;
       tree->ast_node.aes64esm.rs2 = rs2;
       tree->ast_node.aes64esm.rs1 = rs1;
       tree->ast_node.aes64esm.rd = rd;
@@ -4337,7 +4336,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = AES64ES ;
+      tree->ast_node_type = RISCV_AES64ES ;
       tree->ast_node.aes64es.rs2 = rs2;
       tree->ast_node.aes64es.rs1 = rs1;
       tree->ast_node.aes64es.rd = rd;
@@ -4347,7 +4346,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = AES64DSM ;
+      tree->ast_node_type = RISCV_AES64DSM ;
       tree->ast_node.aes64dsm.rs2 = rs2;
       tree->ast_node.aes64dsm.rs1 = rs1;
       tree->ast_node.aes64dsm.rd = rd;
@@ -4357,7 +4356,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = AES64DS ;
+      tree->ast_node_type = RISCV_AES64DS ;
       tree->ast_node.aes64ds.rs2 = rs2;
       tree->ast_node.aes64ds.rs1 = rs1;
       tree->ast_node.aes64ds.rd = rd;
@@ -4366,7 +4365,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x04) && ((binary_stream & 0x000000003E000000)>>25 == 0x08) && ((binary_stream & 0x00000000C0000000)>>30 == 0x0)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = SHA512SUM0 ;
+      tree->ast_node_type = RISCV_SHA512SUM0 ;
       tree->ast_node.sha512sum0.rs1 = rs1;
       tree->ast_node.sha512sum0.rd = rd;
       return ;
@@ -4374,7 +4373,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x05) && ((binary_stream & 0x000000003E000000)>>25 == 0x08) && ((binary_stream & 0x00000000C0000000)>>30 == 0x0)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = SHA512SUM1 ;
+      tree->ast_node_type = RISCV_SHA512SUM1 ;
       tree->ast_node.sha512sum1.rs1 = rs1;
       tree->ast_node.sha512sum1.rd = rd;
       return ;
@@ -4382,7 +4381,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x06) && ((binary_stream & 0x000000003E000000)>>25 == 0x08) && ((binary_stream & 0x00000000C0000000)>>30 == 0x0)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = SHA512SIG0 ;
+      tree->ast_node_type = RISCV_SHA512SIG0 ;
       tree->ast_node.sha512sig0.rs1 = rs1;
       tree->ast_node.sha512sig0.rd = rd;
       return ;
@@ -4390,7 +4389,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x07) && ((binary_stream & 0x000000003E000000)>>25 == 0x08) && ((binary_stream & 0x00000000C0000000)>>30 == 0x0)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = SHA512SIG1 ;
+      tree->ast_node_type = RISCV_SHA512SIG1 ;
       tree->ast_node.sha512sig1.rs1 = rs1;
       tree->ast_node.sha512sig1.rd = rd;
       return ;
@@ -4398,7 +4397,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x08) && ((binary_stream & 0x000000003E000000)>>25 == 0x08) && ((binary_stream & 0x00000000C0000000)>>30 == 0x0)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = SM3P0 ;
+      tree->ast_node_type = RISCV_SM3P0 ;
       tree->ast_node.sm3p0.rs1 = rs1;
       tree->ast_node.sm3p0.rd = rd;
       return ;
@@ -4406,7 +4405,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x13) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x0000000001F00000)>>20 == 0x09) && ((binary_stream & 0x000000003E000000)>>25 == 0x08) && ((binary_stream & 0x00000000C0000000)>>30 == 0x0)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = SM3P1 ;
+      tree->ast_node_type = RISCV_SM3P1 ;
       tree->ast_node.sm3p1.rs1 = rs1;
       tree->ast_node.sm3p1.rd = rd;
       return ;
@@ -4416,7 +4415,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t bs = (binary_stream & 0x00000000C0000000)>>30 ;
-      tree->ast_node_type = SM4ED ;
+      tree->ast_node_type = RISCV_SM4ED ;
       tree->ast_node.sm4ed.bs = bs;
       tree->ast_node.sm4ed.rs2 = rs2;
       tree->ast_node.sm4ed.rs1 = rs1;
@@ -4428,7 +4427,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t bs = (binary_stream & 0x00000000C0000000)>>30 ;
-      tree->ast_node_type = SM4KS ;
+      tree->ast_node_type = RISCV_SM4KS ;
       tree->ast_node.sm4ks.bs = bs;
       tree->ast_node.sm4ks.rs2 = rs2;
       tree->ast_node.sm4ks.rs1 = rs1;
@@ -4439,7 +4438,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBKB_RTYPE ;
+      tree->ast_node_type = RISCV_ZBKB_RTYPE ;
       tree->ast_node.zbkb_rtype.rs2 = rs2;
       tree->ast_node.zbkb_rtype.rs1 = rs1;
       tree->ast_node.zbkb_rtype.rd = rd;
@@ -4450,7 +4449,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBKB_RTYPE ;
+      tree->ast_node_type = RISCV_ZBKB_RTYPE ;
       tree->ast_node.zbkb_rtype.rs2 = rs2;
       tree->ast_node.zbkb_rtype.rs1 = rs1;
       tree->ast_node.zbkb_rtype.rd = rd;
@@ -4461,7 +4460,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZBKB_PACKW ;
+      tree->ast_node_type = RISCV_ZBKB_PACKW ;
       tree->ast_node.zbkb_packw.rs2 = rs2;
       tree->ast_node.zbkb_packw.rs1 = rs1;
       tree->ast_node.zbkb_packw.rd = rd;
@@ -4515,7 +4514,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZICOND_RTYPE ;
+      tree->ast_node_type = RISCV_ZICOND_RTYPE ;
       tree->ast_node.zicond_rtype.rs2 = rs2;
       tree->ast_node.zicond_rtype.rs1 = rs1;
       tree->ast_node.zicond_rtype.rd = rd;
@@ -4526,7 +4525,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = ZICOND_RTYPE ;
+      tree->ast_node_type = RISCV_ZICOND_RTYPE ;
       tree->ast_node.zicond_rtype.rs2 = rs2;
       tree->ast_node.zicond_rtype.rs1 = rs1;
       tree->ast_node.zicond_rtype.rd = rd;
@@ -4540,7 +4539,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t sew = (binary_stream & 0x0000000003800000)>>23 ;
       uint64_t ta = (binary_stream & 0x0000000004000000)>>26 ;
       uint64_t ma = (binary_stream & 0x0000000008000000)>>27 ;
-      tree->ast_node_type = VSETVLI ;
+      tree->ast_node_type = RISCV_VSETVLI ;
       tree->ast_node.vsetvli.ma = ma;
       tree->ast_node.vsetvli.ta = ta;
       tree->ast_node.vsetvli.sew = sew;
@@ -4553,7 +4552,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = VSETVL ;
+      tree->ast_node_type = RISCV_VSETVL ;
       tree->ast_node.vsetvl.rs2 = rs2;
       tree->ast_node.vsetvl.rs1 = rs1;
       tree->ast_node.vsetvl.rd = rd;
@@ -4566,7 +4565,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t sew = (binary_stream & 0x0000000003800000)>>23 ;
       uint64_t ta = (binary_stream & 0x0000000004000000)>>26 ;
       uint64_t ma = (binary_stream & 0x0000000008000000)>>27 ;
-      tree->ast_node_type = VSETIVLI ;
+      tree->ast_node_type = RISCV_VSETIVLI ;
       tree->ast_node.vsetivli.ma = ma;
       tree->ast_node.vsetivli.ta = ta;
       tree->ast_node.vsetivli.sew = sew;
@@ -4579,67 +4578,67 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x06: 
-                funct6 = VV_VMAXU ;
+                funct6 = RISCV_VV_VMAXU ;
         break; 
         case 0x25: 
-                funct6 = VV_VSLL ;
+                funct6 = RISCV_VV_VSLL ;
         break; 
         case 0x23: 
-                funct6 = VV_VSSUB ;
+                funct6 = RISCV_VV_VSSUB ;
         break; 
         case 0x09: 
-                funct6 = VV_VAND ;
+                funct6 = RISCV_VV_VAND ;
         break; 
         case 0x00: 
-                funct6 = VV_VADD ;
+                funct6 = RISCV_VV_VADD ;
         break; 
         case 0x0A: 
-                funct6 = VV_VOR ;
+                funct6 = RISCV_VV_VOR ;
         break; 
         case 0x0C: 
-                funct6 = VV_VRGATHER ;
+                funct6 = RISCV_VV_VRGATHER ;
         break; 
         case 0x2B: 
-                funct6 = VV_VSSRA ;
+                funct6 = RISCV_VV_VSSRA ;
         break; 
         case 0x02: 
-                funct6 = VV_VSUB ;
+                funct6 = RISCV_VV_VSUB ;
         break; 
         case 0x20: 
-                funct6 = VV_VSADDU ;
+                funct6 = RISCV_VV_VSADDU ;
         break; 
         case 0x28: 
-                funct6 = VV_VSRL ;
+                funct6 = RISCV_VV_VSRL ;
         break; 
         case 0x0B: 
-                funct6 = VV_VXOR ;
+                funct6 = RISCV_VV_VXOR ;
         break; 
         case 0x07: 
-                funct6 = VV_VMAX ;
+                funct6 = RISCV_VV_VMAX ;
         break; 
         case 0x04: 
-                funct6 = VV_VMINU ;
+                funct6 = RISCV_VV_VMINU ;
         break; 
         case 0x22: 
-                funct6 = VV_VSSUBU ;
+                funct6 = RISCV_VV_VSSUBU ;
         break; 
         case 0x27: 
-                funct6 = VV_VSMUL ;
+                funct6 = RISCV_VV_VSMUL ;
         break; 
         case 0x0E: 
-                funct6 = VV_VRGATHEREI16 ;
+                funct6 = RISCV_VV_VRGATHEREI16 ;
         break; 
         case 0x2A: 
-                funct6 = VV_VSSRL ;
+                funct6 = RISCV_VV_VSSRL ;
         break; 
         case 0x05: 
-                funct6 = VV_VMIN ;
+                funct6 = RISCV_VV_VMIN ;
         break; 
         case 0x21: 
-                funct6 = VV_VSADD ;
+                funct6 = RISCV_VV_VSADD ;
         break; 
         case 0x29: 
-                funct6 = VV_VSRA ;
+                funct6 = RISCV_VV_VSRA ;
         break; 
  
       }
@@ -4648,7 +4647,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VVTYPE ;
+          tree->ast_node_type = RISCV_VVTYPE ;
           tree->ast_node.vvtype.funct6 = funct6;
           tree->ast_node.vvtype.vm = vm;
           tree->ast_node.vvtype.vs2 = vs2;
@@ -4661,10 +4660,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x2C: 
-                funct6 = NVS_VNSRL ;
+                funct6 = RISCV_NVS_VNSRL ;
         break; 
         case 0x2D: 
-                funct6 = NVS_VNSRA ;
+                funct6 = RISCV_NVS_VNSRA ;
         break; 
  
       }
@@ -4673,7 +4672,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = NVSTYPE ;
+          tree->ast_node_type = RISCV_NVSTYPE ;
           tree->ast_node.nvstype.funct6 = funct6;
           tree->ast_node.nvstype.vm = vm;
           tree->ast_node.nvstype.vs2 = vs2;
@@ -4686,10 +4685,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x2E: 
-                funct6 = NV_VNCLIPU ;
+                funct6 = RISCV_NV_VNCLIPU ;
         break; 
         case 0x2F: 
-                funct6 = NV_VNCLIP ;
+                funct6 = RISCV_NV_VNCLIP ;
         break; 
  
       }
@@ -4698,7 +4697,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = NVTYPE ;
+          tree->ast_node_type = RISCV_NVTYPE ;
           tree->ast_node.nvtype.funct6 = funct6;
           tree->ast_node.nvtype.vm = vm;
           tree->ast_node.nvtype.vs2 = vs2;
@@ -4711,7 +4710,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = MASKTYPEV ;
+      tree->ast_node_type = RISCV_MASKTYPEV ;
       tree->ast_node.masktypev.vs2 = vs2;
       tree->ast_node.masktypev.vs1 = vs1;
       tree->ast_node.masktypev.vd = vd;
@@ -4720,7 +4719,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x57) && ((binary_stream & 0x0000000000007000)>>12 == 0x0) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x0000000002000000)>>25 == 0x1) && ((binary_stream & 0x00000000FC000000)>>26 == 0x17)) { 
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = MOVETYPEV ;
+      tree->ast_node_type = RISCV_MOVETYPEV ;
       tree->ast_node.movetypev.vs1 = vs1;
       tree->ast_node.movetypev.vd = vd;
       return ;
@@ -4729,64 +4728,64 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x06: 
-                funct6 = VX_VMAXU ;
+                funct6 = RISCV_VX_VMAXU ;
         break; 
         case 0x25: 
-                funct6 = VX_VSLL ;
+                funct6 = RISCV_VX_VSLL ;
         break; 
         case 0x23: 
-                funct6 = VX_VSSUB ;
+                funct6 = RISCV_VX_VSSUB ;
         break; 
         case 0x09: 
-                funct6 = VX_VAND ;
+                funct6 = RISCV_VX_VAND ;
         break; 
         case 0x00: 
-                funct6 = VX_VADD ;
+                funct6 = RISCV_VX_VADD ;
         break; 
         case 0x0A: 
-                funct6 = VX_VOR ;
+                funct6 = RISCV_VX_VOR ;
         break; 
         case 0x2B: 
-                funct6 = VX_VSSRA ;
+                funct6 = RISCV_VX_VSSRA ;
         break; 
         case 0x02: 
-                funct6 = VX_VSUB ;
+                funct6 = RISCV_VX_VSUB ;
         break; 
         case 0x20: 
-                funct6 = VX_VSADDU ;
+                funct6 = RISCV_VX_VSADDU ;
         break; 
         case 0x28: 
-                funct6 = VX_VSRL ;
+                funct6 = RISCV_VX_VSRL ;
         break; 
         case 0x0B: 
-                funct6 = VX_VXOR ;
+                funct6 = RISCV_VX_VXOR ;
         break; 
         case 0x07: 
-                funct6 = VX_VMAX ;
+                funct6 = RISCV_VX_VMAX ;
         break; 
         case 0x04: 
-                funct6 = VX_VMINU ;
+                funct6 = RISCV_VX_VMINU ;
         break; 
         case 0x22: 
-                funct6 = VX_VSSUBU ;
+                funct6 = RISCV_VX_VSSUBU ;
         break; 
         case 0x27: 
-                funct6 = VX_VSMUL ;
+                funct6 = RISCV_VX_VSMUL ;
         break; 
         case 0x2A: 
-                funct6 = VX_VSSRL ;
+                funct6 = RISCV_VX_VSSRL ;
         break; 
         case 0x03: 
-                funct6 = VX_VRSUB ;
+                funct6 = RISCV_VX_VRSUB ;
         break; 
         case 0x05: 
-                funct6 = VX_VMIN ;
+                funct6 = RISCV_VX_VMIN ;
         break; 
         case 0x21: 
-                funct6 = VX_VSADD ;
+                funct6 = RISCV_VX_VSADD ;
         break; 
         case 0x29: 
-                funct6 = VX_VSRA ;
+                funct6 = RISCV_VX_VSRA ;
         break; 
  
       }
@@ -4795,7 +4794,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VXTYPE ;
+          tree->ast_node_type = RISCV_VXTYPE ;
           tree->ast_node.vxtype.funct6 = funct6;
           tree->ast_node.vxtype.vm = vm;
           tree->ast_node.vxtype.vs2 = vs2;
@@ -4808,10 +4807,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x2C: 
-                funct6 = NXS_VNSRL ;
+                funct6 = RISCV_NXS_VNSRL ;
         break; 
         case 0x2D: 
-                funct6 = NXS_VNSRA ;
+                funct6 = RISCV_NXS_VNSRA ;
         break; 
  
       }
@@ -4820,7 +4819,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = NXSTYPE ;
+          tree->ast_node_type = RISCV_NXSTYPE ;
           tree->ast_node.nxstype.funct6 = funct6;
           tree->ast_node.nxstype.vm = vm;
           tree->ast_node.nxstype.vs2 = vs2;
@@ -4833,10 +4832,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x2E: 
-                funct6 = NX_VNCLIPU ;
+                funct6 = RISCV_NX_VNCLIPU ;
         break; 
         case 0x2F: 
-                funct6 = NX_VNCLIP ;
+                funct6 = RISCV_NX_VNCLIP ;
         break; 
  
       }
@@ -4845,7 +4844,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = NXTYPE ;
+          tree->ast_node_type = RISCV_NXTYPE ;
           tree->ast_node.nxtype.funct6 = funct6;
           tree->ast_node.nxtype.vm = vm;
           tree->ast_node.nxtype.vs2 = vs2;
@@ -4858,13 +4857,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x0E: 
-                funct6 = VX_VSLIDEUP ;
+                funct6 = RISCV_VX_VSLIDEUP ;
         break; 
         case 0x0C: 
-                funct6 = VX_VRGATHER ;
+                funct6 = RISCV_VX_VRGATHER ;
         break; 
         case 0x0F: 
-                funct6 = VX_VSLIDEDOWN ;
+                funct6 = RISCV_VX_VSLIDEDOWN ;
         break; 
  
       }
@@ -4873,7 +4872,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VXSG ;
+          tree->ast_node_type = RISCV_VXSG ;
           tree->ast_node.vxsg.funct6 = funct6;
           tree->ast_node.vxsg.vm = vm;
           tree->ast_node.vxsg.vs2 = vs2;
@@ -4886,7 +4885,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = MASKTYPEX ;
+      tree->ast_node_type = RISCV_MASKTYPEX ;
       tree->ast_node.masktypex.vs2 = vs2;
       tree->ast_node.masktypex.rs1 = rs1;
       tree->ast_node.masktypex.vd = vd;
@@ -4895,7 +4894,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x57) && ((binary_stream & 0x0000000000007000)>>12 == 0x4) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x0000000002000000)>>25 == 0x1) && ((binary_stream & 0x00000000FC000000)>>26 == 0x17)) { 
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = MOVETYPEX ;
+      tree->ast_node_type = RISCV_MOVETYPEX ;
       tree->ast_node.movetypex.rs1 = rs1;
       tree->ast_node.movetypex.vd = vd;
       return ;
@@ -4904,40 +4903,40 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x28: 
-                funct6 = VI_VSRL ;
+                funct6 = RISCV_VI_VSRL ;
         break; 
         case 0x0B: 
-                funct6 = VI_VXOR ;
+                funct6 = RISCV_VI_VXOR ;
         break; 
         case 0x25: 
-                funct6 = VI_VSLL ;
+                funct6 = RISCV_VI_VSLL ;
         break; 
         case 0x09: 
-                funct6 = VI_VAND ;
+                funct6 = RISCV_VI_VAND ;
         break; 
         case 0x00: 
-                funct6 = VI_VADD ;
+                funct6 = RISCV_VI_VADD ;
         break; 
         case 0x0A: 
-                funct6 = VI_VOR ;
+                funct6 = RISCV_VI_VOR ;
         break; 
         case 0x2A: 
-                funct6 = VI_VSSRL ;
+                funct6 = RISCV_VI_VSSRL ;
         break; 
         case 0x03: 
-                funct6 = VI_VRSUB ;
+                funct6 = RISCV_VI_VRSUB ;
         break; 
         case 0x21: 
-                funct6 = VI_VSADD ;
+                funct6 = RISCV_VI_VSADD ;
         break; 
         case 0x2B: 
-                funct6 = VI_VSSRA ;
+                funct6 = RISCV_VI_VSSRA ;
         break; 
         case 0x29: 
-                funct6 = VI_VSRA ;
+                funct6 = RISCV_VI_VSRA ;
         break; 
         case 0x20: 
-                funct6 = VI_VSADDU ;
+                funct6 = RISCV_VI_VSADDU ;
         break; 
  
       }
@@ -4946,7 +4945,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t simm = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VITYPE ;
+          tree->ast_node_type = RISCV_VITYPE ;
           tree->ast_node.vitype.funct6 = funct6;
           tree->ast_node.vitype.vm = vm;
           tree->ast_node.vitype.vs2 = vs2;
@@ -4959,10 +4958,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x2C: 
-                funct6 = NIS_VNSRL ;
+                funct6 = RISCV_NIS_VNSRL ;
         break; 
         case 0x2D: 
-                funct6 = NIS_VNSRA ;
+                funct6 = RISCV_NIS_VNSRA ;
         break; 
  
       }
@@ -4971,7 +4970,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t simm = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = NISTYPE ;
+          tree->ast_node_type = RISCV_NISTYPE ;
           tree->ast_node.nistype.funct6 = funct6;
           tree->ast_node.nistype.vm = vm;
           tree->ast_node.nistype.vs2 = vs2;
@@ -4984,10 +4983,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x2E: 
-                funct6 = NI_VNCLIPU ;
+                funct6 = RISCV_NI_VNCLIPU ;
         break; 
         case 0x2F: 
-                funct6 = NI_VNCLIP ;
+                funct6 = RISCV_NI_VNCLIP ;
         break; 
  
       }
@@ -4996,7 +4995,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t simm = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = NITYPE ;
+          tree->ast_node_type = RISCV_NITYPE ;
           tree->ast_node.nitype.funct6 = funct6;
           tree->ast_node.nitype.vm = vm;
           tree->ast_node.nitype.vs2 = vs2;
@@ -5009,13 +5008,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x0E: 
-                funct6 = VI_VSLIDEUP ;
+                funct6 = RISCV_VI_VSLIDEUP ;
         break; 
         case 0x0C: 
-                funct6 = VI_VRGATHER ;
+                funct6 = RISCV_VI_VRGATHER ;
         break; 
         case 0x0F: 
-                funct6 = VI_VSLIDEDOWN ;
+                funct6 = RISCV_VI_VSLIDEDOWN ;
         break; 
  
       }
@@ -5024,7 +5023,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t simm = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VISG ;
+          tree->ast_node_type = RISCV_VISG ;
           tree->ast_node.visg.funct6 = funct6;
           tree->ast_node.visg.vm = vm;
           tree->ast_node.visg.vs2 = vs2;
@@ -5037,7 +5036,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t simm = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = MASKTYPEI ;
+      tree->ast_node_type = RISCV_MASKTYPEI ;
       tree->ast_node.masktypei.vs2 = vs2;
       tree->ast_node.masktypei.simm = simm;
       tree->ast_node.masktypei.vd = vd;
@@ -5046,7 +5045,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x57) && ((binary_stream & 0x0000000000007000)>>12 == 0x3) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x0000000002000000)>>25 == 0x1) && ((binary_stream & 0x00000000FC000000)>>26 == 0x17)) { 
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t simm = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = MOVETYPEI ;
+      tree->ast_node_type = RISCV_MOVETYPEI ;
       tree->ast_node.movetypei.vd = vd;
       tree->ast_node.movetypei.simm = simm;
       return ;
@@ -5055,7 +5054,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t simm = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = VMVRTYPE ;
+      tree->ast_node_type = RISCV_VMVRTYPE ;
       tree->ast_node.vmvrtype.vs2 = vs2;
       tree->ast_node.vmvrtype.simm = simm;
       tree->ast_node.vmvrtype.vd = vd;
@@ -5065,40 +5064,40 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x08: 
-                funct6 = MVV_VAADDU ;
+                funct6 = RISCV_MVV_VAADDU ;
         break; 
         case 0x0B: 
-                funct6 = MVV_VASUB ;
+                funct6 = RISCV_MVV_VASUB ;
         break; 
         case 0x25: 
-                funct6 = MVV_VMUL ;
+                funct6 = RISCV_MVV_VMUL ;
         break; 
         case 0x23: 
-                funct6 = MVV_VREM ;
+                funct6 = RISCV_MVV_VREM ;
         break; 
         case 0x09: 
-                funct6 = MVV_VAADD ;
+                funct6 = RISCV_MVV_VAADD ;
         break; 
         case 0x27: 
-                funct6 = MVV_VMULH ;
+                funct6 = RISCV_MVV_VMULH ;
         break; 
         case 0x22: 
-                funct6 = MVV_VREMU ;
+                funct6 = RISCV_MVV_VREMU ;
         break; 
         case 0x0A: 
-                funct6 = MVV_VASUBU ;
+                funct6 = RISCV_MVV_VASUBU ;
         break; 
         case 0x24: 
-                funct6 = MVV_VMULHU ;
+                funct6 = RISCV_MVV_VMULHU ;
         break; 
         case 0x26: 
-                funct6 = MVV_VMULHSU ;
+                funct6 = RISCV_MVV_VMULHSU ;
         break; 
         case 0x21: 
-                funct6 = MVV_VDIV ;
+                funct6 = RISCV_MVV_VDIV ;
         break; 
         case 0x20: 
-                funct6 = MVV_VDIVU ;
+                funct6 = RISCV_MVV_VDIVU ;
         break; 
  
       }
@@ -5107,7 +5106,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = MVVTYPE ;
+          tree->ast_node_type = RISCV_MVVTYPE ;
           tree->ast_node.mvvtype.funct6 = funct6;
           tree->ast_node.mvvtype.vm = vm;
           tree->ast_node.mvvtype.vs2 = vs2;
@@ -5120,16 +5119,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x2D: 
-                funct6 = MVV_VMACC ;
+                funct6 = RISCV_MVV_VMACC ;
         break; 
         case 0x2F: 
-                funct6 = MVV_VNMSAC ;
+                funct6 = RISCV_MVV_VNMSAC ;
         break; 
         case 0x2B: 
-                funct6 = MVV_VNMSUB ;
+                funct6 = RISCV_MVV_VNMSUB ;
         break; 
         case 0x29: 
-                funct6 = MVV_VMADD ;
+                funct6 = RISCV_MVV_VMADD ;
         break; 
  
       }
@@ -5138,7 +5137,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = MVVMATYPE ;
+          tree->ast_node_type = RISCV_MVVMATYPE ;
           tree->ast_node.mvvmatype.funct6 = funct6;
           tree->ast_node.mvvmatype.vm = vm;
           tree->ast_node.mvvmatype.vs2 = vs2;
@@ -5151,25 +5150,25 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x3B: 
-                funct6 = WVV_VWMUL ;
+                funct6 = RISCV_WVV_VWMUL ;
         break; 
         case 0x33: 
-                funct6 = WVV_VSUB ;
+                funct6 = RISCV_WVV_VSUB ;
         break; 
         case 0x3A: 
-                funct6 = WVV_VWMULSU ;
+                funct6 = RISCV_WVV_VWMULSU ;
         break; 
         case 0x31: 
-                funct6 = WVV_VADD ;
+                funct6 = RISCV_WVV_VADD ;
         break; 
         case 0x30: 
-                funct6 = WVV_VADDU ;
+                funct6 = RISCV_WVV_VADDU ;
         break; 
         case 0x32: 
-                funct6 = WVV_VSUBU ;
+                funct6 = RISCV_WVV_VSUBU ;
         break; 
         case 0x38: 
-                funct6 = WVV_VWMULU ;
+                funct6 = RISCV_WVV_VWMULU ;
         break; 
  
       }
@@ -5178,7 +5177,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = WVVTYPE ;
+          tree->ast_node_type = RISCV_WVVTYPE ;
           tree->ast_node.wvvtype.funct6 = funct6;
           tree->ast_node.wvvtype.vm = vm;
           tree->ast_node.wvvtype.vs2 = vs2;
@@ -5191,16 +5190,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x36: 
-                funct6 = WV_VSUBU ;
+                funct6 = RISCV_WV_VSUBU ;
         break; 
         case 0x35: 
-                funct6 = WV_VADD ;
+                funct6 = RISCV_WV_VADD ;
         break; 
         case 0x37: 
-                funct6 = WV_VSUB ;
+                funct6 = RISCV_WV_VSUB ;
         break; 
         case 0x34: 
-                funct6 = WV_VADDU ;
+                funct6 = RISCV_WV_VADDU ;
         break; 
  
       }
@@ -5209,7 +5208,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = WVTYPE ;
+          tree->ast_node_type = RISCV_WVTYPE ;
           tree->ast_node.wvtype.funct6 = funct6;
           tree->ast_node.wvtype.vm = vm;
           tree->ast_node.wvtype.vs2 = vs2;
@@ -5222,13 +5221,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x3D: 
-                funct6 = WMVV_VWMACC ;
+                funct6 = RISCV_WMVV_VWMACC ;
         break; 
         case 0x3C: 
-                funct6 = WMVV_VWMACCU ;
+                funct6 = RISCV_WMVV_VWMACCU ;
         break; 
         case 0x3F: 
-                funct6 = WMVV_VWMACCSU ;
+                funct6 = RISCV_WMVV_VWMACCSU ;
         break; 
  
       }
@@ -5237,7 +5236,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = WMVVTYPE ;
+          tree->ast_node_type = RISCV_WMVVTYPE ;
           tree->ast_node.wmvvtype.funct6 = funct6;
           tree->ast_node.wmvvtype.vm = vm;
           tree->ast_node.wmvvtype.vs2 = vs2;
@@ -5250,10 +5249,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000000F8000)>>15) {
         case 0x06: 
-                funct6 = VEXT2_ZVF2 ;
+                funct6 = RISCV_VEXT2_ZVF2 ;
         break; 
         case 0x07: 
-                funct6 = VEXT2_SVF2 ;
+                funct6 = RISCV_VEXT2_SVF2 ;
         break; 
  
       }
@@ -5261,7 +5260,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VEXT2TYPE ;
+          tree->ast_node_type = RISCV_VEXT2TYPE ;
           tree->ast_node.vext2type.funct6 = funct6;
           tree->ast_node.vext2type.vm = vm;
           tree->ast_node.vext2type.vs2 = vs2;
@@ -5273,10 +5272,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000000F8000)>>15) {
         case 0x04: 
-                funct6 = VEXT4_ZVF4 ;
+                funct6 = RISCV_VEXT4_ZVF4 ;
         break; 
         case 0x05: 
-                funct6 = VEXT4_SVF4 ;
+                funct6 = RISCV_VEXT4_SVF4 ;
         break; 
  
       }
@@ -5284,7 +5283,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VEXT4TYPE ;
+          tree->ast_node_type = RISCV_VEXT4TYPE ;
           tree->ast_node.vext4type.funct6 = funct6;
           tree->ast_node.vext4type.vm = vm;
           tree->ast_node.vext4type.vs2 = vs2;
@@ -5296,10 +5295,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000000F8000)>>15) {
         case 0x03: 
-                funct6 = VEXT8_SVF8 ;
+                funct6 = RISCV_VEXT8_SVF8 ;
         break; 
         case 0x02: 
-                funct6 = VEXT8_ZVF8 ;
+                funct6 = RISCV_VEXT8_ZVF8 ;
         break; 
  
       }
@@ -5307,7 +5306,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VEXT8TYPE ;
+          tree->ast_node_type = RISCV_VEXT8TYPE ;
           tree->ast_node.vext8type.funct6 = funct6;
           tree->ast_node.vext8type.vm = vm;
           tree->ast_node.vext8type.vs2 = vs2;
@@ -5318,7 +5317,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x57) && ((binary_stream & 0x0000000000007000)>>12 == 0x2) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x0000000002000000)>>25 == 0x1) && ((binary_stream & 0x00000000FC000000)>>26 == 0x10)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = VMVXS ;
+      tree->ast_node_type = RISCV_VMVXS ;
       tree->ast_node.vmvxs.vs2 = vs2;
       tree->ast_node.vmvxs.rd = rd;
       return ;
@@ -5327,7 +5326,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = MVVCOMPRESS ;
+      tree->ast_node_type = RISCV_MVVCOMPRESS ;
       tree->ast_node.mvvcompress.vs2 = vs2;
       tree->ast_node.mvvcompress.vs1 = vs1;
       tree->ast_node.mvvcompress.vd = vd;
@@ -5337,46 +5336,46 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x08: 
-                funct6 = MVX_VAADDU ;
+                funct6 = RISCV_MVX_VAADDU ;
         break; 
         case 0x0B: 
-                funct6 = MVX_VASUB ;
+                funct6 = RISCV_MVX_VASUB ;
         break; 
         case 0x25: 
-                funct6 = MVX_VMUL ;
+                funct6 = RISCV_MVX_VMUL ;
         break; 
         case 0x23: 
-                funct6 = MVX_VREM ;
+                funct6 = RISCV_MVX_VREM ;
         break; 
         case 0x09: 
-                funct6 = MVX_VAADD ;
+                funct6 = RISCV_MVX_VAADD ;
         break; 
         case 0x27: 
-                funct6 = MVX_VMULH ;
+                funct6 = RISCV_MVX_VMULH ;
         break; 
         case 0x22: 
-                funct6 = MVX_VREMU ;
+                funct6 = RISCV_MVX_VREMU ;
         break; 
         case 0x0A: 
-                funct6 = MVX_VASUBU ;
+                funct6 = RISCV_MVX_VASUBU ;
         break; 
         case 0x24: 
-                funct6 = MVX_VMULHU ;
+                funct6 = RISCV_MVX_VMULHU ;
         break; 
         case 0x0E: 
-                funct6 = MVX_VSLIDE1UP ;
+                funct6 = RISCV_MVX_VSLIDE1UP ;
         break; 
         case 0x26: 
-                funct6 = MVX_VMULHSU ;
+                funct6 = RISCV_MVX_VMULHSU ;
         break; 
         case 0x21: 
-                funct6 = MVX_VDIV ;
+                funct6 = RISCV_MVX_VDIV ;
         break; 
         case 0x0F: 
-                funct6 = MVX_VSLIDE1DOWN ;
+                funct6 = RISCV_MVX_VSLIDE1DOWN ;
         break; 
         case 0x20: 
-                funct6 = MVX_VDIVU ;
+                funct6 = RISCV_MVX_VDIVU ;
         break; 
  
       }
@@ -5385,7 +5384,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = MVXTYPE ;
+          tree->ast_node_type = RISCV_MVXTYPE ;
           tree->ast_node.mvxtype.funct6 = funct6;
           tree->ast_node.mvxtype.vm = vm;
           tree->ast_node.mvxtype.vs2 = vs2;
@@ -5398,16 +5397,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x2D: 
-                funct6 = MVX_VMACC ;
+                funct6 = RISCV_MVX_VMACC ;
         break; 
         case 0x2F: 
-                funct6 = MVX_VNMSAC ;
+                funct6 = RISCV_MVX_VNMSAC ;
         break; 
         case 0x2B: 
-                funct6 = MVX_VNMSUB ;
+                funct6 = RISCV_MVX_VNMSUB ;
         break; 
         case 0x29: 
-                funct6 = MVX_VMADD ;
+                funct6 = RISCV_MVX_VMADD ;
         break; 
  
       }
@@ -5416,7 +5415,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = MVXMATYPE ;
+          tree->ast_node_type = RISCV_MVXMATYPE ;
           tree->ast_node.mvxmatype.funct6 = funct6;
           tree->ast_node.mvxmatype.vm = vm;
           tree->ast_node.mvxmatype.vs2 = vs2;
@@ -5429,25 +5428,25 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x3B: 
-                funct6 = WVX_VWMUL ;
+                funct6 = RISCV_WVX_VWMUL ;
         break; 
         case 0x33: 
-                funct6 = WVX_VSUB ;
+                funct6 = RISCV_WVX_VSUB ;
         break; 
         case 0x3A: 
-                funct6 = WVX_VWMULSU ;
+                funct6 = RISCV_WVX_VWMULSU ;
         break; 
         case 0x31: 
-                funct6 = WVX_VADD ;
+                funct6 = RISCV_WVX_VADD ;
         break; 
         case 0x30: 
-                funct6 = WVX_VADDU ;
+                funct6 = RISCV_WVX_VADDU ;
         break; 
         case 0x32: 
-                funct6 = WVX_VSUBU ;
+                funct6 = RISCV_WVX_VSUBU ;
         break; 
         case 0x38: 
-                funct6 = WVX_VWMULU ;
+                funct6 = RISCV_WVX_VWMULU ;
         break; 
  
       }
@@ -5456,7 +5455,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = WVXTYPE ;
+          tree->ast_node_type = RISCV_WVXTYPE ;
           tree->ast_node.wvxtype.funct6 = funct6;
           tree->ast_node.wvxtype.vm = vm;
           tree->ast_node.wvxtype.vs2 = vs2;
@@ -5469,16 +5468,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x36: 
-                funct6 = WX_VSUBU ;
+                funct6 = RISCV_WX_VSUBU ;
         break; 
         case 0x35: 
-                funct6 = WX_VADD ;
+                funct6 = RISCV_WX_VADD ;
         break; 
         case 0x37: 
-                funct6 = WX_VSUB ;
+                funct6 = RISCV_WX_VSUB ;
         break; 
         case 0x34: 
-                funct6 = WX_VADDU ;
+                funct6 = RISCV_WX_VADDU ;
         break; 
  
       }
@@ -5487,7 +5486,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = WXTYPE ;
+          tree->ast_node_type = RISCV_WXTYPE ;
           tree->ast_node.wxtype.funct6 = funct6;
           tree->ast_node.wxtype.vm = vm;
           tree->ast_node.wxtype.vs2 = vs2;
@@ -5500,16 +5499,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x3E: 
-                funct6 = WMVX_VWMACCUS ;
+                funct6 = RISCV_WMVX_VWMACCUS ;
         break; 
         case 0x3D: 
-                funct6 = WMVX_VWMACC ;
+                funct6 = RISCV_WMVX_VWMACC ;
         break; 
         case 0x3C: 
-                funct6 = WMVX_VWMACCU ;
+                funct6 = RISCV_WMVX_VWMACCU ;
         break; 
         case 0x3F: 
-                funct6 = WMVX_VWMACCSU ;
+                funct6 = RISCV_WMVX_VWMACCSU ;
         break; 
  
       }
@@ -5518,7 +5517,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = WMVXTYPE ;
+          tree->ast_node_type = RISCV_WMVXTYPE ;
           tree->ast_node.wmvxtype.funct6 = funct6;
           tree->ast_node.wmvxtype.vm = vm;
           tree->ast_node.wmvxtype.vs2 = vs2;
@@ -5530,7 +5529,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x57) && ((binary_stream & 0x0000000000007000)>>12 == 0x6) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x0000000002000000)>>25 == 0x1) && ((binary_stream & 0x00000000FC000000)>>26 == 0x10)) { 
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = VMVSX ;
+      tree->ast_node_type = RISCV_VMVSX ;
       tree->ast_node.vmvsx.rs1 = rs1;
       tree->ast_node.vmvsx.vd = vd;
       return ;
@@ -5539,31 +5538,31 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x08: 
-                funct6 = FVV_VSGNJ ;
+                funct6 = RISCV_FVV_VSGNJ ;
         break; 
         case 0x06: 
-                funct6 = FVV_VMAX ;
+                funct6 = RISCV_FVV_VMAX ;
         break; 
         case 0x04: 
-                funct6 = FVV_VMIN ;
+                funct6 = RISCV_FVV_VMIN ;
         break; 
         case 0x09: 
-                funct6 = FVV_VSGNJN ;
+                funct6 = RISCV_FVV_VSGNJN ;
         break; 
         case 0x00: 
-                funct6 = FVV_VADD ;
+                funct6 = RISCV_FVV_VADD ;
         break; 
         case 0x0A: 
-                funct6 = FVV_VSGNJX ;
+                funct6 = RISCV_FVV_VSGNJX ;
         break; 
         case 0x24: 
-                funct6 = FVV_VMUL ;
+                funct6 = RISCV_FVV_VMUL ;
         break; 
         case 0x02: 
-                funct6 = FVV_VSUB ;
+                funct6 = RISCV_FVV_VSUB ;
         break; 
         case 0x20: 
-                funct6 = FVV_VDIV ;
+                funct6 = RISCV_FVV_VDIV ;
         break; 
  
       }
@@ -5572,7 +5571,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FVVTYPE ;
+          tree->ast_node_type = RISCV_FVVTYPE ;
           tree->ast_node.fvvtype.funct6 = funct6;
           tree->ast_node.fvvtype.vm = vm;
           tree->ast_node.fvvtype.vs2 = vs2;
@@ -5585,28 +5584,28 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x28: 
-                funct6 = FVV_VMADD ;
+                funct6 = RISCV_FVV_VMADD ;
         break; 
         case 0x2C: 
-                funct6 = FVV_VMACC ;
+                funct6 = RISCV_FVV_VMACC ;
         break; 
         case 0x2D: 
-                funct6 = FVV_VNMACC ;
+                funct6 = RISCV_FVV_VNMACC ;
         break; 
         case 0x2E: 
-                funct6 = FVV_VMSAC ;
+                funct6 = RISCV_FVV_VMSAC ;
         break; 
         case 0x2F: 
-                funct6 = FVV_VNMSAC ;
+                funct6 = RISCV_FVV_VNMSAC ;
         break; 
         case 0x2A: 
-                funct6 = FVV_VMSUB ;
+                funct6 = RISCV_FVV_VMSUB ;
         break; 
         case 0x2B: 
-                funct6 = FVV_VNMSUB ;
+                funct6 = RISCV_FVV_VNMSUB ;
         break; 
         case 0x29: 
-                funct6 = FVV_VNMADD ;
+                funct6 = RISCV_FVV_VNMADD ;
         break; 
  
       }
@@ -5615,7 +5614,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FVVMATYPE ;
+          tree->ast_node_type = RISCV_FVVMATYPE ;
           tree->ast_node.fvvmatype.funct6 = funct6;
           tree->ast_node.fvvmatype.vm = vm;
           tree->ast_node.fvvmatype.vs2 = vs2;
@@ -5628,13 +5627,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x30: 
-                funct6 = FWVV_VADD ;
+                funct6 = RISCV_FWVV_VADD ;
         break; 
         case 0x32: 
-                funct6 = FWVV_VSUB ;
+                funct6 = RISCV_FWVV_VSUB ;
         break; 
         case 0x38: 
-                funct6 = FWVV_VMUL ;
+                funct6 = RISCV_FWVV_VMUL ;
         break; 
  
       }
@@ -5643,7 +5642,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FWVVTYPE ;
+          tree->ast_node_type = RISCV_FWVVTYPE ;
           tree->ast_node.fwvvtype.funct6 = funct6;
           tree->ast_node.fwvvtype.vm = vm;
           tree->ast_node.fwvvtype.vs2 = vs2;
@@ -5656,16 +5655,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x3E: 
-                funct6 = FWVV_VMSAC ;
+                funct6 = RISCV_FWVV_VMSAC ;
         break; 
         case 0x3D: 
-                funct6 = FWVV_VNMACC ;
+                funct6 = RISCV_FWVV_VNMACC ;
         break; 
         case 0x3C: 
-                funct6 = FWVV_VMACC ;
+                funct6 = RISCV_FWVV_VMACC ;
         break; 
         case 0x3F: 
-                funct6 = FWVV_VNMSAC ;
+                funct6 = RISCV_FWVV_VNMSAC ;
         break; 
  
       }
@@ -5674,7 +5673,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs2 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs1 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FWVVMATYPE ;
+          tree->ast_node_type = RISCV_FWVVMATYPE ;
           tree->ast_node.fwvvmatype.funct6 = funct6;
           tree->ast_node.fwvvmatype.vm = vm;
           tree->ast_node.fwvvmatype.vs1 = vs1;
@@ -5687,10 +5686,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x36: 
-                funct6 = FWV_VSUB ;
+                funct6 = RISCV_FWV_VSUB ;
         break; 
         case 0x34: 
-                funct6 = FWV_VADD ;
+                funct6 = RISCV_FWV_VADD ;
         break; 
  
       }
@@ -5699,7 +5698,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FWVTYPE ;
+          tree->ast_node_type = RISCV_FWVTYPE ;
           tree->ast_node.fwvtype.funct6 = funct6;
           tree->ast_node.fwvtype.vm = vm;
           tree->ast_node.fwvtype.vs2 = vs2;
@@ -5712,22 +5711,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vfunary0 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000000F8000)>>15) {
         case 0x01: 
-                vfunary0 = FV_CVT_X_F ;
+                vfunary0 = RISCV_FV_CVT_X_F ;
         break; 
         case 0x06: 
-                vfunary0 = FV_CVT_RTZ_XU_F ;
+                vfunary0 = RISCV_FV_CVT_RTZ_XU_F ;
         break; 
         case 0x07: 
-                vfunary0 = FV_CVT_RTZ_X_F ;
+                vfunary0 = RISCV_FV_CVT_RTZ_X_F ;
         break; 
         case 0x00: 
-                vfunary0 = FV_CVT_XU_F ;
+                vfunary0 = RISCV_FV_CVT_XU_F ;
         break; 
         case 0x03: 
-                vfunary0 = FV_CVT_F_X ;
+                vfunary0 = RISCV_FV_CVT_F_X ;
         break; 
         case 0x02: 
-                vfunary0 = FV_CVT_F_XU ;
+                vfunary0 = RISCV_FV_CVT_F_XU ;
         break; 
  
       }
@@ -5735,7 +5734,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VFUNARY0 ;
+          tree->ast_node_type = RISCV_VFUNARY0 ;
           tree->ast_node.vfunary0.vm = vm;
           tree->ast_node.vfunary0.vs2 = vs2;
           tree->ast_node.vfunary0.vfunary0 = vfunary0;
@@ -5747,25 +5746,25 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vfwunary0 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000000F8000)>>15) {
         case 0x08: 
-                vfwunary0 = FWV_CVT_XU_F ;
+                vfwunary0 = RISCV_FWV_CVT_XU_F ;
         break; 
         case 0x0B: 
-                vfwunary0 = FWV_CVT_F_X ;
+                vfwunary0 = RISCV_FWV_CVT_F_X ;
         break; 
         case 0x09: 
-                vfwunary0 = FWV_CVT_X_F ;
+                vfwunary0 = RISCV_FWV_CVT_X_F ;
         break; 
         case 0x0A: 
-                vfwunary0 = FWV_CVT_F_XU ;
+                vfwunary0 = RISCV_FWV_CVT_F_XU ;
         break; 
         case 0x0E: 
-                vfwunary0 = FWV_CVT_RTZ_XU_F ;
+                vfwunary0 = RISCV_FWV_CVT_RTZ_XU_F ;
         break; 
         case 0x0C: 
-                vfwunary0 = FWV_CVT_F_F ;
+                vfwunary0 = RISCV_FWV_CVT_F_F ;
         break; 
         case 0x0F: 
-                vfwunary0 = FWV_CVT_RTZ_X_F ;
+                vfwunary0 = RISCV_FWV_CVT_RTZ_X_F ;
         break; 
  
       }
@@ -5773,7 +5772,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VFWUNARY0 ;
+          tree->ast_node_type = RISCV_VFWUNARY0 ;
           tree->ast_node.vfwunary0.vm = vm;
           tree->ast_node.vfwunary0.vs2 = vs2;
           tree->ast_node.vfwunary0.vfwunary0 = vfwunary0;
@@ -5785,28 +5784,28 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vfnunary0 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000000F8000)>>15) {
         case 0x15: 
-                vfnunary0 = FNV_CVT_ROD_F_F ;
+                vfnunary0 = RISCV_FNV_CVT_ROD_F_F ;
         break; 
         case 0x13: 
-                vfnunary0 = FNV_CVT_F_X ;
+                vfnunary0 = RISCV_FNV_CVT_F_X ;
         break; 
         case 0x10: 
-                vfnunary0 = FNV_CVT_XU_F ;
+                vfnunary0 = RISCV_FNV_CVT_XU_F ;
         break; 
         case 0x12: 
-                vfnunary0 = FNV_CVT_F_XU ;
+                vfnunary0 = RISCV_FNV_CVT_F_XU ;
         break; 
         case 0x14: 
-                vfnunary0 = FNV_CVT_F_F ;
+                vfnunary0 = RISCV_FNV_CVT_F_F ;
         break; 
         case 0x16: 
-                vfnunary0 = FNV_CVT_RTZ_XU_F ;
+                vfnunary0 = RISCV_FNV_CVT_RTZ_XU_F ;
         break; 
         case 0x11: 
-                vfnunary0 = FNV_CVT_X_F ;
+                vfnunary0 = RISCV_FNV_CVT_X_F ;
         break; 
         case 0x17: 
-                vfnunary0 = FNV_CVT_RTZ_X_F ;
+                vfnunary0 = RISCV_FNV_CVT_RTZ_X_F ;
         break; 
  
       }
@@ -5814,7 +5813,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VFNUNARY0 ;
+          tree->ast_node_type = RISCV_VFNUNARY0 ;
           tree->ast_node.vfnunary0.vm = vm;
           tree->ast_node.vfnunary0.vs2 = vs2;
           tree->ast_node.vfnunary0.vfnunary0 = vfnunary0;
@@ -5826,16 +5825,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vfunary1 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000000F8000)>>15) {
         case 0x04: 
-                vfunary1 = FVV_VRSQRT7 ;
+                vfunary1 = RISCV_FVV_VRSQRT7 ;
         break; 
         case 0x10: 
-                vfunary1 = FVV_VCLASS ;
+                vfunary1 = RISCV_FVV_VCLASS ;
         break; 
         case 0x00: 
-                vfunary1 = FVV_VSQRT ;
+                vfunary1 = RISCV_FVV_VSQRT ;
         break; 
         case 0x05: 
-                vfunary1 = FVV_VREC7 ;
+                vfunary1 = RISCV_FVV_VREC7 ;
         break; 
  
       }
@@ -5843,7 +5842,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VFUNARY1 ;
+          tree->ast_node_type = RISCV_VFUNARY1 ;
           tree->ast_node.vfunary1.vm = vm;
           tree->ast_node.vfunary1.vs2 = vs2;
           tree->ast_node.vfunary1.vfunary1 = vfunary1;
@@ -5854,7 +5853,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x57) && ((binary_stream & 0x0000000000007000)>>12 == 0x1) && ((binary_stream & 0x00000000000F8000)>>15 == 0x00) && ((binary_stream & 0x0000000002000000)>>25 == 0x1) && ((binary_stream & 0x00000000FC000000)>>26 == 0x10)) { 
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = VFMVFS ;
+      tree->ast_node_type = RISCV_VFMVFS ;
       tree->ast_node.vfmvfs.vs2 = vs2;
       tree->ast_node.vfmvfs.rd = rd;
       return ;
@@ -5863,43 +5862,43 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x08: 
-                funct6 = VF_VSGNJ ;
+                funct6 = RISCV_VF_VSGNJ ;
         break; 
         case 0x06: 
-                funct6 = VF_VMAX ;
+                funct6 = RISCV_VF_VMAX ;
         break; 
         case 0x04: 
-                funct6 = VF_VMIN ;
+                funct6 = RISCV_VF_VMIN ;
         break; 
         case 0x09: 
-                funct6 = VF_VSGNJN ;
+                funct6 = RISCV_VF_VSGNJN ;
         break; 
         case 0x27: 
-                funct6 = VF_VRSUB ;
+                funct6 = RISCV_VF_VRSUB ;
         break; 
         case 0x00: 
-                funct6 = VF_VADD ;
+                funct6 = RISCV_VF_VADD ;
         break; 
         case 0x0A: 
-                funct6 = VF_VSGNJX ;
+                funct6 = RISCV_VF_VSGNJX ;
         break; 
         case 0x24: 
-                funct6 = VF_VMUL ;
+                funct6 = RISCV_VF_VMUL ;
         break; 
         case 0x0E: 
-                funct6 = VF_VSLIDE1UP ;
+                funct6 = RISCV_VF_VSLIDE1UP ;
         break; 
         case 0x21: 
-                funct6 = VF_VRDIV ;
+                funct6 = RISCV_VF_VRDIV ;
         break; 
         case 0x02: 
-                funct6 = VF_VSUB ;
+                funct6 = RISCV_VF_VSUB ;
         break; 
         case 0x0F: 
-                funct6 = VF_VSLIDE1DOWN ;
+                funct6 = RISCV_VF_VSLIDE1DOWN ;
         break; 
         case 0x20: 
-                funct6 = VF_VDIV ;
+                funct6 = RISCV_VF_VDIV ;
         break; 
  
       }
@@ -5908,7 +5907,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FVFTYPE ;
+          tree->ast_node_type = RISCV_FVFTYPE ;
           tree->ast_node.fvftype.funct6 = funct6;
           tree->ast_node.fvftype.vm = vm;
           tree->ast_node.fvftype.vs2 = vs2;
@@ -5921,28 +5920,28 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x28: 
-                funct6 = VF_VMADD ;
+                funct6 = RISCV_VF_VMADD ;
         break; 
         case 0x2C: 
-                funct6 = VF_VMACC ;
+                funct6 = RISCV_VF_VMACC ;
         break; 
         case 0x2D: 
-                funct6 = VF_VNMACC ;
+                funct6 = RISCV_VF_VNMACC ;
         break; 
         case 0x2E: 
-                funct6 = VF_VMSAC ;
+                funct6 = RISCV_VF_VMSAC ;
         break; 
         case 0x2F: 
-                funct6 = VF_VNMSAC ;
+                funct6 = RISCV_VF_VNMSAC ;
         break; 
         case 0x2A: 
-                funct6 = VF_VMSUB ;
+                funct6 = RISCV_VF_VMSUB ;
         break; 
         case 0x2B: 
-                funct6 = VF_VNMSUB ;
+                funct6 = RISCV_VF_VNMSUB ;
         break; 
         case 0x29: 
-                funct6 = VF_VNMADD ;
+                funct6 = RISCV_VF_VNMADD ;
         break; 
  
       }
@@ -5951,7 +5950,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FVFMATYPE ;
+          tree->ast_node_type = RISCV_FVFMATYPE ;
           tree->ast_node.fvfmatype.funct6 = funct6;
           tree->ast_node.fvfmatype.vm = vm;
           tree->ast_node.fvfmatype.vs2 = vs2;
@@ -5964,13 +5963,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x30: 
-                funct6 = FWVF_VADD ;
+                funct6 = RISCV_FWVF_VADD ;
         break; 
         case 0x32: 
-                funct6 = FWVF_VSUB ;
+                funct6 = RISCV_FWVF_VSUB ;
         break; 
         case 0x38: 
-                funct6 = FWVF_VMUL ;
+                funct6 = RISCV_FWVF_VMUL ;
         break; 
  
       }
@@ -5979,7 +5978,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FWVFTYPE ;
+          tree->ast_node_type = RISCV_FWVFTYPE ;
           tree->ast_node.fwvftype.funct6 = funct6;
           tree->ast_node.fwvftype.vm = vm;
           tree->ast_node.fwvftype.vs2 = vs2;
@@ -5992,16 +5991,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x3E: 
-                funct6 = FWVF_VMSAC ;
+                funct6 = RISCV_FWVF_VMSAC ;
         break; 
         case 0x3D: 
-                funct6 = FWVF_VNMACC ;
+                funct6 = RISCV_FWVF_VNMACC ;
         break; 
         case 0x3C: 
-                funct6 = FWVF_VMACC ;
+                funct6 = RISCV_FWVF_VMACC ;
         break; 
         case 0x3F: 
-                funct6 = FWVF_VNMSAC ;
+                funct6 = RISCV_FWVF_VNMSAC ;
         break; 
  
       }
@@ -6010,7 +6009,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FWVFMATYPE ;
+          tree->ast_node_type = RISCV_FWVFMATYPE ;
           tree->ast_node.fwvfmatype.funct6 = funct6;
           tree->ast_node.fwvfmatype.vm = vm;
           tree->ast_node.fwvfmatype.rs1 = rs1;
@@ -6023,10 +6022,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x36: 
-                funct6 = FWF_VSUB ;
+                funct6 = RISCV_FWF_VSUB ;
         break; 
         case 0x34: 
-                funct6 = FWF_VADD ;
+                funct6 = RISCV_FWF_VADD ;
         break; 
  
       }
@@ -6035,7 +6034,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FWFTYPE ;
+          tree->ast_node_type = RISCV_FWFTYPE ;
           tree->ast_node.fwftype.funct6 = funct6;
           tree->ast_node.fwftype.vm = vm;
           tree->ast_node.fwftype.vs2 = vs2;
@@ -6048,7 +6047,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-      tree->ast_node_type = VFMERGE ;
+      tree->ast_node_type = RISCV_VFMERGE ;
       tree->ast_node.vfmerge.vs2 = vs2;
       tree->ast_node.vfmerge.rs1 = rs1;
       tree->ast_node.vfmerge.vd = vd;
@@ -6057,7 +6056,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x57) && ((binary_stream & 0x0000000000007000)>>12 == 0x5) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x0000000002000000)>>25 == 0x1) && ((binary_stream & 0x00000000FC000000)>>26 == 0x17)) { 
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = VFMV ;
+      tree->ast_node_type = RISCV_VFMV ;
       tree->ast_node.vfmv.rs1 = rs1;
       tree->ast_node.vfmv.vd = vd;
       return ;
@@ -6065,7 +6064,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x57) && ((binary_stream & 0x0000000000007000)>>12 == 0x5) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x0000000002000000)>>25 == 0x1) && ((binary_stream & 0x00000000FC000000)>>26 == 0x10)) { 
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-      tree->ast_node_type = VFMVSF ;
+      tree->ast_node_type = RISCV_VFMVSF ;
       tree->ast_node.vfmvsf.rs1 = rs1;
       tree->ast_node.vfmvsf.vd = vd;
       return ;
@@ -6074,16 +6073,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t width = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                width = VLE64 ;
+                width = RISCV_VLE64 ;
         break; 
         case 0x5: 
-                width = VLE16 ;
+                width = RISCV_VLE16 ;
         break; 
         case 0x6: 
-                width = VLE32 ;
+                width = RISCV_VLE32 ;
         break; 
         case 0x0: 
-                width = VLE8 ;
+                width = RISCV_VLE8 ;
         break; 
  
       }
@@ -6092,7 +6091,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
           uint64_t nf = (binary_stream & 0x00000000E0000000)>>29 ;
-          tree->ast_node_type = VLSEGTYPE ;
+          tree->ast_node_type = RISCV_VLSEGTYPE ;
           tree->ast_node.vlsegtype.nf = nf;
           tree->ast_node.vlsegtype.vm = vm;
           tree->ast_node.vlsegtype.rs1 = rs1;
@@ -6105,16 +6104,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t width = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                width = VLE64 ;
+                width = RISCV_VLE64 ;
         break; 
         case 0x5: 
-                width = VLE16 ;
+                width = RISCV_VLE16 ;
         break; 
         case 0x6: 
-                width = VLE32 ;
+                width = RISCV_VLE32 ;
         break; 
         case 0x0: 
-                width = VLE8 ;
+                width = RISCV_VLE8 ;
         break; 
  
       }
@@ -6123,7 +6122,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
           uint64_t nf = (binary_stream & 0x00000000E0000000)>>29 ;
-          tree->ast_node_type = VLSEGFFTYPE ;
+          tree->ast_node_type = RISCV_VLSEGFFTYPE ;
           tree->ast_node.vlsegfftype.nf = nf;
           tree->ast_node.vlsegfftype.vm = vm;
           tree->ast_node.vlsegfftype.rs1 = rs1;
@@ -6136,16 +6135,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t width = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                width = VLE64 ;
+                width = RISCV_VLE64 ;
         break; 
         case 0x5: 
-                width = VLE16 ;
+                width = RISCV_VLE16 ;
         break; 
         case 0x6: 
-                width = VLE32 ;
+                width = RISCV_VLE32 ;
         break; 
         case 0x0: 
-                width = VLE8 ;
+                width = RISCV_VLE8 ;
         break; 
  
       }
@@ -6154,7 +6153,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
           uint64_t nf = (binary_stream & 0x00000000E0000000)>>29 ;
-          tree->ast_node_type = VSSEGTYPE ;
+          tree->ast_node_type = RISCV_VSSEGTYPE ;
           tree->ast_node.vssegtype.nf = nf;
           tree->ast_node.vssegtype.vm = vm;
           tree->ast_node.vssegtype.rs1 = rs1;
@@ -6167,16 +6166,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t width = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                width = VLE64 ;
+                width = RISCV_VLE64 ;
         break; 
         case 0x5: 
-                width = VLE16 ;
+                width = RISCV_VLE16 ;
         break; 
         case 0x6: 
-                width = VLE32 ;
+                width = RISCV_VLE32 ;
         break; 
         case 0x0: 
-                width = VLE8 ;
+                width = RISCV_VLE8 ;
         break; 
  
       }
@@ -6186,7 +6185,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
           uint64_t nf = (binary_stream & 0x00000000E0000000)>>29 ;
-          tree->ast_node_type = VLSSEGTYPE ;
+          tree->ast_node_type = RISCV_VLSSEGTYPE ;
           tree->ast_node.vlssegtype.nf = nf;
           tree->ast_node.vlssegtype.vm = vm;
           tree->ast_node.vlssegtype.rs2 = rs2;
@@ -6200,16 +6199,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t width = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                width = VLE64 ;
+                width = RISCV_VLE64 ;
         break; 
         case 0x5: 
-                width = VLE16 ;
+                width = RISCV_VLE16 ;
         break; 
         case 0x6: 
-                width = VLE32 ;
+                width = RISCV_VLE32 ;
         break; 
         case 0x0: 
-                width = VLE8 ;
+                width = RISCV_VLE8 ;
         break; 
  
       }
@@ -6219,7 +6218,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
           uint64_t nf = (binary_stream & 0x00000000E0000000)>>29 ;
-          tree->ast_node_type = VSSSEGTYPE ;
+          tree->ast_node_type = RISCV_VSSSEGTYPE ;
           tree->ast_node.vsssegtype.nf = nf;
           tree->ast_node.vsssegtype.vm = vm;
           tree->ast_node.vsssegtype.rs2 = rs2;
@@ -6233,16 +6232,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t width = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                width = VLE64 ;
+                width = RISCV_VLE64 ;
         break; 
         case 0x5: 
-                width = VLE16 ;
+                width = RISCV_VLE16 ;
         break; 
         case 0x6: 
-                width = VLE32 ;
+                width = RISCV_VLE32 ;
         break; 
         case 0x0: 
-                width = VLE8 ;
+                width = RISCV_VLE8 ;
         break; 
  
       }
@@ -6252,7 +6251,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
           uint64_t nf = (binary_stream & 0x00000000E0000000)>>29 ;
-          tree->ast_node_type = VLUXSEGTYPE ;
+          tree->ast_node_type = RISCV_VLUXSEGTYPE ;
           tree->ast_node.vluxsegtype.nf = nf;
           tree->ast_node.vluxsegtype.vm = vm;
           tree->ast_node.vluxsegtype.vs2 = vs2;
@@ -6266,16 +6265,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t width = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                width = VLE64 ;
+                width = RISCV_VLE64 ;
         break; 
         case 0x5: 
-                width = VLE16 ;
+                width = RISCV_VLE16 ;
         break; 
         case 0x6: 
-                width = VLE32 ;
+                width = RISCV_VLE32 ;
         break; 
         case 0x0: 
-                width = VLE8 ;
+                width = RISCV_VLE8 ;
         break; 
  
       }
@@ -6285,7 +6284,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
           uint64_t nf = (binary_stream & 0x00000000E0000000)>>29 ;
-          tree->ast_node_type = VLOXSEGTYPE ;
+          tree->ast_node_type = RISCV_VLOXSEGTYPE ;
           tree->ast_node.vloxsegtype.nf = nf;
           tree->ast_node.vloxsegtype.vm = vm;
           tree->ast_node.vloxsegtype.vs2 = vs2;
@@ -6299,16 +6298,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t width = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                width = VLE64 ;
+                width = RISCV_VLE64 ;
         break; 
         case 0x5: 
-                width = VLE16 ;
+                width = RISCV_VLE16 ;
         break; 
         case 0x6: 
-                width = VLE32 ;
+                width = RISCV_VLE32 ;
         break; 
         case 0x0: 
-                width = VLE8 ;
+                width = RISCV_VLE8 ;
         break; 
  
       }
@@ -6318,7 +6317,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
           uint64_t nf = (binary_stream & 0x00000000E0000000)>>29 ;
-          tree->ast_node_type = VSUXSEGTYPE ;
+          tree->ast_node_type = RISCV_VSUXSEGTYPE ;
           tree->ast_node.vsuxsegtype.nf = nf;
           tree->ast_node.vsuxsegtype.vm = vm;
           tree->ast_node.vsuxsegtype.vs2 = vs2;
@@ -6332,16 +6331,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t width = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                width = VLE64 ;
+                width = RISCV_VLE64 ;
         break; 
         case 0x5: 
-                width = VLE16 ;
+                width = RISCV_VLE16 ;
         break; 
         case 0x6: 
-                width = VLE32 ;
+                width = RISCV_VLE32 ;
         break; 
         case 0x0: 
-                width = VLE8 ;
+                width = RISCV_VLE8 ;
         break; 
  
       }
@@ -6351,7 +6350,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
           uint64_t nf = (binary_stream & 0x00000000E0000000)>>29 ;
-          tree->ast_node_type = VSOXSEGTYPE ;
+          tree->ast_node_type = RISCV_VSOXSEGTYPE ;
           tree->ast_node.vsoxsegtype.nf = nf;
           tree->ast_node.vsoxsegtype.vm = vm;
           tree->ast_node.vsoxsegtype.vs2 = vs2;
@@ -6365,16 +6364,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t width = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x0000000000007000)>>12) {
         case 0x7: 
-                width = VLE64 ;
+                width = RISCV_VLE64 ;
         break; 
         case 0x5: 
-                width = VLE16 ;
+                width = RISCV_VLE16 ;
         break; 
         case 0x6: 
-                width = VLE32 ;
+                width = RISCV_VLE32 ;
         break; 
         case 0x0: 
-                width = VLE8 ;
+                width = RISCV_VLE8 ;
         break; 
  
       }
@@ -6382,7 +6381,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t nf = (binary_stream & 0x00000000E0000000)>>29 ;
-          tree->ast_node_type = VLRETYPE ;
+          tree->ast_node_type = RISCV_VLRETYPE ;
           tree->ast_node.vlretype.nf = nf;
           tree->ast_node.vlretype.rs1 = rs1;
           tree->ast_node.vlretype.width = width;
@@ -6394,7 +6393,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vs3 = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
       uint64_t nf = (binary_stream & 0x00000000E0000000)>>29 ;
-      tree->ast_node_type = VSRETYPE ;
+      tree->ast_node_type = RISCV_VSRETYPE ;
       tree->ast_node.vsretype.nf = nf;
       tree->ast_node.vsretype.rs1 = rs1;
       tree->ast_node.vsretype.vs3 = vs3;
@@ -6404,17 +6403,17 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t op = 0xFFFFFFFFFFFFFFFF ;
       switch (binary_stream & 0x000000000000007F) {
         case 0x07: 
-                op = VLM ;
+                op = RISCV_VLM ;
         break; 
         case 0x27: 
-                op = VSM ;
+                op = RISCV_VSM ;
         break; 
  
       }
       if (op != 0xFFFFFFFFFFFFFFFF) { 
           uint64_t vd_or_vs3 = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
-          tree->ast_node_type = VMTYPE ;
+          tree->ast_node_type = RISCV_VMTYPE ;
           tree->ast_node.vmtype.rs1 = rs1;
           tree->ast_node.vmtype.vd_or_vs3 = vd_or_vs3;
           tree->ast_node.vmtype.op = op;
@@ -6425,28 +6424,28 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x19: 
-                funct6 = MM_VMAND ;
+                funct6 = RISCV_MM_VMAND ;
         break; 
         case 0x1B: 
-                funct6 = MM_VMXOR ;
+                funct6 = RISCV_MM_VMXOR ;
         break; 
         case 0x1C: 
-                funct6 = MM_VMORN ;
+                funct6 = RISCV_MM_VMORN ;
         break; 
         case 0x1A: 
-                funct6 = MM_VMOR ;
+                funct6 = RISCV_MM_VMOR ;
         break; 
         case 0x1E: 
-                funct6 = MM_VMNOR ;
+                funct6 = RISCV_MM_VMNOR ;
         break; 
         case 0x1D: 
-                funct6 = MM_VMNAND ;
+                funct6 = RISCV_MM_VMNAND ;
         break; 
         case 0x18: 
-                funct6 = MM_VMANDN ;
+                funct6 = RISCV_MM_VMANDN ;
         break; 
         case 0x1F: 
-                funct6 = MM_VMXNOR ;
+                funct6 = RISCV_MM_VMXNOR ;
         break; 
  
       }
@@ -6454,7 +6453,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = MMTYPE ;
+          tree->ast_node_type = RISCV_MMTYPE ;
           tree->ast_node.mmtype.funct6 = funct6;
           tree->ast_node.mmtype.vs2 = vs2;
           tree->ast_node.mmtype.vs1 = vs1;
@@ -6466,7 +6465,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-      tree->ast_node_type = VCPOP_M ;
+      tree->ast_node_type = RISCV_VCPOP_M ;
       tree->ast_node.vcpop_m.vm = vm;
       tree->ast_node.vcpop_m.vs2 = vs2;
       tree->ast_node.vcpop_m.rd = rd;
@@ -6476,7 +6475,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t rd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-      tree->ast_node_type = VFIRST_M ;
+      tree->ast_node_type = RISCV_VFIRST_M ;
       tree->ast_node.vfirst_m.vm = vm;
       tree->ast_node.vfirst_m.vs2 = vs2;
       tree->ast_node.vfirst_m.rd = rd;
@@ -6486,7 +6485,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-      tree->ast_node_type = VMSBF_M ;
+      tree->ast_node_type = RISCV_VMSBF_M ;
       tree->ast_node.vmsbf_m.vm = vm;
       tree->ast_node.vmsbf_m.vs2 = vs2;
       tree->ast_node.vmsbf_m.vd = vd;
@@ -6496,7 +6495,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-      tree->ast_node_type = VMSIF_M ;
+      tree->ast_node_type = RISCV_VMSIF_M ;
       tree->ast_node.vmsif_m.vm = vm;
       tree->ast_node.vmsif_m.vs2 = vs2;
       tree->ast_node.vmsif_m.vd = vd;
@@ -6506,7 +6505,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-      tree->ast_node_type = VMSOF_M ;
+      tree->ast_node_type = RISCV_VMSOF_M ;
       tree->ast_node.vmsof_m.vm = vm;
       tree->ast_node.vmsof_m.vs2 = vs2;
       tree->ast_node.vmsof_m.vd = vd;
@@ -6516,7 +6515,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
       uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-      tree->ast_node_type = VIOTA_M ;
+      tree->ast_node_type = RISCV_VIOTA_M ;
       tree->ast_node.viota_m.vm = vm;
       tree->ast_node.viota_m.vs2 = vs2;
       tree->ast_node.viota_m.vd = vd;
@@ -6525,7 +6524,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
   if ((binary_stream & 0x000000000000007F == 0x57) && ((binary_stream & 0x0000000000007000)>>12 == 0x2) && ((binary_stream & 0x00000000000F8000)>>15 == 0x11) && ((binary_stream & 0x0000000001F00000)>>20 == 0x00) && ((binary_stream & 0x00000000FC000000)>>26 == 0x14)) { 
       uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
       uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-      tree->ast_node_type = VID_V ;
+      tree->ast_node_type = RISCV_VID_V ;
       tree->ast_node.vid_v.vm = vm;
       tree->ast_node.vid_v.vd = vd;
       return ;
@@ -6534,10 +6533,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x13: 
-                funct6 = VVM_VMSBC ;
+                funct6 = RISCV_VVM_VMSBC ;
         break; 
         case 0x11: 
-                funct6 = VVM_VMADC ;
+                funct6 = RISCV_VVM_VMADC ;
         break; 
  
       }
@@ -6545,7 +6544,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = VVMTYPE ;
+          tree->ast_node_type = RISCV_VVMTYPE ;
           tree->ast_node.vvmtype.funct6 = funct6;
           tree->ast_node.vvmtype.vs2 = vs2;
           tree->ast_node.vvmtype.vs1 = vs1;
@@ -6557,10 +6556,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x13: 
-                funct6 = VVMC_VMSBC ;
+                funct6 = RISCV_VVMC_VMSBC ;
         break; 
         case 0x11: 
-                funct6 = VVMC_VMADC ;
+                funct6 = RISCV_VVMC_VMADC ;
         break; 
  
       }
@@ -6568,7 +6567,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = VVMCTYPE ;
+          tree->ast_node_type = RISCV_VVMCTYPE ;
           tree->ast_node.vvmctype.funct6 = funct6;
           tree->ast_node.vvmctype.vs2 = vs2;
           tree->ast_node.vvmctype.vs1 = vs1;
@@ -6580,10 +6579,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x10: 
-                funct6 = VVMS_VADC ;
+                funct6 = RISCV_VVMS_VADC ;
         break; 
         case 0x12: 
-                funct6 = VVMS_VSBC ;
+                funct6 = RISCV_VVMS_VSBC ;
         break; 
  
       }
@@ -6591,7 +6590,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = VVMSTYPE ;
+          tree->ast_node_type = RISCV_VVMSTYPE ;
           tree->ast_node.vvmstype.funct6 = funct6;
           tree->ast_node.vvmstype.vs2 = vs2;
           tree->ast_node.vvmstype.vs1 = vs1;
@@ -6603,22 +6602,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x19: 
-                funct6 = VVCMP_VMSNE ;
+                funct6 = RISCV_VVCMP_VMSNE ;
         break; 
         case 0x1B: 
-                funct6 = VVCMP_VMSLT ;
+                funct6 = RISCV_VVCMP_VMSLT ;
         break; 
         case 0x1C: 
-                funct6 = VVCMP_VMSLEU ;
+                funct6 = RISCV_VVCMP_VMSLEU ;
         break; 
         case 0x1A: 
-                funct6 = VVCMP_VMSLTU ;
+                funct6 = RISCV_VVCMP_VMSLTU ;
         break; 
         case 0x18: 
-                funct6 = VVCMP_VMSEQ ;
+                funct6 = RISCV_VVCMP_VMSEQ ;
         break; 
         case 0x1D: 
-                funct6 = VVCMP_VMSLE ;
+                funct6 = RISCV_VVCMP_VMSLE ;
         break; 
  
       }
@@ -6627,7 +6626,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VVCMPTYPE ;
+          tree->ast_node_type = RISCV_VVCMPTYPE ;
           tree->ast_node.vvcmptype.funct6 = funct6;
           tree->ast_node.vvcmptype.vm = vm;
           tree->ast_node.vvcmptype.vs2 = vs2;
@@ -6640,10 +6639,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x13: 
-                funct6 = VXM_VMSBC ;
+                funct6 = RISCV_VXM_VMSBC ;
         break; 
         case 0x11: 
-                funct6 = VXM_VMADC ;
+                funct6 = RISCV_VXM_VMADC ;
         break; 
  
       }
@@ -6651,7 +6650,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = VXMTYPE ;
+          tree->ast_node_type = RISCV_VXMTYPE ;
           tree->ast_node.vxmtype.funct6 = funct6;
           tree->ast_node.vxmtype.vs2 = vs2;
           tree->ast_node.vxmtype.rs1 = rs1;
@@ -6663,10 +6662,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x13: 
-                funct6 = VXMC_VMSBC ;
+                funct6 = RISCV_VXMC_VMSBC ;
         break; 
         case 0x11: 
-                funct6 = VXMC_VMADC ;
+                funct6 = RISCV_VXMC_VMADC ;
         break; 
  
       }
@@ -6674,7 +6673,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = VXMCTYPE ;
+          tree->ast_node_type = RISCV_VXMCTYPE ;
           tree->ast_node.vxmctype.funct6 = funct6;
           tree->ast_node.vxmctype.vs2 = vs2;
           tree->ast_node.vxmctype.rs1 = rs1;
@@ -6686,10 +6685,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x10: 
-                funct6 = VXMS_VADC ;
+                funct6 = RISCV_VXMS_VADC ;
         break; 
         case 0x12: 
-                funct6 = VXMS_VSBC ;
+                funct6 = RISCV_VXMS_VSBC ;
         break; 
  
       }
@@ -6697,7 +6696,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = VXMSTYPE ;
+          tree->ast_node_type = RISCV_VXMSTYPE ;
           tree->ast_node.vxmstype.funct6 = funct6;
           tree->ast_node.vxmstype.vs2 = vs2;
           tree->ast_node.vxmstype.rs1 = rs1;
@@ -6709,28 +6708,28 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x19: 
-                funct6 = VXCMP_VMSNE ;
+                funct6 = RISCV_VXCMP_VMSNE ;
         break; 
         case 0x1B: 
-                funct6 = VXCMP_VMSLT ;
+                funct6 = RISCV_VXCMP_VMSLT ;
         break; 
         case 0x1C: 
-                funct6 = VXCMP_VMSLEU ;
+                funct6 = RISCV_VXCMP_VMSLEU ;
         break; 
         case 0x1A: 
-                funct6 = VXCMP_VMSLTU ;
+                funct6 = RISCV_VXCMP_VMSLTU ;
         break; 
         case 0x1E: 
-                funct6 = VXCMP_VMSGTU ;
+                funct6 = RISCV_VXCMP_VMSGTU ;
         break; 
         case 0x18: 
-                funct6 = VXCMP_VMSEQ ;
+                funct6 = RISCV_VXCMP_VMSEQ ;
         break; 
         case 0x1D: 
-                funct6 = VXCMP_VMSLE ;
+                funct6 = RISCV_VXCMP_VMSLE ;
         break; 
         case 0x1F: 
-                funct6 = VXCMP_VMSGT ;
+                funct6 = RISCV_VXCMP_VMSGT ;
         break; 
  
       }
@@ -6739,7 +6738,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VXCMPTYPE ;
+          tree->ast_node_type = RISCV_VXCMPTYPE ;
           tree->ast_node.vxcmptype.funct6 = funct6;
           tree->ast_node.vxcmptype.vm = vm;
           tree->ast_node.vxcmptype.vs2 = vs2;
@@ -6752,7 +6751,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x11: 
-                funct6 = VIM_VMADC ;
+                funct6 = RISCV_VIM_VMADC ;
         break; 
  
       }
@@ -6760,7 +6759,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t simm = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = VIMTYPE ;
+          tree->ast_node_type = RISCV_VIMTYPE ;
           tree->ast_node.vimtype.funct6 = funct6;
           tree->ast_node.vimtype.vs2 = vs2;
           tree->ast_node.vimtype.simm = simm;
@@ -6772,7 +6771,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x11: 
-                funct6 = VIMC_VMADC ;
+                funct6 = RISCV_VIMC_VMADC ;
         break; 
  
       }
@@ -6780,7 +6779,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t simm = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = VIMCTYPE ;
+          tree->ast_node_type = RISCV_VIMCTYPE ;
           tree->ast_node.vimctype.funct6 = funct6;
           tree->ast_node.vimctype.vs2 = vs2;
           tree->ast_node.vimctype.simm = simm;
@@ -6792,7 +6791,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x10: 
-                funct6 = VIMS_VADC ;
+                funct6 = RISCV_VIMS_VADC ;
         break; 
  
       }
@@ -6800,7 +6799,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vd = (binary_stream & 0x0000000000000F80)>>7 ;
           uint64_t simm = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
-          tree->ast_node_type = VIMSTYPE ;
+          tree->ast_node_type = RISCV_VIMSTYPE ;
           tree->ast_node.vimstype.funct6 = funct6;
           tree->ast_node.vimstype.vs2 = vs2;
           tree->ast_node.vimstype.simm = simm;
@@ -6812,22 +6811,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x19: 
-                funct6 = VICMP_VMSNE ;
+                funct6 = RISCV_VICMP_VMSNE ;
         break; 
         case 0x1C: 
-                funct6 = VICMP_VMSLEU ;
+                funct6 = RISCV_VICMP_VMSLEU ;
         break; 
         case 0x1E: 
-                funct6 = VICMP_VMSGTU ;
+                funct6 = RISCV_VICMP_VMSGTU ;
         break; 
         case 0x18: 
-                funct6 = VICMP_VMSEQ ;
+                funct6 = RISCV_VICMP_VMSEQ ;
         break; 
         case 0x1D: 
-                funct6 = VICMP_VMSLE ;
+                funct6 = RISCV_VICMP_VMSLE ;
         break; 
         case 0x1F: 
-                funct6 = VICMP_VMSGT ;
+                funct6 = RISCV_VICMP_VMSGT ;
         break; 
  
       }
@@ -6836,7 +6835,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t simm = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = VICMPTYPE ;
+          tree->ast_node_type = RISCV_VICMPTYPE ;
           tree->ast_node.vicmptype.funct6 = funct6;
           tree->ast_node.vicmptype.vm = vm;
           tree->ast_node.vicmptype.vs2 = vs2;
@@ -6849,16 +6848,16 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x19: 
-                funct6 = FVVM_VMFLE ;
+                funct6 = RISCV_FVVM_VMFLE ;
         break; 
         case 0x1B: 
-                funct6 = FVVM_VMFLT ;
+                funct6 = RISCV_FVVM_VMFLT ;
         break; 
         case 0x1C: 
-                funct6 = FVVM_VMFNE ;
+                funct6 = RISCV_FVVM_VMFNE ;
         break; 
         case 0x18: 
-                funct6 = FVVM_VMFEQ ;
+                funct6 = RISCV_FVVM_VMFEQ ;
         break; 
  
       }
@@ -6867,7 +6866,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FVVMTYPE ;
+          tree->ast_node_type = RISCV_FVVMTYPE ;
           tree->ast_node.fvvmtype.funct6 = funct6;
           tree->ast_node.fvvmtype.vm = vm;
           tree->ast_node.fvvmtype.vs2 = vs2;
@@ -6880,22 +6879,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x19: 
-                funct6 = VFM_VMFLE ;
+                funct6 = RISCV_VFM_VMFLE ;
         break; 
         case 0x1B: 
-                funct6 = VFM_VMFLT ;
+                funct6 = RISCV_VFM_VMFLT ;
         break; 
         case 0x1C: 
-                funct6 = VFM_VMFNE ;
+                funct6 = RISCV_VFM_VMFNE ;
         break; 
         case 0x18: 
-                funct6 = VFM_VMFEQ ;
+                funct6 = RISCV_VFM_VMFEQ ;
         break; 
         case 0x1D: 
-                funct6 = VFM_VMFGT ;
+                funct6 = RISCV_VFM_VMFGT ;
         break; 
         case 0x1F: 
-                funct6 = VFM_VMFGE ;
+                funct6 = RISCV_VFM_VMFGE ;
         break; 
  
       }
@@ -6904,7 +6903,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t rs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = FVFMTYPE ;
+          tree->ast_node_type = RISCV_FVFMTYPE ;
           tree->ast_node.fvfmtype.funct6 = funct6;
           tree->ast_node.fvfmtype.vm = vm;
           tree->ast_node.fvfmtype.vs2 = vs2;
@@ -6917,10 +6916,10 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x31: 
-                funct6 = IVV_VWREDSUM ;
+                funct6 = RISCV_IVV_VWREDSUM ;
         break; 
         case 0x30: 
-                funct6 = IVV_VWREDSUMU ;
+                funct6 = RISCV_IVV_VWREDSUMU ;
         break; 
  
       }
@@ -6929,7 +6928,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = RIVVTYPE ;
+          tree->ast_node_type = RISCV_RIVVTYPE ;
           tree->ast_node.rivvtype.funct6 = funct6;
           tree->ast_node.rivvtype.vm = vm;
           tree->ast_node.rivvtype.vs2 = vs2;
@@ -6942,28 +6941,28 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x01: 
-                funct6 = MVV_VREDAND ;
+                funct6 = RISCV_MVV_VREDAND ;
         break; 
         case 0x06: 
-                funct6 = MVV_VREDMAXU ;
+                funct6 = RISCV_MVV_VREDMAXU ;
         break; 
         case 0x07: 
-                funct6 = MVV_VREDMAX ;
+                funct6 = RISCV_MVV_VREDMAX ;
         break; 
         case 0x04: 
-                funct6 = MVV_VREDMINU ;
+                funct6 = RISCV_MVV_VREDMINU ;
         break; 
         case 0x00: 
-                funct6 = MVV_VREDSUM ;
+                funct6 = RISCV_MVV_VREDSUM ;
         break; 
         case 0x03: 
-                funct6 = MVV_VREDXOR ;
+                funct6 = RISCV_MVV_VREDXOR ;
         break; 
         case 0x05: 
-                funct6 = MVV_VREDMIN ;
+                funct6 = RISCV_MVV_VREDMIN ;
         break; 
         case 0x02: 
-                funct6 = MVV_VREDOR ;
+                funct6 = RISCV_MVV_VREDOR ;
         break; 
  
       }
@@ -6972,7 +6971,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = RMVVTYPE ;
+          tree->ast_node_type = RISCV_RMVVTYPE ;
           tree->ast_node.rmvvtype.funct6 = funct6;
           tree->ast_node.rmvvtype.vm = vm;
           tree->ast_node.rmvvtype.vs2 = vs2;
@@ -6985,22 +6984,22 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t funct6 = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FC000000)>>26) {
         case 0x33: 
-                funct6 = FVV_VFWREDOSUM ;
+                funct6 = RISCV_FVV_VFWREDOSUM ;
         break; 
         case 0x01: 
-                funct6 = FVV_VFREDUSUM ;
+                funct6 = RISCV_FVV_VFREDUSUM ;
         break; 
         case 0x31: 
-                funct6 = FVV_VFWREDUSUM ;
+                funct6 = RISCV_FVV_VFWREDUSUM ;
         break; 
         case 0x07: 
-                funct6 = FVV_VFREDMAX ;
+                funct6 = RISCV_FVV_VFREDMAX ;
         break; 
         case 0x03: 
-                funct6 = FVV_VFREDOSUM ;
+                funct6 = RISCV_FVV_VFREDOSUM ;
         break; 
         case 0x05: 
-                funct6 = FVV_VFREDMIN ;
+                funct6 = RISCV_FVV_VFREDMIN ;
         break; 
  
       }
@@ -7009,7 +7008,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
           uint64_t vs1 = (binary_stream & 0x00000000000F8000)>>15 ;
           uint64_t vs2 = (binary_stream & 0x0000000001F00000)>>20 ;
           uint64_t vm = (binary_stream & 0x0000000002000000)>>25 ;
-          tree->ast_node_type = RFVVTYPE ;
+          tree->ast_node_type = RISCV_RFVVTYPE ;
           tree->ast_node.rfvvtype.funct6 = funct6;
           tree->ast_node.rfvvtype.vm = vm;
           tree->ast_node.rfvvtype.vs2 = vs2;
@@ -7022,13 +7021,13 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       uint64_t cbop = 0xFFFFFFFFFFFFFFFF ;
       switch ((binary_stream & 0x00000000FFF00000)>>20) {
         case 0x000: 
-                cbop = CBO_INVAL ;
+                cbop = RISCV_CBO_INVAL ;
         break; 
         case 0x002: 
-                cbop = CBO_FLUSH ;
+                cbop = RISCV_CBO_FLUSH ;
         break; 
         case 0x001: 
-                cbop = CBO_CLEAN ;
+                cbop = RISCV_CBO_CLEAN ;
         break; 
  
       }
@@ -7047,7 +7046,7 @@ void decode(struct ast *tree, uint64_t binary_stream) {
       return ;
   }
     uint64_t s = binary_stream & 0x00000000FFFFFFFF ;
-    tree->ast_node_type = ILLEGAL ;
+    tree->ast_node_type = RISCV_ILLEGAL ;
     tree->ast_node.illegal = s;
     return ;
 }

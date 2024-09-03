@@ -86,11 +86,15 @@ let int_to_clike_bitv_size size =
          ^ string_of_int size
           )
 
+let enum_case_to_str enum_case_id =
+  let str = id_to_str enum_case_id in
+  add_prefix_unless_exists identifier_prefix str
+
 let gen_clike_builtin_from_bitvec_size_expr name arg =
   Clike_builtin (name, int_to_clike_bitv_size (sail_bitv_size_to_int arg))
 
 let gen_clike_type_from_enum enum_name name case_names =
-  Clike_enum (enum_name, name, List.map id_to_str case_names)
+  Clike_enum (enum_name, name, List.map enum_case_to_str case_names)
 
 let gen_clike_type_from_app name constructor args =
   match constructor with
@@ -166,11 +170,15 @@ let gen_clike_typedef ast_typename typgen_info =
       )
       case_bodies
   in
+  let prefixed_case_names =
+    List.map (add_prefix_unless_exists identifier_prefix) case_names
+  in
   Clike_struct
     ( ast_typename,
       "",
       [
-        Clike_enum ("", ast_typename ^ generated_ast_enum_suffix, case_names);
+        Clike_enum
+          ("", ast_typename ^ generated_ast_enum_suffix, prefixed_case_names);
         Clike_union
           ("", ast_typename ^ generated_ast_payload_suffix, clike_bodies);
       ]

@@ -113,3 +113,15 @@ let bitv_literal_size bitv_lit =
   | L_hex lit_str -> String.length lit_str * 4
   | L_bin lit_str -> String.length lit_str
   | _ -> failwith "Expected a bitvec literal, found neither L_hex nor L_bin"
+
+let str_starts_with prefix str =
+  let plen = String.length prefix in
+  let slen = String.length str in
+  if plen > slen then false
+  else (
+    let str_prefix = String.sub str 0 plen in
+    str_prefix = prefix
+  )
+
+let add_prefix_unless_exists prefix str =
+  if str_starts_with prefix str then str else prefix ^ str
