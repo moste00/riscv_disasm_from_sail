@@ -41,14 +41,13 @@ jobs:
             - name: Running the generator
               run: |
                 cd generator && source ~/.bash_profile                
-                mv riscv_ast.gen.inc old_riscv_ast.gen.inc
-                mv riscv_decode.gen.inc old_riscv_decode.gen.inc
+                mv riscv_diasm old_output
 
                 dune exec --profile release -- riscv_disasm_from_sail -f sail.filepaths.txt
 
             - name: Checking the generated code compiles and is identical to the committed generated code
               run: |
-                cd generator
+                cd generator/riscv_disasm
                 touch test_main.c
                 echo '#include "riscv_decode.gen.inc"' >> test_main.c 
                 echo >> test_main.c
@@ -56,8 +55,8 @@ jobs:
 
                 gcc test_main.c || { echo "Failure: Trying to compile the tool-generated C code failed."; exit 1; }
 
-                if diff -q riscv_ast.gen.inc old_riscv_ast.gen.inc > /dev/null 2>&1; then
-                  if diff -q riscv_decode.gen.inc old_riscv_decode.gen.inc > /dev/null 2>&1; then
+                if diff -q riscv_ast.gen.inc ../old_output/riscv_ast.gen.inc > /dev/null 2>&1; then
+                  if diff -q riscv_decode.gen.inc ../old_output/riscv_decode.gen.inc > /dev/null 2>&1; then
                     echo "Success: The tool generates compiling C code that is identical to the files committed."
                   else
                     echo "Failure: The tool-generated decoding logic differ from that committed in the repo."

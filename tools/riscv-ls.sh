@@ -8,7 +8,6 @@ elif [ $# -eq 1 ]; then
   echo "Path to sail model given as $1"
 else
   echo "Unrecognized arguments. Usage: riscv-ls [path to riscv sail model repo]"
-  echo "If no path to sail model was given, it's automatically searched for using find"
   exit
 fi
 

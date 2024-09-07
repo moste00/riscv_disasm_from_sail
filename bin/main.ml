@@ -5,8 +5,15 @@ open Riscv_disasm_from_sail
 open Constants
 open Printexc
 
+let mkdir_if_none_exists dirname = 
+  try Sys.mkdir dirname 0o777
+  with Sys_error _ -> ()
+
 let write_c_file ?(additional_includes = []) name code =
-  let oc = open_out name in
+  mkdir_if_none_exists "riscv_disasm";
+
+  print_endline "\n ------------------------------- REACHED -----------------------------------\n";
+  let oc = open_out ("riscv_disasm/" ^ name) in
   let mk_include_lines incs =
     String.concat "\n" (List.map (fun i -> "#include " ^ i ^ "\n") incs)
   in
