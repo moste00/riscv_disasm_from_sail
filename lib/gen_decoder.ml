@@ -40,7 +40,7 @@ type decoder_gen_iteration_state = {
   type_ctx : sail_types_context;
   mapping_ctx : sail_mappings_context;
   (* The length of the bitstream input to the decoder
-     option because it initializes to None, then is inferred from the type of the decode mapping *)
+     Of type option because it initializes to None, then is inferred from the type of the decode mapping *)
   mutable instr_length : int option;
   (* The final output of the decoder generation process, gradually built up mutably during iteration of the ast*)
   mutable decode_rules : decoder;

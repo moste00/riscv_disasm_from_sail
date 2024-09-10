@@ -41,7 +41,7 @@ jobs:
             - name: Running the generator
               run: |
                 cd generator && source ~/.bash_profile                
-                mv riscv_diasm old_output
+                mv riscv_disasm old_output
 
                 dune exec --profile release -- riscv_disasm_from_sail -f sail.filepaths.txt
 
