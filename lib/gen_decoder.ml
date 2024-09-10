@@ -2,6 +2,7 @@ open Sail_ast_foreach
 open Sail_ast_processor
 open Sail_ast_utils
 open Constants
+open Common_types
 open Decoder
 open Decode_procedure
 open Hashset

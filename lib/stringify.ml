@@ -1,4 +1,5 @@
 open Clike_typedef
+open Common_types
 open Decoder
 open Decode_procedure
 open Constants

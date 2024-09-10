@@ -72,16 +72,10 @@
         Each decoder is effectively a little program in a domain-specific declarative language.
         The language is a rule-based one where each program is simply a table of rules describing
         under what condition a certain action should be taken. *)
+open Common_types
 
 type bv2enum_table = (string, string) Hashtbl.t
 
-type value =
-  | Bv_const of string
-  | Bool_const of bool
-  | Binding of string
-  | Enum_lit of string
-
-type kv_pairs = (string * value) list
 type bv2struct_table = (string, kv_pairs) Hashtbl.t
 
 type len = int

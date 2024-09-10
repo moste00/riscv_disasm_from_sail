@@ -1,3 +1,4 @@
+open Common_types
 open Decoder
 
 type bv_val = string
