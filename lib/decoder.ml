@@ -74,10 +74,6 @@
         under what condition a certain action should be taken. *)
 open Common_types
 
-type bv2enum_table = (string, string) Hashtbl.t
-
-type bv2struct_table = (string, kv_pairs) Hashtbl.t
-
 type len = int
 
 type condition =

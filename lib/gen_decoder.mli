@@ -4,7 +4,8 @@ open Ast_defs
 
 open Decoder
 open Decode_procedure
+open Sail_analysis
 
-val gen_decoder : tannot ast -> decoder
+val gen_decoder : tannot ast -> sail_analysis_result -> decoder
 
 val gen_decode_proc : decoder -> decproc
