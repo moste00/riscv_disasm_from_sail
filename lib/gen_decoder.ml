@@ -1,6 +1,7 @@
 open Sail_ast_foreach
 open Sail_ast_processor
 open Sail_ast_utils
+open Utils
 open Constants
 open Common_types
 open Decoder
@@ -58,22 +59,6 @@ let bind_args_and_create_consequences state l =
       match pat with
       | MP_app (union_case_id, union_case_args) ->
           let case_name = id_to_str union_case_id in
-          let arg_types =
-            Hashtbl.find state.analysis.type_ctx.union_case_to_arg_types
-              case_name
-          in
-          let arg_sizes =
-            List.map
-              (fun arg ->
-                match arg with
-                | Named_type name -> (
-                    try Hashtbl.find state.analysis.type_ctx.bitv_synonyms name
-                    with Not_found -> -1
-                  )
-                | Bitvec size -> size
-              )
-              arg_types
-          in
           let bodies =
             match union_case_args with
             | [MP_aux (MP_lit (L_aux (L_unit, _)), _)] -> []
@@ -85,7 +70,9 @@ let bind_args_and_create_consequences state l =
                     | MP_lit lit -> lit_to_consequence_body lit
                     | MP_id id ->
                         let n = id_to_str id in
-                        let bitv_size = List.nth arg_sizes i in
+                        let bitv_size =
+                          get_case_arg_size state.analysis case_name i
+                        in
                         Hashtbl.add bindings n bitv_size;
                         idstr_to_consequence_body n
                     | MP_vector_concat slices ->
@@ -119,7 +106,8 @@ let create_conditions state r arg_bindings =
               match pat with
               | MP_id id ->
                   let idstr = id_to_str id in
-                  let size = Hashtbl.find arg_bindings idstr in
+                  let maybe_size = Hashtbl.find arg_bindings idstr in
+                  let size = get_some_or_failwith maybe_size "UNREACHABLE" in
                   Bind (size, idstr)
               | MP_typ (pat, typ) ->
                   let size =
@@ -128,15 +116,13 @@ let create_conditions state r arg_bindings =
                       when id_to_str id = "bitvector" || id_to_str id = "bits"
                       ->
                         sail_bitv_size_to_int (List.nth args 0)
-                    | Typ_aux (Typ_id id, _) -> (
-                        try
-                          Hashtbl.find state.analysis.type_ctx.bitv_synonyms
-                            (id_to_str id)
-                        with Not_found ->
-                          failwith
-                            "Type annotation is a named type not synonymous \
-                             with bitvec "
-                      )
+                    | Typ_aux (Typ_id id, _) ->
+                        let sz =
+                          get_size_of_bv_synonym state.analysis (id_to_str id)
+                        in
+                        get_some_or_failwith sz
+                          "Type annotation is a named type not synonymous with \
+                           bitvec "
                     | _ ->
                         failwith
                           ("Type annotation cant be non-bitvec @ "
@@ -163,22 +149,33 @@ let create_conditions state r arg_bindings =
                           "Unsupported mapping pattern, multiple arguments are \
                            not supported"
                   in
-                  try
-                    let bv_to_enum =
-                      Hashtbl.find
-                        state.analysis.mapping_ctx.enum_bitv_mappings_registery
-                        mapping_name
-                    in
-                    let size = Hashtbl.find arg_bindings arg_name in
-                    Map_bind (size, bv_to_enum, arg_name)
-                  with Not_found ->
-                    let struct_name, bv_to_struct =
-                      Hashtbl.find
-                        state.analysis.mapping_ctx
-                          .struct_bitv_mappings_registery mapping_name
-                    in
-                    let size = Hashtbl.find arg_bindings arg_name in
-                    Struct_map_bind (size, struct_name, bv_to_struct, arg_name)
+                  let bv_to_enum =
+                    get_bv2enum_mapping state.analysis mapping_name
+                  in
+                  match bv_to_enum with
+                  | Some bv2enum ->
+                      let maybe_size = Hashtbl.find arg_bindings arg_name in
+                      let size =
+                        get_some_or_failwith maybe_size "UNREACHABLE"
+                      in
+                      Map_bind (size, bv2enum, arg_name)
+                  | None -> (
+                      match
+                        get_bv2struct_mapping state.analysis mapping_name
+                      with
+                      | Some (struct_name, bv_to_struct) ->
+                          let maybe_size = Hashtbl.find arg_bindings arg_name in
+                          let size =
+                            get_some_or_failwith maybe_size "UNREACHABLE"
+                          in
+                          Struct_map_bind
+                            (size, struct_name, bv_to_struct, arg_name)
+                      | None ->
+                          failwith
+                            ("Mapping " ^ mapping_name
+                           ^ " is neither a bv<->enum nor a bv<->struct mapping"
+                            )
+                    )
                 )
               | _ -> failwith ""
             )

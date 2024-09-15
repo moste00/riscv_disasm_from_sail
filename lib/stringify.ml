@@ -5,6 +5,7 @@ open Decode_procedure
 open Constants
 open Gen_clike_typedef
 open Sail_ast_utils
+open Utils
 
 let mk_indentation lvl =
   if lvl = 0 then ""
@@ -84,7 +85,7 @@ let rec stringify_bv vars e =
       let mask =
         0 :: List.init 63 (fun x -> x + 1)
         |> List.map (fun i -> if i >= i1 && i < i2 then "1" else "0")
-        |> List.rev |> String.concat "" |> Sail_ast_utils.binary_str_to_hex_str
+        |> List.rev |> String.concat "" |> binary_str_to_hex_str
       in
       let masking_expr = binary_stream_c_parameter ^ " & 0x" ^ mask in
       if i1 <> 0 then "(" ^ masking_expr ^ ")" ^ ">>" ^ string_of_int i1

@@ -18,7 +18,7 @@ type sail_types_context = {
      e.g. MY_UNION_CASE(bits(32), (bits(16), (bits(8), bits(8))))
      is a valid union clause definition in Sail, but it's too
      complicated to record in this table *)
-  union_case_to_arg_types : (string, union_case_type list) Hashtbl.t;
+  union_cases_type_signature : (string, union_case_type list) Hashtbl.t;
   (* Records the names of all enum types *)
   enum_names : string set;
   (* Records the names of all struct types *)
@@ -69,13 +69,13 @@ let assoc_clause_with_args state _ union_id clause_id typ =
             )
             args_typ
         in
-        Hashtbl.add state.type_ctx.union_case_to_arg_types name args
+        Hashtbl.add state.type_ctx.union_cases_type_signature name args
     | Typ_id id ->
-        Hashtbl.add state.type_ctx.union_case_to_arg_types name
+        Hashtbl.add state.type_ctx.union_cases_type_signature name
           [Named_type (id_to_str id)]
     | Typ_app (id, args)
       when id_to_str id = "bits" || id_to_str id = "bitvector" ->
-        Hashtbl.add state.type_ctx.union_case_to_arg_types name
+        Hashtbl.add state.type_ctx.union_cases_type_signature name
           [Bitvec (sail_bitv_size_to_int (List.nth args 0))]
     | _ -> failwith ("Unsupported type expression after the union case " ^ name)
   )
@@ -258,7 +258,7 @@ let analyze ast =
     {
       type_ctx =
         {
-          union_case_to_arg_types = Hashtbl.create 50;
+          union_cases_type_signature = Hashtbl.create 50;
           enum_names = Hashtbl.create 100;
           struct_names = Hashtbl.create 100;
           bitv_synonyms = Hashtbl.create 50;
@@ -283,3 +283,27 @@ let analyze ast =
   in
   foreach_node ast analyzer_processor analysis_result;
   analysis_result
+
+let get_bv2enum_mapping ana map_name =
+  let bv2enum_mappings = ana.mapping_ctx.enum_bitv_mappings_registery in
+  try Some (Hashtbl.find bv2enum_mappings map_name) with Not_found -> None
+
+let get_bv2struct_mapping ana map_name =
+  let bv2struct_mappings = ana.mapping_ctx.struct_bitv_mappings_registery in
+  try Some (Hashtbl.find bv2struct_mappings map_name) with Not_found -> None
+
+let get_size_of_bv_synonym ana name =
+  try Some (Hashtbl.find ana.type_ctx.bitv_synonyms name)
+  with Not_found -> None
+
+let get_case_arg_size ana case_name arg_idx =
+  try
+    let typsig =
+      Hashtbl.find ana.type_ctx.union_cases_type_signature case_name
+    in
+    let case_typ = List.nth typsig arg_idx in
+    match case_typ with
+    | Named_type typ_name ->
+        Some (Hashtbl.find ana.type_ctx.bitv_synonyms typ_name)
+    | Bitvec size -> Some size
+  with Not_found -> None
