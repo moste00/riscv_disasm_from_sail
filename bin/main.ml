@@ -82,7 +82,7 @@ let ctypedefs, typdefwalker = Gen_clike_typedef.gen_def ast
 
 let ctypedefs_str = Stringify.stringify_typdef ctypedefs
 
-let analysis = Sail_analysis.analyze ast
+let analysis = Sail_analysis.analyze ast types
 
 let dec = Gen_decoder.gen_decoder ast analysis
 

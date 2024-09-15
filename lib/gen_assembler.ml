@@ -1,1 +1,1 @@
-let gen_asm _ = failwith "UNIMPLEMENTED"
+let gen_asm _ _ = failwith "UNIMPLEMENTED"

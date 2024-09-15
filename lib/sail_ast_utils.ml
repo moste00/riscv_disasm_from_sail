@@ -1,6 +1,7 @@
 open Libsail
 open Ast
 open Lexing
+open Ast_util
 
 open Utils
 
@@ -72,3 +73,6 @@ let bitv_literal_size bitv_lit =
   | L_hex lit_str -> String.length lit_str * 4
   | L_bin lit_str -> String.length lit_str
   | _ -> failwith "Expected a bitvec literal, found neither L_hex nor L_bin"
+
+let bindings_contains_id bindings i =
+  Option.is_some (Bindings.find_opt i bindings)

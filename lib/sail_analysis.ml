@@ -1,5 +1,4 @@
 open Common_types
-open Hashset
 open Sail_ast_utils
 open Sail_ast_foreach
 open Sail_ast_processor
@@ -7,6 +6,8 @@ open Constants
 
 open Libsail
 open Ast
+open Type_check
+open Ast_util
 
 type union_case_type = Named_type of string | Bitvec of int
 
@@ -19,10 +20,6 @@ type sail_types_context = {
      is a valid union clause definition in Sail, but it's too
      complicated to record in this table *)
   union_cases_type_signature : (string, union_case_type list) Hashtbl.t;
-  (* Records the names of all enum types *)
-  enum_names : string set;
-  (* Records the names of all struct types *)
-  struct_names : string set;
   (* Maps every type equivalent to a bitvector into its bitv size *)
   bitv_synonyms : (string, int) Hashtbl.t;
 }
@@ -35,9 +32,18 @@ type sail_mappings_context = {
   struct_bitv_mappings_registery : (string, string * bv2struct_table) Hashtbl.t;
 }
 
+type typecheck_env_info = {
+  e : Env.t;
+  (* All what follows is obtained from the sail typechecker's env, but
+     because the getter functions could be hiding expensive computation, we
+     obtain them once and store them here *)
+  enums : IdSet.t Bindings.t;
+}
+
 type sail_analysis_result = {
   type_ctx : sail_types_context;
   mapping_ctx : sail_mappings_context;
+  sail_env : typecheck_env_info;
 }
 
 let mk_case_arg_from_app id args =
@@ -79,12 +85,6 @@ let assoc_clause_with_args state _ union_id clause_id typ =
           [Bitvec (sail_bitv_size_to_int (List.nth args 0))]
     | _ -> failwith ("Unsupported type expression after the union case " ^ name)
   )
-
-let collect_enum_names state _ id _ _ =
-  set_add state.type_ctx.enum_names (id_to_str id)
-
-let collect_struct_names state _ id _ _ _ =
-  set_add state.type_ctx.struct_names (id_to_str id)
 
 let collect_bitvec_abbreviations state _ abbrev _ typ =
   let (A_aux (ty, _)) = typ in
@@ -209,32 +209,32 @@ let destructure_type_annotation type_annotation =
       Some (type1, type2)
   | _ -> None
 
-let is_enum_bitv_mapping enum_names mapping_type_annotation =
+let is_enum_bitv_mapping enums mapping_type_annotation =
   let types = destructure_type_annotation mapping_type_annotation in
   match types with
   | Some (Typ_app (id1, args), Typ_id id2)
-    when (id_to_str id2 = "bool" || set_contains enum_names (id_to_str id2))
+    when (id_to_str id2 = "bool" || bindings_contains_id enums id2)
          && id_to_str id1 = "bits" ->
       Some (id_to_str id2, sail_bitv_size_to_int (List.nth args 0))
   | Some (Typ_id id1, Typ_app (id2, args))
-    when (id_to_str id1 = "bool" || set_contains enum_names (id_to_str id1))
+    when (id_to_str id1 = "bool" || bindings_contains_id enums id1)
          && id_to_str id2 = "bits" ->
       Some (id_to_str id1, sail_bitv_size_to_int (List.nth args 0))
   | _ -> None
 
-let is_struct_bitv_mapping struct_names mapping_type_annotation =
+let is_struct_bitv_mapping env mapping_type_annotation =
   let types = destructure_type_annotation mapping_type_annotation in
   match types with
   | Some (Typ_app (id1, args), Typ_id id2)
-    when set_contains struct_names (id_to_str id2) && id_to_str id1 = "bits" ->
+    when Env.is_record id2 env && id_to_str id1 = "bits" ->
       Some (id_to_str id2, sail_bitv_size_to_int (List.nth args 0))
   | Some (Typ_id id1, Typ_app (id2, args))
-    when set_contains struct_names (id_to_str id1) && id_to_str id2 = "bits" ->
+    when Env.is_record id1 env && id_to_str id2 = "bits" ->
       Some (id_to_str id1, sail_bitv_size_to_int (List.nth args 0))
   | _ -> None
 
 let collect_enum_bitv_mappings state _ id typ_annot clauses =
-  match is_enum_bitv_mapping state.type_ctx.enum_names typ_annot with
+  match is_enum_bitv_mapping state.sail_env.enums typ_annot with
   | Some (enum_name, bitv_size) ->
       Hashtbl.add state.mapping_ctx.enum_bitv_mappings_registery (id_to_str id)
         (mk_bitv2enum clauses);
@@ -242,7 +242,7 @@ let collect_enum_bitv_mappings state _ id typ_annot clauses =
   | _ -> ()
 
 let collect_struct_bitv_mappings state _ id typ_annot clauses =
-  match is_struct_bitv_mapping state.type_ctx.struct_names typ_annot with
+  match is_struct_bitv_mapping state.sail_env.e typ_annot with
   | Some (struct_name, bitv_size) ->
       Hashtbl.add state.mapping_ctx.struct_bitv_mappings_registery (id_to_str id)
         (struct_name, mk_bitv2struct clauses);
@@ -253,14 +253,12 @@ let collect_mappings state __ id typ_annot clauses =
   collect_enum_bitv_mappings state __ id typ_annot clauses;
   collect_struct_bitv_mappings state __ id typ_annot clauses
 
-let analyze ast =
+let analyze ast env =
   let analysis_result =
     {
       type_ctx =
         {
           union_cases_type_signature = Hashtbl.create 50;
-          enum_names = Hashtbl.create 100;
-          struct_names = Hashtbl.create 100;
           bitv_synonyms = Hashtbl.create 50;
         };
       mapping_ctx =
@@ -268,6 +266,7 @@ let analyze ast =
           enum_bitv_mappings_registery = Hashtbl.create 50;
           struct_bitv_mappings_registery = Hashtbl.create 5;
         };
+      sail_env = { e = env; enums = Env.get_enums env };
     }
   in
 
@@ -276,8 +275,6 @@ let analyze ast =
       default_processor with
       process_union_clause = assoc_clause_with_args;
       process_abbrev = collect_bitvec_abbreviations;
-      process_enum = collect_enum_names;
-      process_record = collect_struct_names;
       process_mapping = collect_mappings;
     }
   in

@@ -6,7 +6,7 @@ open Common_types
 
 type sail_analysis_result
 
-val analyze : tannot ast -> sail_analysis_result
+val analyze : tannot ast -> Env.t -> sail_analysis_result
 
 val get_bv2enum_mapping : sail_analysis_result -> string -> bv2enum_table option
 
