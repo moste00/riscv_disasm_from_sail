@@ -1,6 +1,6 @@
 open Sail_ast_processor
 open Sail_ast_foreach
-open Sail_ast_utils
+open Sail_utils
 open Utils
 
 open Libsail

@@ -4,7 +4,7 @@ open Decoder
 open Decode_procedure
 open Constants
 open Gen_clike_typedef
-open Sail_ast_utils
+open Sail_utils
 open Utils
 
 let mk_indentation lvl =

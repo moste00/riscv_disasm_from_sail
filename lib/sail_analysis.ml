@@ -1,5 +1,5 @@
 open Common_types
-open Sail_ast_utils
+open Sail_utils
 open Sail_ast_foreach
 open Sail_ast_processor
 open Constants
@@ -95,50 +95,22 @@ let collect_bitvec_abbreviations state _ abbrev _ typ =
         Hashtbl.add state.type_ctx.bitv_synonyms (id_to_str abbrev) size
   | _ -> ()
 
-let add_bitv2enum_entry tbl enum_id bitv_lit =
-  let enum_name = id_to_str enum_id in
-  let const = bitv_literal_to_str bitv_lit in
-  Hashtbl.add tbl const enum_name
+let add_bitv2enum_entry tbl (bitv_str, pat) =
+  match pat with
+  | MP_id enum_id ->
+      let enum_name = id_to_str enum_id in
+      Hashtbl.add tbl bitv_str enum_name
+  | MP_lit (L_aux (lit, _)) -> (
+    let name = match lit with
+      | L_true -> "true"
+      | L_false -> "false"
+      | _ -> failwith "Expression too complex, unsupported"
+    in
+    Hashtbl.add tbl bitv_str name
+  )
+  | _ -> failwith "Unsupported pattern in enum <-> bitvec mapping"  
 
-let add_bitv2bool_entry tbl lit bitv_lit =
-  let name =
-    match lit with
-    | L_true -> "true"
-    | L_false -> "false"
-    | _ -> failwith "Expected literal to be a boolean literal"
-  in
-  Hashtbl.add tbl (bitv_literal_to_str bitv_lit) name
-
-let btv2enum_entry_from_mapping_clause bitv2enum_tbl cl =
-  let (MCL_aux (clause, _)) = cl in
-  match clause with
-  | MCL_bidir (l, r) -> (
-      let (MPat_aux (left, _)) = l in
-      let (MPat_aux (right, _)) = r in
-      match (left, right) with
-      | MPat_pat lpat, MPat_pat rpat -> (
-          let (MP_aux (p1, _)) = lpat in
-          let (MP_aux (p2, _)) = rpat in
-          match (p1, p2) with
-          | MP_id enum_id, MP_lit bitv_const ->
-              add_bitv2enum_entry bitv2enum_tbl enum_id bitv_const
-          | MP_lit bitv_const, MP_id enum_id ->
-              add_bitv2enum_entry bitv2enum_tbl enum_id bitv_const
-          | MP_lit (L_aux (bool_lit, _)), MP_lit bitv_const ->
-              add_bitv2bool_entry bitv2enum_tbl bool_lit bitv_const
-          | _ ->
-              failwith
-                "Expected an enum string to map to a bitvec literal in \
-                 enum<->bitvec mapping"
-        )
-      | _ ->
-          failwith
-            "Both sides of a bidiectional enum<->bitvec mapping must be \n\
-            \             simple patterns"
-    )
-  | _ -> failwith "Non-bidirectional enum<->bitvec mappings are not supported"
-
-let struct_member_to_key_value_pair (id, MP_aux (pat, _)) =
+let struct_member_to_kv_pair (id, MP_aux (pat, _)) =
   let error_msg =
     "Unsupported struct member: only bool constants, enum literals, and \
      bitvector constants are supported"
@@ -156,82 +128,35 @@ let struct_member_to_key_value_pair (id, MP_aux (pat, _)) =
   | MP_id enum_lit -> (key, Enum_lit (id_to_str enum_lit))
   | _ -> failwith error_msg
 
-let add_bitv2struct_entry bitv2struct_tbl struct_members bitv_constant =
-  let bitv_str = bitv_literal_to_str bitv_constant in
-  let key_values = List.map struct_member_to_key_value_pair struct_members in
-  Hashtbl.add bitv2struct_tbl bitv_str key_values
-
-let btv2struct_entry_from_mapping_clause bitv2struct_tbl cl =
-  let (MCL_aux (clause, _)) = cl in
-  match clause with
-  | MCL_bidir (l, r) -> (
-      let (MPat_aux (left, _)) = l in
-      let (MPat_aux (right, _)) = r in
-      match (left, right) with
-      | MPat_pat lpat, MPat_pat rpat -> (
-          let (MP_aux (p1, _)) = lpat in
-          let (MP_aux (p2, _)) = rpat in
-          match (p1, p2) with
-          | MP_struct members, MP_lit bitv_const ->
-              add_bitv2struct_entry bitv2struct_tbl members bitv_const
-          | MP_lit bitv_const, MP_struct members ->
-              add_bitv2struct_entry bitv2struct_tbl members bitv_const
-          | _ ->
-              failwith
-                "Expected a struct instance to map to a bitvec literal in \
-                 struct<->bitvec mapping"
-        )
-      | _ ->
-          failwith
-            "Both sides of a bidiectional struct<->bitvec mapping must be\n\
-            \             simple patterns"
-    )
-  | _ -> failwith "Non-bidirectional struct<->bitvec mappings are not supported"
+let add_bitv2struct_entry bitv2struct_tbl (bitv_str, pat) =
+  match pat with 
+  | MP_struct struct_members -> 
+      let key_values = List.map struct_member_to_kv_pair struct_members in
+      Hashtbl.add bitv2struct_tbl bitv_str key_values
+  | _ -> failwith "Only struct <-> bitvec mappings with struct literals are supported"
 
 let mk_bitv2enum mapping_clauses =
   let bitv2enum_tbl = Hashtbl.create (List.length mapping_clauses) in
-  List.iter (btv2enum_entry_from_mapping_clause bitv2enum_tbl) mapping_clauses;
+  let entries = destructure_bitv_mapping mapping_clauses in
+  List.iter (add_bitv2enum_entry bitv2enum_tbl) entries;
   bitv2enum_tbl
 
 let mk_bitv2struct mapping_clauses =
   let bitv2struct_tbl = Hashtbl.create (List.length mapping_clauses) in
-  List.iter
-    (btv2struct_entry_from_mapping_clause bitv2struct_tbl)
-    mapping_clauses;
+  let entries = destructure_bitv_mapping mapping_clauses in
+  List.iter (add_bitv2struct_entry bitv2struct_tbl) entries;
   bitv2struct_tbl
 
-let destructure_type_annotation type_annotation =
-  let (Typ_annot_opt_aux (tannot, _)) = type_annotation in
-  match tannot with
-  | Typ_annot_opt_some (_, Typ_aux (Typ_bidir (t1, t2), _)) ->
-      let (Typ_aux (type1, _)) = t1 in
-      let (Typ_aux (type2, _)) = t2 in
-      Some (type1, type2)
-  | _ -> None
-
 let is_enum_bitv_mapping enums mapping_type_annotation =
-  let types = destructure_type_annotation mapping_type_annotation in
-  match types with
-  | Some (Typ_app (id1, args), Typ_id id2)
-    when (id_to_str id2 = "bool" || bindings_contains_id enums id2)
-         && id_to_str id1 = "bits" ->
-      Some (id_to_str id2, sail_bitv_size_to_int (List.nth args 0))
-  | Some (Typ_id id1, Typ_app (id2, args))
-    when (id_to_str id1 = "bool" || bindings_contains_id enums id1)
-         && id_to_str id2 = "bits" ->
-      Some (id_to_str id1, sail_bitv_size_to_int (List.nth args 0))
-  | _ -> None
+  is_mapping_from_bitv_to_type_id mapping_type_annotation (fun other_type_id ->
+      id_to_str other_type_id = "bool"
+      || bindings_contains_id enums other_type_id
+  )
 
 let is_struct_bitv_mapping env mapping_type_annotation =
-  let types = destructure_type_annotation mapping_type_annotation in
-  match types with
-  | Some (Typ_app (id1, args), Typ_id id2)
-    when Env.is_record id2 env && id_to_str id1 = "bits" ->
-      Some (id_to_str id2, sail_bitv_size_to_int (List.nth args 0))
-  | Some (Typ_id id1, Typ_app (id2, args))
-    when Env.is_record id1 env && id_to_str id2 = "bits" ->
-      Some (id_to_str id1, sail_bitv_size_to_int (List.nth args 0))
-  | _ -> None
+  is_mapping_from_bitv_to_type_id mapping_type_annotation (fun other_type_id ->
+      Env.is_record other_type_id env
+  )
 
 let collect_enum_bitv_mappings state _ id typ_annot clauses =
   match is_enum_bitv_mapping state.sail_env.enums typ_annot with

@@ -76,3 +76,53 @@ let bitv_literal_size bitv_lit =
 
 let bindings_contains_id bindings i =
   Option.is_some (Bindings.find_opt i bindings)
+
+let destructure_type_annotation type_annotation =
+  let (Typ_annot_opt_aux (tannot, _)) = type_annotation in
+  match tannot with
+  | Typ_annot_opt_some (_, Typ_aux (Typ_bidir (t1, t2), _)) ->
+      let (Typ_aux (type1, _)) = t1 in
+      let (Typ_aux (type2, _)) = t2 in
+      Some (type1, type2)
+  | _ -> None
+
+let is_mapping_from_bitv_to_type_id mapping_type_annotation other_type_predicate
+    =
+  let types = destructure_type_annotation mapping_type_annotation in
+  match types with
+  | Some (Typ_app (id1, args), Typ_id id2)
+    when id_to_str id1 = "bits" && other_type_predicate id2 ->
+      Some (id_to_str id2, sail_bitv_size_to_int (List.nth args 0))
+  | Some (Typ_id id1, Typ_app (id2, args))
+    when id_to_str id2 = "bits" && other_type_predicate id1 ->
+      Some (id_to_str id1, sail_bitv_size_to_int (List.nth args 0))
+  | _ -> None
+
+let destructure_bitv_mapping mapping_clauses =
+  let destructure_clause cl =
+    let (MCL_aux (clause, _)) = cl in
+    match clause with
+    | MCL_bidir (l, r) -> (
+        let (MPat_aux (left, _)) = l in
+        let (MPat_aux (right, _)) = r in
+        match (left, right) with
+        | MPat_pat lpat, MPat_pat rpat -> (
+            let (MP_aux (p1, _)) = lpat in
+            let (MP_aux (p2, _)) = rpat in
+            match (p1, p2) with
+            | pat, MP_lit bv -> (bitv_literal_to_str bv, pat)
+            | MP_lit bv, pat -> (bitv_literal_to_str bv, pat)
+            | _ ->
+                failwith
+                  "bitvec mappings with bitvec expressions more complex than \
+                   literals are not supported"
+          )
+        | _ ->
+            failwith
+              "Both sides of a bidiectional T <-> bitvec mapping must be \
+               simple patterns"
+      )
+    | _ -> failwith "Non-bidirectional T <-> bitvec mappings are not supported"
+  in
+
+  List.map destructure_clause mapping_clauses
