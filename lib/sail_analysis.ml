@@ -9,7 +9,9 @@ open Ast
 open Type_check
 open Ast_util
 
-type union_case_type = Named_type of string | Bitvec of int
+type union_case_param_type = Named_type of string | Bitvec of int
+
+type bv_equiv_type = Synonym | Convertible
 
 type sail_types_context = {
   (* Associates each ast case name with the types of its arguments
@@ -19,9 +21,16 @@ type sail_types_context = {
      e.g. MY_UNION_CASE(bits(32), (bits(16), (bits(8), bits(8))))
      is a valid union clause definition in Sail, but it's too
      complicated to record in this table *)
-  union_cases_type_signature : (string, union_case_type list) Hashtbl.t;
+  union_cases_type_signatures : (string, union_case_param_type list) Hashtbl.t;
   (* Maps every type equivalent to a bitvector into its bitv size *)
-  bitv_synonyms : (string, int) Hashtbl.t;
+  bitv_synonyms : (string, bv_equiv_type * int) Hashtbl.t;
+}
+
+type to_string_mappings = {
+  bv2string_mappings : (string, bv2str_table) Hashtbl.t;
+  enum2string_mappings : (string, enum2str_table) Hashtbl.t;
+  bool2string_mappings : (string, bool2str_table) Hashtbl.t;
+  struct2string_mappings : (string, string * struct2str_table) Hashtbl.t;
 }
 
 type sail_mappings_context = {
@@ -30,6 +39,7 @@ type sail_mappings_context = {
   (* Records all tables mapping structs to bitvector, keyed by mapping name
      Also records the name of the struct type along with the table *)
   struct_bitv_mappings_registery : (string, string * bv2struct_table) Hashtbl.t;
+  to_string_mappings_registery : to_string_mappings;
 }
 
 type typecheck_env_info = {
@@ -75,13 +85,13 @@ let assoc_clause_with_args state _ union_id clause_id typ =
             )
             args_typ
         in
-        Hashtbl.add state.type_ctx.union_cases_type_signature name args
+        Hashtbl.add state.type_ctx.union_cases_type_signatures name args
     | Typ_id id ->
-        Hashtbl.add state.type_ctx.union_cases_type_signature name
+        Hashtbl.add state.type_ctx.union_cases_type_signatures name
           [Named_type (id_to_str id)]
     | Typ_app (id, args)
       when id_to_str id = "bits" || id_to_str id = "bitvector" ->
-        Hashtbl.add state.type_ctx.union_cases_type_signature name
+        Hashtbl.add state.type_ctx.union_cases_type_signatures name
           [Bitvec (sail_bitv_size_to_int (List.nth args 0))]
     | _ -> failwith ("Unsupported type expression after the union case " ^ name)
   )
@@ -92,7 +102,8 @@ let collect_bitvec_abbreviations state _ abbrev _ typ =
   | A_typ (Typ_aux (Typ_app (id, args), _)) when id_to_str id = "bits" ->
       let size = sail_bitv_size_to_int_noexn (List.nth args 0) in
       if size <> -1 then
-        Hashtbl.add state.type_ctx.bitv_synonyms (id_to_str abbrev) size
+        Hashtbl.add state.type_ctx.bitv_synonyms (id_to_str abbrev)
+          (Synonym, size)
   | _ -> ()
 
 let add_bitv2enum_entry tbl (bitv_str, pat) =
@@ -100,15 +111,15 @@ let add_bitv2enum_entry tbl (bitv_str, pat) =
   | MP_id enum_id ->
       let enum_name = id_to_str enum_id in
       Hashtbl.add tbl bitv_str enum_name
-  | MP_lit (L_aux (lit, _)) -> (
-    let name = match lit with
-      | L_true -> "true"
-      | L_false -> "false"
-      | _ -> failwith "Expression too complex, unsupported"
-    in
-    Hashtbl.add tbl bitv_str name
-  )
-  | _ -> failwith "Unsupported pattern in enum <-> bitvec mapping"  
+  | MP_lit (L_aux (lit, _)) ->
+      let name =
+        match lit with
+        | L_true -> "true"
+        | L_false -> "false"
+        | _ -> failwith "Expression too complex, unsupported"
+      in
+      Hashtbl.add tbl bitv_str name
+  | _ -> failwith "Unsupported pattern in enum <-> bitvec mapping"
 
 let struct_member_to_kv_pair (id, MP_aux (pat, _)) =
   let error_msg =
@@ -129,11 +140,13 @@ let struct_member_to_kv_pair (id, MP_aux (pat, _)) =
   | _ -> failwith error_msg
 
 let add_bitv2struct_entry bitv2struct_tbl (bitv_str, pat) =
-  match pat with 
-  | MP_struct struct_members -> 
+  match pat with
+  | MP_struct struct_members ->
       let key_values = List.map struct_member_to_kv_pair struct_members in
       Hashtbl.add bitv2struct_tbl bitv_str key_values
-  | _ -> failwith "Only struct <-> bitvec mappings with struct literals are supported"
+  | _ ->
+      failwith
+        "Only struct <-> bitvec mappings with struct literals are supported"
 
 let mk_bitv2enum mapping_clauses =
   let bitv2enum_tbl = Hashtbl.create (List.length mapping_clauses) in
@@ -163,7 +176,7 @@ let collect_enum_bitv_mappings state _ id typ_annot clauses =
   | Some (enum_name, bitv_size) ->
       Hashtbl.add state.mapping_ctx.enum_bitv_mappings_registery (id_to_str id)
         (mk_bitv2enum clauses);
-      Hashtbl.add state.type_ctx.bitv_synonyms enum_name bitv_size
+      Hashtbl.add state.type_ctx.bitv_synonyms enum_name (Convertible, bitv_size)
   | _ -> ()
 
 let collect_struct_bitv_mappings state _ id typ_annot clauses =
@@ -171,25 +184,129 @@ let collect_struct_bitv_mappings state _ id typ_annot clauses =
   | Some (struct_name, bitv_size) ->
       Hashtbl.add state.mapping_ctx.struct_bitv_mappings_registery (id_to_str id)
         (struct_name, mk_bitv2struct clauses);
-      Hashtbl.add state.type_ctx.bitv_synonyms struct_name bitv_size
+      Hashtbl.add state.type_ctx.bitv_synonyms struct_name
+        (Convertible, bitv_size)
   | _ -> ()
+
+let is_bv_str_mapping bitv_synonyms mapping_typ_annotation =
+  is_mapping_from_string_to_type_id mapping_typ_annotation (fun other_type_id ->
+      if not (Hashtbl.mem bitv_synonyms (id_to_str other_type_id)) then false
+      else (
+        match Hashtbl.find bitv_synonyms (id_to_str other_type_id) with
+        | Synonym, _ -> true
+        | _ -> false
+      )
+  )
+  |> Option.is_some
+
+let is_enum_str_mapping enums mapping_typ_annotation =
+  is_mapping_from_string_to_type_id mapping_typ_annotation (fun other_type_id ->
+      bindings_contains_id enums other_type_id
+  )
+  |> Option.is_some
+
+let is_bool_str_mapping mapping_typ_annotation =
+  is_mapping_from_string_to_type_id mapping_typ_annotation (fun other_type_id ->
+      id_to_str other_type_id = "bool"
+  )
+  |> Option.is_some
+
+let is_struct_str_mapping env mapping_typ_annotation =
+  is_mapping_from_string_to_type_id mapping_typ_annotation (fun other_type_id ->
+      Env.is_record other_type_id env
+  )
+
+let mk_bv2str clauses =
+  let add_bv2str_entry bv2str_table (s, bv) =
+    match bv with
+    | MP_lit bitv -> Hashtbl.add bv2str_table (bitv_literal_to_str bitv) s
+    | _ -> failwith "----"
+  in
+  let bv2str = Hashtbl.create (List.length clauses) in
+  let entries = destructure_string_mapping clauses in
+  List.iter (add_bv2str_entry bv2str) entries;
+  bv2str
+
+let mk_enum2str clauses =
+  let add_enum2str_entry enum2str_table (s, enm) =
+    match enm with
+    | MP_id enum_const -> Hashtbl.add enum2str_table (id_to_str enum_const) s
+    | _ -> failwith "------"
+  in
+  let enum2str = Hashtbl.create (List.length clauses) in
+  let entries = destructure_string_mapping clauses in
+  List.iter (add_enum2str_entry enum2str) entries;
+  enum2str
+
+let mk_bool2str clauses =
+  let entries = destructure_string_mapping clauses in
+  match entries with
+  | [(tstr, MP_lit (L_aux (L_true, _))); (fstr, MP_lit (L_aux (L_false, _)))] ->
+      (fstr, tstr)
+  | [(fstr, MP_lit (L_aux (L_false, _))); (tstr, MP_lit (L_aux (L_true, _)))] ->
+      (fstr, tstr)
+  | _ -> failwith "+++++++++ "
+
+let mk_struct2str clauses =
+  let add_struct2str_entry struct2str_table (s, struct_lit) =
+    match struct_lit with
+    | MP_struct struct_members ->
+        Hashtbl.add struct2str_table
+          (List.map struct_member_to_kv_pair struct_members)
+          s
+    | _ -> failwith "***********************"
+  in
+  let struct2str = Hashtbl.create (List.length clauses) in
+  let entries = destructure_string_mapping clauses in
+  List.iter (add_struct2str_entry struct2str) entries;
+  struct2str
+
+let collect_to_string_mappings state _ id typ_annot clauses =
+  if is_bv_str_mapping state.type_ctx.bitv_synonyms typ_annot then
+    Hashtbl.add
+      state.mapping_ctx.to_string_mappings_registery.bv2string_mappings
+      (id_to_str id) (mk_bv2str clauses)
+  else if is_enum_str_mapping state.sail_env.enums typ_annot then
+    Hashtbl.add
+      state.mapping_ctx.to_string_mappings_registery.enum2string_mappings
+      (id_to_str id) (mk_enum2str clauses)
+  else if is_bool_str_mapping typ_annot then
+    Hashtbl.add
+      state.mapping_ctx.to_string_mappings_registery.bool2string_mappings
+      (id_to_str id) (mk_bool2str clauses)
+  else (
+    let maybe_struct_name = is_struct_str_mapping state.sail_env.e typ_annot in
+    if Option.is_some maybe_struct_name then
+      Hashtbl.add
+        state.mapping_ctx.to_string_mappings_registery.struct2string_mappings
+        (id_to_str id)
+        (Option.get maybe_struct_name, mk_struct2str clauses)
+  )
 
 let collect_mappings state __ id typ_annot clauses =
   collect_enum_bitv_mappings state __ id typ_annot clauses;
-  collect_struct_bitv_mappings state __ id typ_annot clauses
+  collect_struct_bitv_mappings state __ id typ_annot clauses;
+  collect_to_string_mappings state __ id typ_annot clauses
 
 let analyze ast env =
   let analysis_result =
     {
       type_ctx =
         {
-          union_cases_type_signature = Hashtbl.create 50;
+          union_cases_type_signatures = Hashtbl.create 50;
           bitv_synonyms = Hashtbl.create 50;
         };
       mapping_ctx =
         {
           enum_bitv_mappings_registery = Hashtbl.create 50;
           struct_bitv_mappings_registery = Hashtbl.create 5;
+          to_string_mappings_registery =
+            {
+              bv2string_mappings = Hashtbl.create 50;
+              enum2string_mappings = Hashtbl.create 50;
+              bool2string_mappings = Hashtbl.create 50;
+              struct2string_mappings = Hashtbl.create 50;
+            };
         };
       sail_env = { e = env; enums = Env.get_enums env };
     }
@@ -215,17 +332,20 @@ let get_bv2struct_mapping ana map_name =
   try Some (Hashtbl.find bv2struct_mappings map_name) with Not_found -> None
 
 let get_size_of_bv_synonym ana name =
-  try Some (Hashtbl.find ana.type_ctx.bitv_synonyms name)
+  try
+    let _, sz = Hashtbl.find ana.type_ctx.bitv_synonyms name in
+    Some sz
   with Not_found -> None
 
 let get_case_arg_size ana case_name arg_idx =
   try
     let typsig =
-      Hashtbl.find ana.type_ctx.union_cases_type_signature case_name
+      Hashtbl.find ana.type_ctx.union_cases_type_signatures case_name
     in
     let case_typ = List.nth typsig arg_idx in
     match case_typ with
     | Named_type typ_name ->
-        Some (Hashtbl.find ana.type_ctx.bitv_synonyms typ_name)
+        let _, sz = Hashtbl.find ana.type_ctx.bitv_synonyms typ_name in
+        Some sz
     | Bitvec size -> Some size
   with Not_found -> None

@@ -57,6 +57,7 @@ let convert_bitv_size_to_int ?(throw_on_unsupported_size_exprs = true) size =
 
 let sail_bitv_size_to_int =
   convert_bitv_size_to_int ~throw_on_unsupported_size_exprs:true
+
 let sail_bitv_size_to_int_noexn =
   convert_bitv_size_to_int ~throw_on_unsupported_size_exprs:false
 
@@ -86,6 +87,18 @@ let destructure_type_annotation type_annotation =
       Some (type1, type2)
   | _ -> None
 
+let is_mapping_from_string_to_type_id mapping_type_annotation
+    other_type_predicate =
+  let types = destructure_type_annotation mapping_type_annotation in
+  match types with
+  | Some (Typ_id id1, Typ_id id2)
+    when id_to_str id1 = "string" && other_type_predicate id2 ->
+      Some (id_to_str id2)
+  | Some (Typ_id id1, Typ_id id2)
+    when id_to_str id2 = "string" && other_type_predicate id1 ->
+      Some (id_to_str id1)
+  | _ -> None
+
 let is_mapping_from_bitv_to_type_id mapping_type_annotation other_type_predicate
     =
   let types = destructure_type_annotation mapping_type_annotation in
@@ -98,7 +111,8 @@ let is_mapping_from_bitv_to_type_id mapping_type_annotation other_type_predicate
       Some (id_to_str id1, sail_bitv_size_to_int (List.nth args 0))
   | _ -> None
 
-let destructure_bitv_mapping mapping_clauses =
+let destructure_mapping mapping_clauses typ_name
+    (inner_destructurer : 'a mpat_aux -> 'a mpat_aux -> string * 'a mpat_aux) =
   let destructure_clause cl =
     let (MCL_aux (clause, _)) = cl in
     match clause with
@@ -106,23 +120,41 @@ let destructure_bitv_mapping mapping_clauses =
         let (MPat_aux (left, _)) = l in
         let (MPat_aux (right, _)) = r in
         match (left, right) with
-        | MPat_pat lpat, MPat_pat rpat -> (
+        | MPat_pat lpat, MPat_pat rpat ->
             let (MP_aux (p1, _)) = lpat in
             let (MP_aux (p2, _)) = rpat in
-            match (p1, p2) with
-            | pat, MP_lit bv -> (bitv_literal_to_str bv, pat)
-            | MP_lit bv, pat -> (bitv_literal_to_str bv, pat)
-            | _ ->
-                failwith
-                  "bitvec mappings with bitvec expressions more complex than \
-                   literals are not supported"
-          )
+            inner_destructurer p1 p2
         | _ ->
             failwith
-              "Both sides of a bidiectional T <-> bitvec mapping must be \
-               simple patterns"
+              ("Both sides of a bidiectional T <->" ^ typ_name
+             ^ " mapping must be simple patterns"
+              )
       )
-    | _ -> failwith "Non-bidirectional T <-> bitvec mappings are not supported"
+    | _ ->
+        failwith
+          ("Non-bidirectional T <->" ^ typ_name ^ "mappings are not supported")
   in
 
   List.map destructure_clause mapping_clauses
+
+let destructure_bitv_mapping mapping_clauses =
+  destructure_mapping mapping_clauses "bitvec" (fun p1 p2 ->
+      match (p1, p2) with
+      | pat, MP_lit bv -> (bitv_literal_to_str bv, pat)
+      | MP_lit bv, pat -> (bitv_literal_to_str bv, pat)
+      | _ ->
+          failwith
+            "bitvec mappings with bitvec expressions more complex than \
+             literals are not supported"
+  )
+
+let destructure_string_mapping mapping_clauses =
+  destructure_mapping mapping_clauses "string" (fun p1 p2 ->
+      match (p1, p2) with
+      | pat, MP_lit (L_aux (L_string s, _)) -> (s, pat)
+      | MP_lit (L_aux (L_string s, _)), pat -> (s, pat)
+      | _ ->
+          failwith
+            "string mappings with expressions more complex than literals are \
+             not supported"
+  )
