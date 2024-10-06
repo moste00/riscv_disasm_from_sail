@@ -1,4 +1,4 @@
-open Common_types
+open Sail_values
 open Sail_utils
 open Sail_ast_foreach
 open Sail_ast_processor
@@ -189,15 +189,25 @@ let collect_struct_bitv_mappings state _ id typ_annot clauses =
   | _ -> ()
 
 let is_bv_str_mapping bitv_synonyms mapping_typ_annotation =
-  is_mapping_from_string_to_type_id mapping_typ_annotation (fun other_type_id ->
-      if not (Hashtbl.mem bitv_synonyms (id_to_str other_type_id)) then false
-      else (
-        match Hashtbl.find bitv_synonyms (id_to_str other_type_id) with
-        | Synonym, _ -> true
-        | _ -> false
-      )
-  )
-  |> Option.is_some
+  let is_bv_synonym_str_mapping =
+    is_mapping_from_string_to_type_id mapping_typ_annotation
+      (fun other_type_id ->
+        if not (Hashtbl.mem bitv_synonyms (id_to_str other_type_id)) then false
+        else (
+          match Hashtbl.find bitv_synonyms (id_to_str other_type_id) with
+          | Synonym, _ -> true
+          | _ -> false
+        )
+    )
+    |> Option.is_some
+  in
+  let is_bv_str_mapping =
+    is_mapping_from_bitv_to_type_id mapping_typ_annotation (fun other_type_id ->
+        id_to_str other_type_id = "string"
+    )
+    |> Option.is_some
+  in
+  is_bv_synonym_str_mapping || is_bv_str_mapping
 
 let is_enum_str_mapping enums mapping_typ_annotation =
   is_mapping_from_string_to_type_id mapping_typ_annotation (fun other_type_id ->
@@ -262,10 +272,14 @@ let mk_struct2str clauses =
   struct2str
 
 let collect_to_string_mappings state _ id typ_annot clauses =
-  if is_bv_str_mapping state.type_ctx.bitv_synonyms typ_annot then
-    Hashtbl.add
-      state.mapping_ctx.to_string_mappings_registery.bv2string_mappings
-      (id_to_str id) (mk_bv2str clauses)
+  if is_bv_str_mapping state.type_ctx.bitv_synonyms typ_annot then (
+    try
+      Hashtbl.add
+        state.mapping_ctx.to_string_mappings_registery.bv2string_mappings
+        (id_to_str id) (mk_bv2str clauses)
+      (* Raised if the mapping has non-literal string exprs, ignore silently *)
+    with Failure _ -> ()
+  )
   else if is_enum_str_mapping state.sail_env.enums typ_annot then
     Hashtbl.add
       state.mapping_ctx.to_string_mappings_registery.enum2string_mappings
@@ -284,9 +298,18 @@ let collect_to_string_mappings state _ id typ_annot clauses =
   )
 
 let collect_mappings state __ id typ_annot clauses =
-  collect_enum_bitv_mappings state __ id typ_annot clauses;
-  collect_struct_bitv_mappings state __ id typ_annot clauses;
-  collect_to_string_mappings state __ id typ_annot clauses
+  let (Typ_annot_opt_aux (tannot, _)) = typ_annot in
+  match tannot with
+  | Typ_annot_opt_some (_, _) ->
+      collect_enum_bitv_mappings state __ id tannot clauses;
+      collect_struct_bitv_mappings state __ id tannot clauses;
+      collect_to_string_mappings state __ id tannot clauses
+  | Typ_annot_opt_none ->
+      let quant, typ = Env.get_val_spec_orig id state.sail_env.e in
+      let annot = Typ_annot_opt_some (quant, typ) in
+      collect_enum_bitv_mappings state __ id annot clauses;
+      collect_struct_bitv_mappings state __ id annot clauses;
+      collect_to_string_mappings state __ id annot clauses
 
 let analyze ast env =
   let analysis_result =
@@ -325,11 +348,11 @@ let analyze ast env =
 
 let get_bv2enum_mapping ana map_name =
   let bv2enum_mappings = ana.mapping_ctx.enum_bitv_mappings_registery in
-  try Some (Hashtbl.find bv2enum_mappings map_name) with Not_found -> None
+  Hashtbl.find_opt bv2enum_mappings map_name
 
 let get_bv2struct_mapping ana map_name =
   let bv2struct_mappings = ana.mapping_ctx.struct_bitv_mappings_registery in
-  try Some (Hashtbl.find bv2struct_mappings map_name) with Not_found -> None
+  Hashtbl.find_opt bv2struct_mappings map_name
 
 let get_size_of_bv_synonym ana name =
   try
@@ -349,3 +372,30 @@ let get_case_arg_size ana case_name arg_idx =
         Some sz
     | Bitvec size -> Some size
   with Not_found -> None
+
+let is_member_of_enum ana maybe_member =
+  Type_check.is_enum_member maybe_member ana.sail_env.e
+
+let get_bv2str_mapping ana map_name =
+  let bv2str_mappings =
+    ana.mapping_ctx.to_string_mappings_registery.bv2string_mappings
+  in
+  Hashtbl.find_opt bv2str_mappings map_name
+
+let get_enum2str_mapping ana map_name =
+  let enum2str_mappings =
+    ana.mapping_ctx.to_string_mappings_registery.enum2string_mappings
+  in
+  Hashtbl.find_opt enum2str_mappings map_name
+
+let get_bool2str_mapping ana map_name =
+  let bool2str_mappings =
+    ana.mapping_ctx.to_string_mappings_registery.bool2string_mappings
+  in
+  Hashtbl.find_opt bool2str_mappings map_name
+
+let get_struct2str_mapping ana map_name =
+  let struct2str_mappings =
+    ana.mapping_ctx.to_string_mappings_registery.struct2string_mappings
+  in
+  Option.map snd (Hashtbl.find_opt struct2str_mappings map_name)

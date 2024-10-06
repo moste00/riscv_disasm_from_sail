@@ -3,7 +3,7 @@ open Sail_ast_processor
 open Sail_utils
 open Utils
 open Constants
-open Common_types
+open Sail_values
 open Decoder
 open Decode_procedure
 open Sail_analysis

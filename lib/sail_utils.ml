@@ -79,8 +79,7 @@ let bindings_contains_id bindings i =
   Option.is_some (Bindings.find_opt i bindings)
 
 let destructure_type_annotation type_annotation =
-  let (Typ_annot_opt_aux (tannot, _)) = type_annotation in
-  match tannot with
+  match type_annotation with
   | Typ_annot_opt_some (_, Typ_aux (Typ_bidir (t1, t2), _)) ->
       let (Typ_aux (type1, _)) = t1 in
       let (Typ_aux (type2, _)) = t2 in
@@ -104,15 +103,19 @@ let is_mapping_from_bitv_to_type_id mapping_type_annotation other_type_predicate
   let types = destructure_type_annotation mapping_type_annotation in
   match types with
   | Some (Typ_app (id1, args), Typ_id id2)
-    when id_to_str id1 = "bits" && other_type_predicate id2 ->
+    when (id_to_str id1 = "bits" || id_to_str id1 = "bitvector")
+         && other_type_predicate id2 ->
       Some (id_to_str id2, sail_bitv_size_to_int (List.nth args 0))
   | Some (Typ_id id1, Typ_app (id2, args))
-    when id_to_str id2 = "bits" && other_type_predicate id1 ->
+    when (id_to_str id2 = "bits" || id_to_str id2 = "bitvector")
+         && other_type_predicate id1 ->
       Some (id_to_str id1, sail_bitv_size_to_int (List.nth args 0))
   | _ -> None
 
 let destructure_mapping mapping_clauses typ_name
-    (inner_destructurer : 'a mpat_aux -> 'a mpat_aux -> string * 'a mpat_aux) =
+    (inner_destructurer :
+      'a mpat_aux -> 'a mpat_aux -> l -> string * 'a mpat_aux
+      ) =
   let destructure_clause cl =
     let (MCL_aux (clause, _)) = cl in
     match clause with
@@ -121,9 +124,9 @@ let destructure_mapping mapping_clauses typ_name
         let (MPat_aux (right, _)) = r in
         match (left, right) with
         | MPat_pat lpat, MPat_pat rpat ->
-            let (MP_aux (p1, _)) = lpat in
+            let (MP_aux (p1, (loc, _))) = lpat in
             let (MP_aux (p2, _)) = rpat in
-            inner_destructurer p1 p2
+            inner_destructurer p1 p2 loc
         | _ ->
             failwith
               ("Both sides of a bidiectional T <->" ^ typ_name
@@ -138,23 +141,27 @@ let destructure_mapping mapping_clauses typ_name
   List.map destructure_clause mapping_clauses
 
 let destructure_bitv_mapping mapping_clauses =
-  destructure_mapping mapping_clauses "bitvec" (fun p1 p2 ->
+  destructure_mapping mapping_clauses "bitvec" (fun p1 p2 loc ->
       match (p1, p2) with
       | pat, MP_lit bv -> (bitv_literal_to_str bv, pat)
       | MP_lit bv, pat -> (bitv_literal_to_str bv, pat)
       | _ ->
           failwith
-            "bitvec mappings with bitvec expressions more complex than \
-             literals are not supported"
+            ("bitvec mappings with bitvec expressions more complex than \
+              literals are not supported @"
+            ^ stringify_sail_source_loc loc
+            )
   )
 
 let destructure_string_mapping mapping_clauses =
-  destructure_mapping mapping_clauses "string" (fun p1 p2 ->
+  destructure_mapping mapping_clauses "string" (fun p1 p2 loc ->
       match (p1, p2) with
       | pat, MP_lit (L_aux (L_string s, _)) -> (s, pat)
       | MP_lit (L_aux (L_string s, _)), pat -> (s, pat)
       | _ ->
           failwith
-            "string mappings with expressions more complex than literals are \
-             not supported"
+            ("string mappings with expressions more complex than literals are \
+              not supported @ "
+            ^ stringify_sail_source_loc loc
+            )
   )

@@ -223,20 +223,46 @@ let walk walker =
     if walker.curr_primitive_case_already_walked then None
     else (
       walker.curr_primitive_case_already_walked <- true;
-      Some
-        (ast_sail_def_name ^ generated_ast_payload_suffix ^ "."
-       ^ walker.curr_case
-        )
+      let path =
+        ast_sail_def_name ^ generated_ast_payload_suffix ^ "."
+        ^ walker.curr_case
+      in
+      Some path
     )
   else (
     match walker.curr_case_remaining_member with
     | [] -> None
     | next :: rest ->
         walker.curr_case_remaining_member <- rest;
-        Some
-          (ast_sail_def_name ^ generated_ast_payload_suffix ^ "."
-         ^ walker.curr_case ^ "." ^ next
-          )
+        let path =
+          ast_sail_def_name ^ generated_ast_payload_suffix ^ "."
+          ^ walker.curr_case ^ "." ^ next
+        in
+        Some path
+  )
+
+let get_member_path walker arg_idx =
+  if walker.curr_case_is_primitive then
+    if arg_idx != 0 then None
+    else (
+      let path =
+        ast_sail_def_name ^ generated_ast_payload_suffix ^ "."
+        ^ walker.curr_case
+      in
+      Some path
+    )
+  else if arg_idx >= List.length walker.curr_case_remaining_member then None
+  else (
+    let member =
+      List.nth
+        (Hashtbl.find walker.case_names_to_member_names walker.curr_case)
+        arg_idx
+    in
+    let path =
+      ast_sail_def_name ^ generated_ast_payload_suffix ^ "." ^ walker.curr_case
+      ^ "." ^ member
+    in
+    Some path
   )
 
 let gen_def ast =

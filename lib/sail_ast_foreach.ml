@@ -31,10 +31,7 @@ let foreach_mapdef node proc state =
       match clause with
       | MCL_bidir (pat1, pat2) ->
           proc.process_mapping_bidir_clause state clause id tannot pat1 pat2
-      | MCL_forwards (pat, exp) ->
-          proc.process_mapping_forward_clause state clause id tannot pat exp
-      | MCL_backwards (pat, exp) ->
-          proc.process_mapping_backwards_clause state clause id tannot pat exp
+      | _ -> ()
     )
     clauses
 

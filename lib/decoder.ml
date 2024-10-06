@@ -72,7 +72,7 @@
         Each decoder is effectively a little program in a domain-specific declarative language.
         The language is a rule-based one where each program is simply a table of rules describing
         under what condition a certain action should be taken. *)
-open Common_types
+open Sail_values
 
 type len = int
 

@@ -1,4 +1,4 @@
-open Common_types
+open Sail_values
 open Decoder
 
 type bv_val = string

@@ -55,3 +55,9 @@ let add_prefix_unless_exists prefix str =
 
 let get_some_or_failwith opt msg =
   match opt with Some thing -> thing | None -> failwith msg
+
+let assert_empty_or_length1_or_failwith listt msg =
+  if List.length listt > 1 then failwith msg
+
+let get_sole_element_or_none listt =
+  if List.length listt = 1 then Some (List.nth listt 0) else None

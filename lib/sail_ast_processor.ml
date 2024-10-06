@@ -18,10 +18,6 @@ type ('a, 'state) ast_node_processor = {
     'state -> 'a mapdef_aux -> id -> tannot_opt -> 'a mapcl list -> unit;
   process_mapping_bidir_clause :
     'state -> 'a mapcl_aux -> id -> tannot_opt -> 'a mpexp -> 'a mpexp -> unit;
-  process_mapping_forward_clause :
-    'state -> 'a mapcl_aux -> id -> tannot_opt -> 'a mpexp -> 'a exp -> unit;
-  process_mapping_backwards_clause :
-    'state -> 'a mapcl_aux -> id -> tannot_opt -> 'a mpexp -> 'a exp -> unit;
   process_val : 'state -> val_spec_aux -> id -> typquant -> typ -> unit;
 }
 
@@ -37,7 +33,5 @@ let default_processor =
     process_function_clause = (fun _ _ _ _ -> ());
     process_mapping = (fun _ _ _ _ _ -> ());
     process_mapping_bidir_clause = (fun _ _ _ _ _ _ -> ());
-    process_mapping_forward_clause = (fun _ _ _ _ _ _ -> ());
-    process_mapping_backwards_clause = (fun _ _ _ _ _ _ -> ());
     process_val = (fun _ _ _ _ _ -> ());
   }
