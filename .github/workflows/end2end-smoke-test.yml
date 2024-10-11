@@ -34,7 +34,7 @@ jobs:
                 cd generator && source ~/.bash_profile
                 export OPAMCONFIRMLEVEL=yes
                 opam update
-                
+
                 opam install sail=0.18
                 sudo apt-get install z3
                 opam install . --deps-only
@@ -60,6 +60,9 @@ jobs:
                 echo '#include "riscv_ast2str.gen.inc"' >> test_main.c
                 echo >> test_main.c
                 echo 'void main() {}' >> test_main.c
+                
+                mv ../old_output/riscv_helpers_ast2str.h riscv_helpers_ast2str.h
+                mv ../old_output/riscv_helpers_rvconf.h riscv_helpers_rvconf.h
 
                 gcc test_main.c || { echo "Failure: Trying to compile the tool-generated C code failed."; exit 1; }
                 

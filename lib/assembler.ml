@@ -12,10 +12,10 @@ type intrinsic_logic_arg =
 
 type tostr_logic =
   | Lit of string
-  | Bitv2Str of int * bv2str_table
-  | Enum2Str of int * enum2str_table
-  | Bool2Str of int * bool2str_table
-  | Struct2str of int * struct2str_table
+  | Bitv2Str of string * int * bv2str_table
+  | Enum2Str of string * int * enum2str_table
+  | Bool2Str of string * int * bool2str_table
+  | Struct2str of string * int * struct2str_table
   | Intrinsic_tostr_logic of string * intrinsic_logic_arg list
 
 type subcase_condition = (int * string) option

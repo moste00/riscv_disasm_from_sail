@@ -92,7 +92,7 @@ let proc_dec_str = Stringify.stringify_decode_procedure proc_dec typdefwalker
 
 let asm = Gen_assembler.gen_asm ast analysis
 
-let asm_str = Stringify.stringify_assembler asm typdefwalker
+let asm_str, tables_str = Stringify.stringify_assembler asm typdefwalker
 
 let () = write_c_file Constants.ast_type_filename ctypedefs_str
 let () =
@@ -102,4 +102,12 @@ let () =
 let () =
   write_c_file Constants.assembler_filename asm_str
     ~additional_includes:
-      ["\"" ^ Constants.ast_type_filename ^ "\""; "\"riscv_helpers_ast2str.h\""]
+      [
+        "\"" ^ Constants.ast_type_filename ^ "\"";
+        "\"" ^ Constants.ast2str_tables_filename ^ "\"";
+        "\"riscv_helpers_ast2str.h\"";
+      ]
+
+let () =
+  write_c_file Constants.ast2str_tables_filename tables_str
+    ~additional_includes:["\"" ^ Constants.ast_type_filename ^ "\""]

@@ -103,15 +103,15 @@ let get_case analysis pat =
       | _ -> failwith "1"
     )
 
-let create_bv2str tbl arg_names_to_indices args =
+let create_bv2str name tbl arg_names_to_indices args =
   match args with
   | [arg] ->
       let arg_name = id_to_str (Option.get (case_arg_to_id arg)) in
       let arg_idx = Hashtbl.find arg_names_to_indices arg_name in
-      Bitv2Str (arg_idx, tbl)
+      Bitv2Str (name, arg_idx, tbl)
   | _ -> failwith ""
 
-let create_enum2str analysis tbl arg_names_to_indices args =
+let create_enum2str analysis name tbl arg_names_to_indices args =
   match args with
   | [arg] ->
       let arg_id = Option.get (case_arg_to_id arg) in
@@ -122,11 +122,11 @@ let create_enum2str analysis tbl arg_names_to_indices args =
       else (
         (* emit the table lookup as-is *)
         let arg_idx = Hashtbl.find arg_names_to_indices arg_name in
-        Enum2Str (arg_idx, tbl)
+        Enum2Str (name, arg_idx, tbl)
       )
   | _ -> failwith ""
 
-let create_bool2str tbl arg_names_to_indices args =
+let create_bool2str name tbl arg_names_to_indices args =
   match args with
   | [arg] -> (
       match arg with
@@ -139,16 +139,16 @@ let create_bool2str tbl arg_names_to_indices args =
             Hashtbl.find arg_names_to_indices
               (id_to_str (Option.get (case_arg_to_id arg)))
           in
-          Bool2Str (arg_idx, tbl)
+          Bool2Str (name, arg_idx, tbl)
     )
   | _ -> failwith ""
 
-let create_struct2str tbl arg_names_to_indices args =
+let create_struct2str name tbl arg_names_to_indices args =
   match args with
   | [arg] ->
       let arg_name = id_to_str (Option.get (case_arg_to_id arg)) in
       let arg_idx = Hashtbl.find arg_names_to_indices arg_name in
-      Struct2str (arg_idx, tbl)
+      Struct2str (name, arg_idx, tbl)
   | _ -> failwith ""
 
 let create_to_str_from_pattern analysis arg_names_to_indices pat =
@@ -159,28 +159,28 @@ let create_to_str_from_pattern analysis arg_names_to_indices pat =
       let name = id_to_str id in
       let maybe_bv2str = get_bv2str_mapping analysis name in
       if Option.is_some maybe_bv2str then
-        create_bv2str (Option.get maybe_bv2str) arg_names_to_indices args
+        create_bv2str name (Option.get maybe_bv2str) arg_names_to_indices args
       else (
         let maybe_enum2str = get_enum2str_mapping analysis name in
         if Option.is_some maybe_enum2str then
-          create_enum2str analysis
+          create_enum2str analysis name
             (Option.get maybe_enum2str)
             arg_names_to_indices args
         else (
           let maybe_bool2str = get_bool2str_mapping analysis name in
           if Option.is_some maybe_bool2str then
-            create_bool2str
+            create_bool2str name
               (Option.get maybe_bool2str)
               arg_names_to_indices args
           else (
             let maybe_struct2str = get_struct2str_mapping analysis name in
             if Option.is_some maybe_struct2str then
-              create_struct2str
+              create_struct2str name
                 (Option.get maybe_struct2str)
                 arg_names_to_indices args
             else
               Intrinsic_tostr_logic
-                ( id_to_str id,
+                ( name,
                   case_args_to_intrinsic_logic_args analysis
                     arg_names_to_indices args
                 )
