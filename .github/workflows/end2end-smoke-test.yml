@@ -33,8 +33,7 @@ jobs:
               run: |
                 cd generator && source ~/.bash_profile
                 export OPAMCONFIRMLEVEL=yes
-                opam update
-                opam list -a
+                opam update && opam upgrade
                 opam install . --deps-only
                 opam install sail=0.18
                 sudo apt-get install z3
