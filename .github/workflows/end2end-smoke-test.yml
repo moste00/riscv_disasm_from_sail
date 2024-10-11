@@ -70,10 +70,12 @@ jobs:
 
                 if diff -q riscv_ast.gen.inc ../old_output/riscv_ast.gen.inc > /dev/null 2>&1; then
                   if diff -q riscv_decode.gen.inc ../old_output/riscv_decode.gen.inc > /dev/null 2>&1; then
-                    if diff -q riscv_ast2str.gen.inc ../old_output/riscv_ast2str.gen.inc > /dev/null 2>&1 then
+                    if diff -q riscv_ast2str.gen.inc ../old_output/riscv_ast2str.gen.inc > /dev/null 2>&1; then
                       echo "Success: The tool generates compiling C code that is identical to the files committed."
                     else
                       echo "Failure: The tool-generated ast stringification logic differ from the one committed in the repo"
+                      exit 1
+                    fi
                   else
                     echo "Failure: The tool-generated decoding logic differ from the one committed in the repo."
                     exit 1
