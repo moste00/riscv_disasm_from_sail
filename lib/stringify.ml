@@ -321,7 +321,39 @@ let stringfy_tostr_logic ({ walker; _ } as str_state) i tostr =
         ^ ") {" ^ true_assignments ^ "}" ^ "else {" ^ false_asssignments ^ "} ",
         ""
       )
-  | Struct2str (_, _, _) -> ("/* TODO */", "")
+  | Struct2str (_, arg_idx, tbl) ->
+      let struct_arg =
+        ast_c_parameter ^ "->" ^ Option.get (get_member_path walker arg_idx)
+      in
+      let cases = ref [] in
+      Hashtbl.iter
+        (fun kv_pairs string ->
+          let cond =
+            List.map
+              (fun (key, valu) ->
+                "(" ^ struct_arg ^ "." ^ key ^ " == "
+                ^ ( match valu with
+                  | Bv_const s -> s
+                  | Bool_const b -> if b then "1" else "0"
+                  | Binding s -> s
+                  | Enum_lit e -> add_prefix_unless_exists identifier_prefix e
+                  )
+                ^ ")"
+              )
+              kv_pairs
+          in
+          let cond = String.concat " && " cond in
+          let case =
+            "if (" ^ cond ^ ") { s" ^ string_of_int i ^ " = \"" ^ string
+            ^ "\"; s" ^ string_of_int i ^ "_len = "
+            ^ string_of_int (String.length string)
+            ^ ";} else "
+          in
+          cases := case :: !cases
+        )
+        tbl;
+
+      (String.concat "" !cases ^ ";", "")
   | Intrinsic_tostr_logic (name, args) ->
       let sep = if List.length args != 0 then "," else "" in
       let args = List.map (stringify_intrinsic_logic_arg walker) args in
@@ -338,7 +370,8 @@ let stringify_subcase_body ({ walker; _ } as str_state) body =
            let i = string_of_int i in
            match tostr with
            | Intrinsic_tostr_logic _ ->
-               "char s" ^ i ^ "_buffer[RISCV_TEMP_BUFFER_MAX_LEN] = {0}; char *s" ^ i
+               "char s" ^ i
+               ^ "_buffer[RISCV_TEMP_BUFFER_MAX_LEN] = {0}; char *s" ^ i
                ^ " = s" ^ i ^ "_buffer; size_t s" ^ i ^ "_len = 0;"
            | _ -> "char *s" ^ i ^ " = \"\" ; size_t s" ^ i ^ "_len = 0;"
          )
@@ -411,4 +444,82 @@ let stringify_assembler asm walker =
   let tables = String.concat "" (List.map snd body_and_tables) in
   ( prologue ^ concat_defs ^ procedure_start ^ procedure_body ^ procedure_end,
     tables
+  )
+
+let stringify_instr_types instr_types typedef_walker =
+  let enum_def = Buffer.create 10000 in
+  let mapping = Buffer.create 10000 in
+  let mapping_table = Buffer.create 10000 in
+
+  let put = Buffer.add_string enum_def in
+  let apnd = Buffer.add_string mapping in
+  let prnt = Buffer.add_string mapping_table in
+
+  put "enum ";
+  put (String.lowercase_ascii identifier_prefix);
+  put "insn { ";
+
+  prnt " = {";
+
+  apnd "uint16_t get_insn_type(";
+  apnd ("struct " ^ ast_sail_def_name ^ " *" ^ ast_c_parameter);
+  apnd ") { switch (";
+  apnd (ast_c_parameter ^ "->" ^ ast_sail_def_name ^ generated_ast_enum_suffix);
+  apnd ") {";
+
+  let max_num_instr_types = ref 0 in
+  Hashtbl.iter
+    (fun case_name (i, types) ->
+      set_walker_case typedef_walker case_name;
+      let case_name = add_prefix_unless_exists identifier_prefix case_name in
+      put "\n//--------------------- ";
+      put case_name;
+      put "--------------------- \n";
+
+      List.iter
+        (fun typename ->
+          put "RISCV_INSN_";
+          put (strip_prefix_if_exists identifier_prefix typename);
+          put ","
+        )
+        types;
+      let len = List.length types in
+      if len > !max_num_instr_types then max_num_instr_types := len;
+
+      prnt ("[" ^ case_name ^ "] = {");
+      prnt
+        (String.concat ","
+           (List.map (add_prefix_unless_exists identifier_prefix) types)
+        );
+      prnt "},";
+
+      if i != -1 then (
+        apnd "case ";
+        apnd case_name;
+        apnd ": return to_insn[";
+        apnd case_name;
+        apnd "][";
+        apnd (ast_c_parameter ^ "->");
+        apnd (Option.get (get_member_path typedef_walker i));
+        apnd "];"
+      )
+    )
+    instr_types;
+  (* Close the enum definition *)
+  put "};";
+  (* Close the function definition *)
+  apnd "default: return to_insn[";
+  apnd (ast_c_parameter ^ "->" ^ ast_sail_def_name ^ generated_ast_enum_suffix);
+  apnd "][0];}}";
+  (* Close the table definition *)
+  prnt "};";
+  let table_decl =
+    "static const uint16_t to_insn["
+    ^ string_of_int (Hashtbl.length instr_types)
+    ^ "]["
+    ^ string_of_int !max_num_instr_types
+    ^ "]"
+  in
+  ( Buffer.contents enum_def,
+    table_decl ^ Buffer.contents mapping_table ^ Buffer.contents mapping
   )

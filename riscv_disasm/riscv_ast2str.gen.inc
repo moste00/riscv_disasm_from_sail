@@ -1466,7 +1466,29 @@ void ast2str(struct ast *tree, char *buff, riscv_conf *conf) {
     char *s5 = s5_buffer;
     size_t s5_len = 0;
     char *s6 = "";
-    size_t s6_len = 0; /* TODO */
+    size_t s6_len = 0;
+    if ((tree->ast_node.mul.mul_op.high == 1) &&
+        (tree->ast_node.mul.mul_op.signed_rs1 == 1) &&
+        (tree->ast_node.mul.mul_op.signed_rs2 == 1)) {
+      s0 = "mulh";
+      s0_len = 4;
+    } else if ((tree->ast_node.mul.mul_op.high == 1) &&
+               (tree->ast_node.mul.mul_op.signed_rs1 == 0) &&
+               (tree->ast_node.mul.mul_op.signed_rs2 == 0)) {
+      s0 = "mulhu";
+      s0_len = 5;
+    } else if ((tree->ast_node.mul.mul_op.high == 1) &&
+               (tree->ast_node.mul.mul_op.signed_rs1 == 1) &&
+               (tree->ast_node.mul.mul_op.signed_rs2 == 0)) {
+      s0 = "mulhsu";
+      s0_len = 6;
+    } else if ((tree->ast_node.mul.mul_op.high == 0) &&
+               (tree->ast_node.mul.mul_op.signed_rs1 == 1) &&
+               (tree->ast_node.mul.mul_op.signed_rs2 == 1)) {
+      s0 = "mul";
+      s0_len = 3;
+    } else
+      ;
     spc(&s1, &s1_len, conf);
     reg_name(tree->ast_node.mul.rd, &s2, &s2_len);
     sep(&s3, &s3_len, conf);

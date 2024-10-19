@@ -46,23 +46,7 @@ let anon_arg_handler a =
 
 let () = Arg.parse arg_spec anon_arg_handler usage_msg
 
-let read_filepaths name =
-  let names = ref [] in
-  let file_chnl = open_in name in
-  try
-    while true do
-      names := input_line file_chnl :: !names
-    done;
-    [""] (*UNREACHABLE, just to guide type checker*)
-  with
-  | End_of_file ->
-      close_in file_chnl;
-      List.rev !names
-  | e ->
-      close_in_noerr file_chnl;
-      raise e
-
-let filepaths = read_filepaths !paths_filename
+let filepaths = Utils.read_file !paths_filename
 
 let initial_typeenv = Type_check.initial_env
 
@@ -94,6 +78,14 @@ let asm = Gen_assembler.gen_asm ast analysis
 
 let asm_str, tables_str = Stringify.stringify_assembler asm typdefwalker
 
+let gen_instr_types_conf =
+  Gen_instr_types.read_config "sail.instr_types_excluded_enums.txt"
+
+let instr_types = Gen_instr_types.gen_instr_types analysis gen_instr_types_conf
+
+let instr_types_str, instr_types_mapping_str =
+  Stringify.stringify_instr_types instr_types typdefwalker
+
 let () = write_c_file Constants.ast_type_filename ctypedefs_str
 let () =
   write_c_file Constants.decode_logic_filename proc_dec_str
@@ -111,3 +103,11 @@ let () =
 let () =
   write_c_file Constants.ast2str_tables_filename tables_str
     ~additional_includes:["\"" ^ Constants.ast_type_filename ^ "\""]
+
+let () =
+  write_c_file Constants.instr_types_filename instr_types_str
+    ~additional_includes:["\"" ^ Constants.ast_type_filename ^ "\""]
+
+let () =
+  write_c_file Constants.instr_types_mapping_filename instr_types_mapping_str
+    ~additional_includes:["\"" ^ Constants.instr_types_filename ^ "\""]

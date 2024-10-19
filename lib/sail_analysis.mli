@@ -20,6 +20,8 @@ val get_case_arg_size : sail_analysis_result -> string -> int -> int option
 
 val is_member_of_enum : sail_analysis_result -> id -> bool
 
+val get_all_members_of_enum : sail_analysis_result -> string -> string list
+
 val get_bv2str_mapping : sail_analysis_result -> string -> bv2str_table option
 
 val get_enum2str_mapping :
@@ -30,3 +32,6 @@ val get_bool2str_mapping :
 
 val get_struct2str_mapping :
   sail_analysis_result -> string -> struct2str_table option
+
+val get_all_cases_with_enum_members :
+  sail_analysis_result -> (string, (int * string) list) Hashtbl.t

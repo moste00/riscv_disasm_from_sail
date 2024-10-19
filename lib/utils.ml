@@ -53,6 +53,14 @@ let str_starts_with prefix str =
 let add_prefix_unless_exists prefix str =
   if str_starts_with prefix str then str else prefix ^ str
 
+let strip_prefix_if_exists prefix str =
+  if not (str_starts_with prefix str) then str
+  else (
+    let plen = String.length prefix in
+    let len = String.length str in
+    String.sub str plen (len - plen)
+  )
+
 let get_some_or_failwith opt msg =
   match opt with Some thing -> thing | None -> failwith msg
 
@@ -61,3 +69,19 @@ let assert_empty_or_length1_or_failwith listt msg =
 
 let get_sole_element_or_none listt =
   if List.length listt = 1 then Some (List.nth listt 0) else None
+
+let read_file name =
+  let names = ref [] in
+  let file_chnl = open_in name in
+  try
+    while true do
+      names := input_line file_chnl :: !names
+    done;
+    [""] (*UNREACHABLE, just to guide type checker*)
+  with
+  | End_of_file ->
+      close_in file_chnl;
+      List.rev !names
+  | e ->
+      close_in_noerr file_chnl;
+      raise e

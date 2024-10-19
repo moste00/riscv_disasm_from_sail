@@ -25,3 +25,7 @@ let ast_assembly_mapping = "assembly"
 let assembler_filename = "riscv_ast2str.gen.inc"
 
 let ast2str_tables_filename = "riscv_ast2str_tbls.gen.inc"
+
+let instr_types_filename = "riscv_insn.gen.inc"
+
+let instr_types_mapping_filename = "riscv_insn_mapping.gen.inc"

@@ -376,6 +376,12 @@ let get_case_arg_size ana case_name arg_idx =
 let is_member_of_enum ana maybe_member =
   Type_check.is_enum_member maybe_member ana.sail_env.e
 
+let get_all_members_of_enum ana enum_typename =
+  let member_ids = Bindings.find (mk_id enum_typename) ana.sail_env.enums in
+  let members = ref [] in
+  IdSet.iter (fun i -> members := id_to_str i :: !members) member_ids;
+  !members
+
 let get_bv2str_mapping ana map_name =
   let bv2str_mappings =
     ana.mapping_ctx.to_string_mappings_registery.bv2string_mappings
@@ -399,3 +405,27 @@ let get_struct2str_mapping ana map_name =
     ana.mapping_ctx.to_string_mappings_registery.struct2string_mappings
   in
   Option.map snd (Hashtbl.find_opt struct2str_mappings map_name)
+
+let get_all_cases_with_enum_members ana =
+  let cases_type_sigs = ana.type_ctx.union_cases_type_signatures in
+  let cases_with_enum_members =
+    Hashtbl.create (Hashtbl.length cases_type_sigs)
+  in
+  Hashtbl.iter
+    (fun case_name typesig ->
+      let enum_types =
+        List.mapi
+          (fun i typ ->
+            match typ with
+            | Named_type name when Bindings.mem (mk_id name) ana.sail_env.enums
+              ->
+                Some (i, name)
+            | _ -> None
+          )
+          typesig
+      in
+      let enum_types = List.filter_map (fun a -> a) enum_types in
+      Hashtbl.add cases_with_enum_members case_name enum_types
+    )
+    cases_type_sigs;
+  cases_with_enum_members
