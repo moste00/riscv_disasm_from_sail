@@ -102,7 +102,7 @@ jobs:
                   exit 1
                 fi
 
-                if ! diff -q riscv_insn.gen.inc ../old_output/riscv_insn.gen.gen.inc > /dev/null 2>&1; then
+                if ! diff -q riscv_insn.gen.inc ../old_output/riscv_insn.gen.inc > /dev/null 2>&1; then
                   echo "Failure: The tool-generated instruction ids differ from the one committed in the repo"
                   exit 1
                 fi
