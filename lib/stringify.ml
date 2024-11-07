@@ -99,7 +99,7 @@ let rec stringify_bv vars e =
 
 let rec stringify_bool vars b =
   match b with
-  | Is_eq (bv_expr, valu) -> stringify_bv vars bv_expr ^ " == " ^ valu
+  | Is_eq (bv_expr, valu) -> "(" ^ stringify_bv vars bv_expr ^ ") == " ^ valu
   | Is_enum_var_valid var -> var ^ " != 0xFFFF" ^ "FFFF" ^ "FFFF" ^ "FFFF"
   | Is_struct_var_valid var -> var ^ "_is_valid == 1"
   | And exprs ->
@@ -107,6 +107,11 @@ let rec stringify_bool vars b =
 
 let rec stringify_stmt str_state stmt =
   match stmt with
+  | Start_rule rule_name ->
+      "\n// ---------------------------" ^ rule_name
+      ^ "-------------------------------\n {"
+  | End_rule ->
+      "}\n//------------------------------------------------------------\n"
   | Init (var, expr) ->
       Hashtbl.add str_state.currently_defined_bv_sizes var
         (bv_len str_state expr);
@@ -184,10 +189,10 @@ let rec stringify_stmt str_state stmt =
   | Ret_ast -> "return " ^ ";"
   | Block stmts -> String.concat "" (List.map (stringify_stmt str_state) stmts)
 
-let stringify_decode_procedure (Proc stmt) walker =
+let stringify_decode_procedure ?(c_proc_name = "decode") (Proc stmt) walker =
   let procedure_start =
-    "void decode(struct " ^ ast_sail_def_name ^ " *" ^ ast_c_parameter
-    ^ ", uint64_t " ^ binary_stream_c_parameter ^ ") {"
+    "void " ^ c_proc_name ^ "(struct " ^ ast_sail_def_name ^ " *"
+    ^ ast_c_parameter ^ ", uint64_t " ^ binary_stream_c_parameter ^ ") {"
   in
   let procedure_end = "}" in
   let initial_state =

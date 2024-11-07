@@ -29,5 +29,8 @@ type stmt =
   | Set_ast_next_case_member of value_xor_expr
   | Ret_ast
   | Block of stmt list
+  | Start_rule of string
+  | End_rule
+(* delineate the beginning and end of an instruction group that implement one declarative rule*)
 
 type decproc = Proc of stmt

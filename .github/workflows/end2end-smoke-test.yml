@@ -57,7 +57,11 @@ jobs:
                 touch test_main.c
                 echo '#include "riscv_decode.gen.inc"' >> test_main.c 
                 echo >> test_main.c
+                echo '#include "riscv_decode_compressed.gen.inc"' >> test_main.c
+                echo >> test_main.c
                 echo '#include "riscv_ast2str.gen.inc"' >> test_main.c
+                echo >> test_main.c
+                echo '#include "riscv_insn_mapping.gen.inc"' >> test_main.c
                 echo >> test_main.c
                 echo 'void main() {}' >> test_main.c
                 
@@ -68,19 +72,40 @@ jobs:
                 
                 clang-format -i *
 
-                if diff -q riscv_ast.gen.inc ../old_output/riscv_ast.gen.inc > /dev/null 2>&1; then
-                  if diff -q riscv_decode.gen.inc ../old_output/riscv_decode.gen.inc > /dev/null 2>&1; then
-                    if diff -q riscv_ast2str.gen.inc ../old_output/riscv_ast2str.gen.inc > /dev/null 2>&1; then
-                      echo "Success: The tool generates compiling C code that is identical to the files committed."
-                    else
-                      echo "Failure: The tool-generated ast stringification logic differ from the one committed in the repo"
-                      exit 1
-                    fi
-                  else
-                    echo "Failure: The tool-generated decoding logic differ from the one committed in the repo."
-                    exit 1
-                  fi
-                else
+                if ! diff -q riscv_ast.gen.inc ../old_output/riscv_ast.gen.inc > /dev/null 2>&1; then
                   echo "Failure: The tool-generated ast definition differ from the one committed in the repo."
                   exit 1
                 fi
+                
+                if ! diff -q riscv_decode.gen.inc ../old_output/riscv_decode.gen.inc > /dev/null 2>&1; then
+                  echo "Failure: The tool-generated decoding logic differ from the one committed in the repo."
+                  exit 1
+                fi
+
+                if ! diff -q riscv_decode_compressed.gen.inc ../old_output/riscv_decode_compressed.gen.inc > /dev/null 2>&1; then
+                  echo "Failure: The tool-generated compressed (16-bit) decoding logic differ from the one committed in the repo."
+                  exit 1
+                fi
+
+                if ! diff -q riscv_ast2str_tbls.gen.inc ../old_output/riscv_ast2str_tbls.gen.inc > /dev/null 2>&1; then
+                  echo "Failure: The tool-generated stringification helpers differ from the one committed in the repo"
+                  exit 1
+                fi
+
+                if ! diff -q riscv_ast2str.gen.inc ../old_output/riscv_ast2str.gen.inc > /dev/null 2>&1; then
+                  echo "Failure: The tool-generated ast stringification logic differ from the one committed in the repo"
+                  exit 1
+                fi
+                
+                if ! diff -q riscv_insn_mapping.gen.inc ../old_output/riscv_insn_mapping.gen.inc > /dev/null 2>&1; then
+                  echo "Failure: The tool-generated ast-id->instruction-id mapping logic differ from the one committed in the repo"
+                  exit 1
+                fi
+
+                if ! diff -q riscv_insn.gen.inc ../old_output/riscv_insn.gen.gen.inc > /dev/null 2>&1; then
+                  echo "Failure: The tool-generated instruction ids differ from the one committed in the repo"
+                  exit 1
+                fi
+
+                echo "Success: The tool generates compiling C code that is identical to the files committed."
+                  

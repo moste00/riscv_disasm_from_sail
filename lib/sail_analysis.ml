@@ -429,3 +429,13 @@ let get_all_cases_with_enum_members ana =
     )
     cases_type_sigs;
   cases_with_enum_members
+
+let get_all_case_members_of_type_named ana case_name type_name =
+  let cases_type_sigs = ana.type_ctx.union_cases_type_signatures in
+  let case_type_sig = Hashtbl.find cases_type_sigs case_name in
+  let case_type_sig_indexed = List.mapi (fun i t -> (i, t)) case_type_sig in
+  List.filter_map
+    (fun (i, t) ->
+      match t with Named_type name when name = type_name -> Some i | _ -> None
+    )
+    case_type_sig_indexed

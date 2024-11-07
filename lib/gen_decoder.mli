@@ -6,6 +6,6 @@ open Decoder
 open Decode_procedure
 open Sail_analysis
 
-val gen_decoder : (tannot, env) ast -> sail_analysis_result -> decoder
+val gen_decoder : string -> (tannot, env) ast -> sail_analysis_result -> decoder
 
 val gen_decode_proc : decoder -> decproc

@@ -35,3 +35,6 @@ val get_struct2str_mapping :
 
 val get_all_cases_with_enum_members :
   sail_analysis_result -> (string, (int * string) list) Hashtbl.t
+
+val get_all_case_members_of_type_named :
+  sail_analysis_result -> string -> string -> int list

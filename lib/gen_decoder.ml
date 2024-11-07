@@ -205,19 +205,19 @@ let calculate_instr_len state _ id _ typ =
     state.instr_length <- Some (calculate_instr_length typ)
   )
 
-let gen_decode_rule state _ id tannot left right =
-  if id_to_str id = ast_decode_mapping then (
+let gen_decode_rule decode_mappig_name state _ id tannot left right =
+  if id_to_str id = decode_mappig_name then (
     let bindings, consequences = bind_args_and_create_consequences state left in
     let conditions = create_conditions state right bindings in
     state.decode_rules <- (conditions, consequences) :: state.decode_rules
   )
 
-let gen_decoder ast analysis =
+let gen_decoder decode_mappig_name ast analysis =
   let state = { analysis; decode_rules = []; instr_length = None } in
   let decoder_gen_processor =
     {
       default_processor with
-      process_mapping_bidir_clause = gen_decode_rule;
+      process_mapping_bidir_clause = gen_decode_rule decode_mappig_name;
       process_val = calculate_instr_len;
     }
   in
@@ -285,7 +285,7 @@ let gen_mapbind_stmt offsets (i, cond) body =
       Block [switch; If (Is_struct_var_valid var_name, body)]
   | _ -> body
 
-let gen_stmt_from_conditions conds conseq_stmts =
+let gen_stmt_from_conditions rule_name conds conseq_stmts =
   let offsets = calculate_offsets conds in
   let indices = List.mapi (fun i _ -> i) conds in
   let conds_indexed = List.combine indices conds in
@@ -298,8 +298,10 @@ let gen_stmt_from_conditions conds conseq_stmts =
       (Block (List.append bind_stmts conseq_stmts))
   in
   match assert_exprs with
-  | [] -> mapbind_stmt
-  | _ -> If (And assert_exprs, mapbind_stmt)
+  | [] -> Block [Start_rule rule_name; mapbind_stmt; End_rule]
+  | _ ->
+      Block
+        [Start_rule rule_name; If (And assert_exprs, mapbind_stmt); End_rule]
 
 let gen_stmt_from_consequences consequences =
   let head, bodies = consequences in
@@ -326,11 +328,11 @@ let gen_stmt_from_consequences consequences =
       )
       bodies
   in
-  List.append (Set_ast_case case_name :: body_stmts) [Ret_ast]
+  (List.append (Set_ast_case case_name :: body_stmts) [Ret_ast], case_name)
 
 let gen_stmt_from_rule rule =
   let conditions, consequences = rule in
-  let conseq_stmts = gen_stmt_from_consequences consequences in
-  gen_stmt_from_conditions conditions conseq_stmts
+  let conseq_stmts, name = gen_stmt_from_consequences consequences in
+  gen_stmt_from_conditions name conditions conseq_stmts
 
 let gen_decode_proc decoder = Proc (Block (List.map gen_stmt_from_rule decoder))
