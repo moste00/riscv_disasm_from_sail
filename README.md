@@ -70,7 +70,7 @@ The generator tool itself has almost no dependencies except Libsail, the Sail co
 In commands:
 
 ```bash
-git clone https://github.com/moste00/riscv_disasm_from_sail.git
+git clone https://github.com/rizinorg/capstone-autosync-sail.git
 cd riscv_disasm_from_sail && source ~/.bash_profile
 export OPAMCONFIRMLEVEL=yes
 opam update
